@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('presensis', function (Blueprint $table) {
             $table->id();
+            // $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('karyawan_id')->constrained('karyawans');
+            $table->date('tanggal_bolos');
             $table->timestamps();
         });
     }
