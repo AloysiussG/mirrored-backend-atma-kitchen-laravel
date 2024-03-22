@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('detail_hampers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hampers_id')->constrained('hampers');
+            $table->foreignId('produk_id')->constrained('produks');
             $table->integer('jumlah_produk');
             $table->timestamps();
         });
