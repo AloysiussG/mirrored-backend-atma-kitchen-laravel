@@ -23,11 +23,8 @@ class ResepSeeder extends Seeder
             ],
             [
                 'produk_id' => 3,
-                'nama_resep' => 'Lapis Surabaya Chef Wilson', 
+                'nama_resep' => 'Fudgy Brownies by Ramsey', 
             ],
-            [
-                'nama' => 'Titipan',
-            ]
             ]);
     }
 }
