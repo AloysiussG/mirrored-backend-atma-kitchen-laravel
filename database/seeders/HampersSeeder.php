@@ -13,7 +13,7 @@ class HampersSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('produks')->insert([[
+        DB::table('hampers')->insert([[
             'nama_hampers' => 'Paket A',
             'harga_hampers' => 650000,
         ],

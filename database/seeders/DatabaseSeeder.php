@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-
 use DB;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -26,7 +25,7 @@ class DatabaseSeeder extends Seeder
             PenggajianSeeder::class,
           
             KategoriProdukSeeder::class,
-            penitipSeeder::class,
+            PenitipSeeder::class,
             ProdukSeeder::class,
             BahanBakuSeeder::class,
             ResepSeeder::class,
@@ -35,6 +34,13 @@ class DatabaseSeeder extends Seeder
             PengadaanBahanBakuSeeder::class,
             PromoPointSeeder::class,
             PengeluaranSeeder::class,
+
+            PermintaanRefundSeeder::class,
+            CartSeeder::class,
+            HampersSeeder::class,
+            DetailHampersSeeder::class,
+            DetailCartSeeder::class,
+            TransaksiSeeder::class,
         ]);
 
         // User::factory(10)->create();

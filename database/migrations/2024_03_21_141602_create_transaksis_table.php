@@ -15,19 +15,20 @@ return new class extends Migration
             $table->id();
             $table->foreignId('status_transaksi_id')->constrained('status_transaksis');
             $table->foreignId('cart_id')->constrained('carts');
-            $table->foreignId('alamat_id')->constrained('alamats');
+            $table->foreignId('alamat_id')->nullable()->constrained('alamats');
             $table->date('tanggal_pesan');
             $table->date('tanggal_lunas');
-            $table->float('tip');
-            $table->float('ongkos_kirim');
+            $table->date('tanggal_ambil');
             $table->integer('poin_dipakai');
             $table->integer('poin_didapat');
             $table->integer('poin_sekarang');
-            $table->string('no_nota');
+            $table->float('tip');
+            $table->float('ongkos_kirim');
             $table->float('potongan_harga');
-            $table->string('kode_bukti_bayar');
+            $table->float('total_harga');
+            $table->string('no_nota');
+            $table->string('kode_bukti_bayar')->nullable();
             $table->string('jenis_pengiriman');
-            $table->date('tanggal_ambil');
             $table->timestamps();
         });
     }

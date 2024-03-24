@@ -16,15 +16,19 @@ class KategoriProdukSeeder extends Seeder
         DB::table('kategori_produks')->insert([
         [
             'nama_kategori_produk' => 'Cake',
+            'satuan_pembelian' => 'Loyang',
         ],
         [
             'nama_kategori_produk' => 'Roti',
+            'satuan_pembelian' => 'Box (isi 10)',
         ],
         [
             'nama_kategori_produk' => 'Minuman',
+            'satuan_pembelian' => 'Liter',
         ],
         [
             'nama_kategori_produk' => 'Titipan',
+            'satuan_pembelian' => 'Bungkus',
         ]
         ]);
     }

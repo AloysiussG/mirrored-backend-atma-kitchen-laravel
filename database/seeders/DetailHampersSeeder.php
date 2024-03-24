@@ -13,7 +13,7 @@ class DetailHampersSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('produks')->insert([
+        DB::table('detail_hampers')->insert([
         //PAKET A
         [
             //id =  1

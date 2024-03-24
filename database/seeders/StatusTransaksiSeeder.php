@@ -18,6 +18,15 @@ class StatusTransaksiSeeder extends Seeder
                 'nama_status' => 'Pesanan belum dibayar',
             ],
             [
+                'nama_status' => 'Pesanan sudah dibayar',
+            ],
+            [
+                'nama_status' => 'Pembayaran valid',
+            ],
+            [
+                'nama_status' => 'Pesanan ditolak',
+            ],
+            [
                 'nama_status' => 'Pesanan diterima',
             ],
             [

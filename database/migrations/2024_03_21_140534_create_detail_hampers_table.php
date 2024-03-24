@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('hampers_id')->constrained('hampers');
             $table->foreignId('produk_id')->constrained('produks');
-            $table->integer('jumlah_produk');
+            $table->float('jumlah_produk');
             $table->timestamps();
         });
     }
