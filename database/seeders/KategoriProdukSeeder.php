@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB; 
 
 class KategoriProdukSeeder extends Seeder
 {
@@ -14,16 +15,16 @@ class KategoriProdukSeeder extends Seeder
     {
         DB::table('kategori_produks')->insert([
         [
-            'nama' => 'Cake',
+            'nama_kategori_produk' => 'Cake',
         ],
         [
-            'nama' => 'Roti',
+            'nama_kategori_produk' => 'Roti',
         ],
         [
-            'nama' => 'Minuman',
+            'nama_kategori_produk' => 'Minuman',
         ],
         [
-            'nama' => 'Titipan',
+            'nama_kategori_produk' => 'Titipan',
         ]
         ]);
     }
