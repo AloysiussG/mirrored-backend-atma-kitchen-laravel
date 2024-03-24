@@ -14,4 +14,9 @@ class Presensi extends Model
         'karyawan_id',
         'tanggal_bolos'
     ];
+
+    public function karyawan()
+    {
+        return $this->belongsTo(Karyawan::class);
+    }
 }

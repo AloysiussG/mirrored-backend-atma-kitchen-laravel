@@ -15,4 +15,9 @@ class Penggajian extends Model
         'total_gaji',
         'tanggal_gaji'
     ];
+
+    public function karyawan()
+    {
+        return $this->belongsTo(Karyawan::class);
+    }
 }
