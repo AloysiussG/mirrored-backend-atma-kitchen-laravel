@@ -16,6 +16,7 @@ class Produk extends Model
         'jumlah_stock',
         'status',
         'harga',
+        'harga_setengah',
         'kuota_harian'
     ];
 
