@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class Resep extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'produk_id',
+        'nama_resep',
+    ];
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class);
+    }
+    
 }

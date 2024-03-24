@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Penggajian extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'karyawan_id',
+        'total_gaji',
+        'tanggal_gaji'
+    ];
 }
