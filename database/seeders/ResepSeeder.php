@@ -16,7 +16,7 @@ class ResepSeeder extends Seeder
         DB::table('reseps')->insert([
             [
                 'produk_id' => 1,
-                'nama_resep' => 'Lapis Legit andalan', 
+                'nama_resep' => 'lah-pees leh-zheet andalan', 
             ],
             [
                 'produk_id' => 2,
