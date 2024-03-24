@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('jumlah_bahan');
             $table->float('harga_pengadaan_bahan_baku');
             $table->string('satuan_pengadaan');
-            $table->date('tanggal_pengadaaan');
+            $table->date('tanggal_pengadaan');
             $table->timestamps();
         });
     }
