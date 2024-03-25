@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('detail_carts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cart_id')->constrained('carts');
-            $table->foreignId('produk_id')->constrained('produks');
-            $table->foreignId('hampers_id')->constrained('hampers');
-            $table->integer('jumlah');
+            $table->foreignId('produk_id')->nullable()->constrained('produks');
+            $table->foreignId('hampers_id')->nullable()->constrained('hampers');
+            $table->float('jumlah');
             $table->float('harga_produk_sekarang');
             $table->timestamps();
         });
