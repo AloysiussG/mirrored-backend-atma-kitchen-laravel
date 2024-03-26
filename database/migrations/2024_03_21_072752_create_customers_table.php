@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
+            // $table->foreignId('user_id')->constrained('users');
 
             // ini sebenernya udah ada di user tapi entah kenapa di PDM tetep ada
             // mungkin karena relasi generalisasi spesialisasi
