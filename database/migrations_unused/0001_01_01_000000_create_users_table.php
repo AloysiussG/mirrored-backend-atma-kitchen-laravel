@@ -11,21 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama');
-            $table->string('password');
-            $table->string('email')->unique();
-            $table->string('no_telp', 16)->unique();
+        // USERS AKU COMMENT
+        
+        // Schema::create('users', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->string('nama');
+        //     $table->string('password');
+        //     $table->string('email')->unique();
+        //     $table->string('no_telp', 16)->unique();
 
-            // sebenernya di bawah ini auto generate jadi belum kuhapus
-            // tapi emang di database design (PDM) Atma Kitchen ga terlalu dibutuhin
-            // khusus yang 'timestamps' kayaknya tetep penting soalnya bisa buat ->latest() atau ->oldest()
+        //     // sebenernya di bawah ini auto generate jadi belum kuhapus
+        //     // tapi emang di database design (PDM) Atma Kitchen ga terlalu dibutuhin
+        //     // khusus yang 'timestamps' kayaknya tetep penting soalnya bisa buat ->latest() atau ->oldest()
 
-            // $table->timestamp('email_verified_at')->nullable();
-            // $table->rememberToken();
-            $table->timestamps();
-        });
+        //     // $table->timestamp('email_verified_at')->nullable();
+        //     // $table->rememberToken();
+        //     $table->timestamps();
+        // });
 
         // ini aku comment dulu soalnya ngegenerate tabel yang belum dibutuhin
 

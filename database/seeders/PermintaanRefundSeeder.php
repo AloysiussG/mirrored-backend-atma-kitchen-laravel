@@ -29,7 +29,7 @@ class PermintaanRefundSeeder extends Seeder
             'customer_id' => 3,
             'status' =>'Selesai',
             'nominal' => '360000',
-            'tanggal_refund' => '2024-03-03',
+            'tanggal_refund' => '2024-02-03',
         ],
         ]);
     }

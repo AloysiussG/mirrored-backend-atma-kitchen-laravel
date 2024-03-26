@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -15,20 +14,22 @@ class CustomerSeeder extends Seeder
      */
     public function run(): void
     {
-        $usersArray = User::whereRaw('id % 2 = 0')->get();
+        Customer::factory()->count(5)->create();
 
-        // FOREACH CREATE MODEL
-        foreach ($usersArray as $user) {
-            Customer::create([
-                'user_id' => $user->id,
-                'nama' => $user->nama,
-                'password' => $user->password,
-                'email' => $user->email,
-                'no_telp' => $user->no_telp,
-                'saldo' => fake()->numberBetween(0, 250) * 1000,
-                'poin' => fake()->numberBetween(0, 300),
-                'tanggal_lahir' => fake()->date(),
-            ]);
-        }
+        // $usersArray = User::whereRaw('id % 2 = 0')->get();
+
+        // // FOREACH CREATE MODEL
+        // foreach ($usersArray as $user) {
+        //     Customer::create([
+        //         'user_id' => $user->id,
+        //         'nama' => $user->nama,
+        //         'password' => $user->password,
+        //         'email' => $user->email,
+        //         'no_telp' => $user->no_telp,
+        //         'saldo' => fake()->numberBetween(0, 250) * 1000,
+        //         'poin' => fake()->numberBetween(0, 300),
+        //         'tanggal_lahir' => fake()->date(),
+        //     ]);
+        // }
     }
 }

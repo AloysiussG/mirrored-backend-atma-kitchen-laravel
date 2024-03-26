@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('karyawans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
+            // $table->foreignId('user_id')->constrained('users');
             $table->foreignId('role_id')->constrained('roles');
 
             // ini sebenernya udah ada di user tapi entah kenapa di PDM tetep ada
