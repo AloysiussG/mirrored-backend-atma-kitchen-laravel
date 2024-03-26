@@ -19,15 +19,15 @@ class DetailCartSeeder extends Seeder
                 'cart_id' => 1,
                 'produk_id' => 1,
                 'hampers_id' => null,
-                'jumlah' => 1,
+                'jumlah' => 2,
                 'harga_produk_sekarang' => 850000,
             ],
             [
                 //id = 2
                 'cart_id' => 1,
-                'produk_id' => 9,
+                'produk_id' => 12,
                 'hampers_id' => null,
-                'jumlah' => 1,
+                'jumlah' => 3,
                 'harga_produk_sekarang' => 250000,
             ],
             [
@@ -35,7 +35,7 @@ class DetailCartSeeder extends Seeder
                 'cart_id' => 3,
                 'produk_id' => 2,
                 'hampers_id' => null,
-                'jumlah' => 0.5,
+                'jumlah' => 1,
                 'harga_produk_sekarang' => 300000,
             ],
             [
@@ -67,7 +67,7 @@ class DetailCartSeeder extends Seeder
                 'cart_id' => 5,
                 'produk_id' => 4,
                 'hampers_id' => null,
-                'jumlah' => 0.5,
+                'jumlah' => 1,
                 'harga_produk_sekarang' => 200000,
             ],
             [
@@ -81,9 +81,9 @@ class DetailCartSeeder extends Seeder
             [
                 //id = 9
                 'cart_id' => 5,
-                'produk_id' => 8,
+                'produk_id' => 13,
                 'hampers_id' => null,
-                'jumlah' => 1,
+                'jumlah' => 2,
                 'harga_produk_sekarang' => 75000,
             ],
             [
