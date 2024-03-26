@@ -19,7 +19,7 @@ class PresensiSeeder extends Seeder
                 [
                     // dimulai dari karyawan id 2 karena Owner tidak termasuk presensi
                     'karyawan_id' => fake()->numberBetween(2, Karyawan::count()),
-                    'tanggal_bolos' => fake()->dateTimeBetween('-8 weeks', 'now'),
+                    'tanggal_bolos' => fake()->dateTimeBetween('-6 weeks', '2024-03-26'),
                 ],
             );
         }
