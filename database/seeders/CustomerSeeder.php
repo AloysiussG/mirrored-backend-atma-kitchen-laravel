@@ -14,7 +14,22 @@ class CustomerSeeder extends Seeder
      */
     public function run(): void
     {
-        Customer::factory()->count(5)->create();
+
+        $customerArray = array(
+            array('nama' => 'Rina Suartini', 'password' => 'A~([9NhJ', 'email' => 'daruna53@example.net', 'no_telp' => '089154757461', 'saldo' => '13000', 'poin' => '64', 'tanggal_lahir' => '1987-09-20'),
+            array('nama' => 'Cahya Permadi S.H.', 'password' => 'InA!g+', 'email' => 'novitasari.cahyadi@example.com', 'no_telp' => '082288631082', 'saldo' => '71000', 'poin' => '242', 'tanggal_lahir' => '1988-07-01'),
+            array('nama' => 'Najwa Rahimah', 'password' => '<*<Od230', 'email' => 'okto54@example.org', 'no_telp' => '084119884865', 'saldo' => '129000', 'poin' => '258', 'tanggal_lahir' => '1988-12-14'),
+            array('nama' => 'Garan Taswir Siregar S.Ked', 'password' => 'p5WtowY', 'email' => 'gpurnawati@example.org', 'no_telp' => '089468923047', 'saldo' => '144000', 'poin' => '60', 'tanggal_lahir' => '2010-10-09'),
+            array('nama' => 'Mila Melani', 'password' => 'tW"xTp-{^', 'email' => 'elvina90@example.net', 'no_telp' => '080574781700', 'saldo' => '220000', 'poin' => '228', 'tanggal_lahir' => '1994-12-27')
+        );
+
+        // FOREACH CREATE MODEL
+        foreach ($customerArray as $item) {
+            Customer::create($item);
+        }
+
+
+        // Customer::factory()->count(5)->create();
 
         // $usersArray = User::whereRaw('id % 2 = 0')->get();
 
