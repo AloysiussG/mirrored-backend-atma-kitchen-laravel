@@ -7,17 +7,46 @@ use App\Models\Customer;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
-class LoginController extends Controller
+class AuthController extends Controller
 {
-    public function index()
+    public function getUserDataByToken(Request $request)
     {
-        return response()->json([
-            'data' => null,
-            'message' => 'Berhasil.'
-        ], 200);
+        try {
+            $userDataByToken = $request->user();
+
+            // cek di Customer
+            $userData = Customer::query()
+                ->where('email', '=', $userDataByToken['email'])
+                ->first();
+
+            // jika tidak ketemu, cek di Karyawan
+            if (!$userData) {
+                $userData = Karyawan::query()
+                    ->where('email', '=', $userDataByToken['email'])
+                    ->with('role')
+                    ->first();
+            }
+
+            return response()->json(
+                [
+                    'data' => $userData,
+                    'message' => 'Berhasil mengambil data user.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
 
     public function loginByEmail(Request $request)
@@ -26,8 +55,7 @@ class LoginController extends Controller
             $userDataRequest = $request->all();
 
             $validate = Validator::make($userDataRequest, [
-                // 'email' => 'required|email:rfc,dns',
-                'email' => 'required|email:rfc',
+                'email' => 'required|email:rfc,dns',
                 'password' => 'required',
             ]);
 
@@ -44,18 +72,12 @@ class LoginController extends Controller
             // cek di Customer
             $userData = Customer::query()
                 ->where('email', '=', $userDataRequest['email'])
-                // [TODO] 
-                // ini belum dihash, nanti pakai Hash::make
-                ->where('password', '=', $userDataRequest['password'])
                 ->first();
 
             // jika tidak ketemu, cek di Karyawan
             if (!$userData) {
                 $userData = Karyawan::query()
                     ->where('email', '=', $userDataRequest['email'])
-                    // [TODO] 
-                    // ini belum dihash, nanti pakai Hash::make
-                    ->where('password', '=', $userDataRequest['password'])
                     ->with('role')
                     ->first();
             }
@@ -65,13 +87,24 @@ class LoginController extends Controller
                 return response()->json(
                     [
                         'data' => null,
+                        'message' => 'User tidak ditemukan.',
+                    ],
+                    404
+                );
+            }
+
+            // jika user ditemukan tapi email/password salah
+            if (!Hash::check($userDataRequest['password'], $userData->password)) {
+                return response()->json(
+                    [
+                        'data' => null,
                         'message' => 'Email atau password salah.',
                     ],
                     404
                 );
             }
 
-            // jika ditemukan, authorize dengan token juga 
+            // jika ditemukan dan password benar, authorize dengan token juga 
             $userToken = $userData->createToken('Login Token')->plainTextToken;
             return response()->json(
                 [

@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // --- PUBLIC ROUTES
-Route::post('/login', [LoginController::class, 'loginByEmail']);
+Route::post('/login', [AuthController::class, 'loginByEmail']);
 
 // --- PROTECTED ROUTES
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', [LoginController::class, 'index']);
-    Route::post('/logout', [LoginController::class, 'logout']);
+    Route::get('/user-by-token', [AuthController::class, 'getUserDataByToken']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 
     // ...etc
 });

@@ -22,6 +22,14 @@ class Karyawan extends Authenticatable
         'updated_at',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            // 'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
