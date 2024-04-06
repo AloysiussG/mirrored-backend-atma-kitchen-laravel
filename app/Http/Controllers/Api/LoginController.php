@@ -8,101 +8,110 @@ use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class LoginController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return response()->json([
+            'data' => null,
+            'message' => 'Berhasil.'
+        ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function loginByEmail(Request $request)
     {
-        $userDataRequest = $request->all();
+        try {
+            $userDataRequest = $request->all();
 
-        $validate = Validator::make($userDataRequest, [
-            // 'email' => 'required|email:rfc,dns',
-            'email' => 'required|email:rfc',
-            'password' => 'required',
-        ]);
+            $validate = Validator::make($userDataRequest, [
+                // 'email' => 'required|email:rfc,dns',
+                'email' => 'required|email:rfc',
+                'password' => 'required',
+            ]);
 
-        if ($validate->fails()) {
-            return response()->json(
-                [
-                    'data' => null,
-                    'message' => 'Login request tidak valid.',
-                ],
-                400
-            );
-        }
+            if ($validate->fails()) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Login request tidak valid.',
+                    ],
+                    400
+                );
+            }
 
-        // cek di Customer
-        $userData = Customer::query()
-            ->where('email', '=', $userDataRequest['email'])
-            // [COMING SOON] ini belum dihash, nanti pakai Hash::make
-            ->where('password', '=', $userDataRequest['password'])
-            ->first();
-
-        // jika tidak ketemu, cek di Karyawan
-        if (!$userData) {
-            $userData = Karyawan::query()
+            // cek di Customer
+            $userData = Customer::query()
                 ->where('email', '=', $userDataRequest['email'])
+                // [TODO] 
                 // ini belum dihash, nanti pakai Hash::make
                 ->where('password', '=', $userDataRequest['password'])
-                ->with('role')
                 ->first();
-        }
 
-        // jika masih tidak ketemu, throw invalid response
-        if (!$userData) {
+            // jika tidak ketemu, cek di Karyawan
+            if (!$userData) {
+                $userData = Karyawan::query()
+                    ->where('email', '=', $userDataRequest['email'])
+                    // [TODO] 
+                    // ini belum dihash, nanti pakai Hash::make
+                    ->where('password', '=', $userDataRequest['password'])
+                    ->with('role')
+                    ->first();
+            }
+
+            // jika masih tidak ketemu, throw invalid response
+            if (!$userData) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Email atau password salah.',
+                    ],
+                    404
+                );
+            }
+
+            // jika ditemukan, authorize dengan token juga 
+            $userToken = $userData->createToken('Login Token')->plainTextToken;
+            return response()->json(
+                [
+                    'data' => $userData,
+                    'token' => $userToken,
+                    'message' => 'Login berhasil.',
+                ],
+                200
+            );
+        } catch (Throwable $th) {
             return response()->json(
                 [
                     'data' => null,
-                    'message' => 'Email atau password salah.',
+                    'message' => $th->getMessage(),
                 ],
-                404
+                500
             );
         }
-
-        // jika ditemukan, authorize dengan token juga
-        // [COMING SOON] tambah token Laravel Sanctum
-        return response()->json(
-            [
-                'data' => $userData,
-                'token' => null,
-                'message' => 'Login berhasil.',
-            ],
-            200
-        );
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function logout(Request $request)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        try {
+            // hapus current user token
+            $request->user()->currentAccessToken()->delete();
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => 'Logout berhasil.',
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
 }

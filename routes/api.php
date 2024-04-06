@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\Api\LoginController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
-
-
+// --- PUBLIC ROUTES
 Route::post('/login', [LoginController::class, 'loginByEmail']);
+
+// --- PROTECTED ROUTES
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', [LoginController::class, 'index']);
+    Route::post('/logout', [LoginController::class, 'logout']);
+
+    // ...etc
+});
