@@ -156,7 +156,7 @@ class HampersController extends Controller
     public function show(string $id)
     {
         try {
-            $hampersData = Hampers::find($id);
+            $hampersData = Hampers::with('detailHampers.produk')->find($id);
 
             if (!$hampersData) {
                 return response()->json(

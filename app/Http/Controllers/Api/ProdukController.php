@@ -176,7 +176,7 @@ class ProdukController extends Controller
     public function show(string $id)
     {
         try {
-            $produkData = Produk::find($id);
+            $produkData = Produk::with('kategoriProduk', 'penitip')->find($id);
 
             if (!$produkData) {
                 return response()->json(

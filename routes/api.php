@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DetailHampersController;
 use App\Http\Controllers\Api\HampersController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,11 @@ Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::get('/hampers', [HampersController::class, 'index']);
 Route::get('/hampers/{id}', [HampersController::class, 'show']);
 
+// route GET /detail-hampers juga bisa search juga menggunakan URL query parameter
+Route::get('/detail-hampers-by-hampers/{hampersId}', [DetailHampersController::class, 'indexByHampers']);
+Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
+
+
 
 // --- PROTECTED ROUTES
 Route::middleware('auth:sanctum')->group(function () {
@@ -31,6 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/hampers', [HampersController::class, 'store']);
     Route::put('/hampers/{id}', [HampersController::class, 'updateAll']);
     Route::delete('/hampers/{id}', [HampersController::class, 'destroy']);
+
+    Route::post('/detail-hampers/store/{hampersId}', [DetailHampersController::class, 'store']);
+    Route::put('/detail-hampers/{id}', [DetailHampersController::class, 'update']);
+    Route::delete('/detail-hampers/{id}', [DetailHampersController::class, 'destroy']);
 
     // ...etc
 });
