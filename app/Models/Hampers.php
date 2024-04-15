@@ -12,4 +12,9 @@ class Hampers extends Model
     protected $guarded = [
         'id',
     ];
+
+    public function detailHampers()
+    {
+        return $this->hasMany(DetailHampers::class);
+    }
 }
