@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DetailHampersController;
 use App\Http\Controllers\Api\HampersController;
+use App\Http\Controllers\Api\PengadaanBahanBakuController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/detail-hampers/store/{hampersId}', [DetailHampersController::class, 'store']);
     Route::put('/detail-hampers/{id}', [DetailHampersController::class, 'update']);
     Route::delete('/detail-hampers/{id}', [DetailHampersController::class, 'destroy']);
+
+    // route GET /pengadaan-bahan-baku juga bisa search juga menggunakan URL query parameter
+    Route::get('/pengadaan-bahan-baku', [PengadaanBahanBakuController::class, 'index']);
+    Route::post('/pengadaan-bahan-baku', [PengadaanBahanBakuController::class, 'store']);
+    Route::get('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'show']);
+    Route::put('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'update']);
+    Route::delete('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'destroy']);
 
     // ...etc
 });

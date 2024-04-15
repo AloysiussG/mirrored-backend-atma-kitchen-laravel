@@ -39,7 +39,7 @@ class DetailHampersController extends Controller
                 });
             }
 
-            if ($request->sortBy && in_array($request->sortBy, ['id', 'produk.nama_produk', 'created_at'])) {
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'created_at'])) {
                 $sortBy = $request->sortBy;
             } else {
                 $sortBy = 'id';
