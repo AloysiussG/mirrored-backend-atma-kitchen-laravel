@@ -30,6 +30,7 @@ Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user-by-token', [AuthController::class, 'getUserDataByToken']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::put('/changePassword/{id}', [AuthController::class, 'changePassword']);
 
     Route::post('/produk', [ProdukController::class, 'store']);
     Route::put('/produk/{id}', [ProdukController::class, 'update']);
