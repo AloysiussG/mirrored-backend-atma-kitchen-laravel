@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DetailHampersController;
 use App\Http\Controllers\Api\HampersController;
+use App\Http\Controllers\Api\KaryawanController;
 use App\Http\Controllers\Api\PengadaanBahanBakuController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
@@ -30,7 +31,12 @@ Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user-by-token', [AuthController::class, 'getUserDataByToken']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::put('/changePassword/{id}', [AuthController::class, 'changePassword']);
+
+    //Karyawans
+    Route::post('/karyawan', [KaryawanController::class, 'store']);
+    Route::put('/karyawan/{id}', [KaryawanController::class, 'changePassword']);
+    Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
+    Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
 
     Route::post('/produk', [ProdukController::class, 'store']);
     Route::put('/produk/{id}', [ProdukController::class, 'update']);
