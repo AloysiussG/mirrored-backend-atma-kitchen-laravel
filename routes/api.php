@@ -6,9 +6,12 @@ use App\Http\Controllers\Api\HampersController;
 use App\Http\Controllers\Api\PengadaanBahanBakuController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PasswordChangeController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
+ // --- PASSWORD CHANGE
+ Route::get('/password-change/verify/{verifyID}', [PasswordChangeController::class, 'verify']);
 
 // khusus route GET /produk bisa search juga menggunakan URL query parameter
 // contoh: /produk?search=milk&kategori=titipan
@@ -28,8 +31,13 @@ Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
 
 // --- PROTECTED ROUTES
 Route::middleware('auth:sanctum')->group(function () {
+    // --- AUTH/LOGIN USER
     Route::get('/user-by-token', [AuthController::class, 'getUserDataByToken']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+
+     // --- PASSWORD CHANGE
+    Route::post('/password-change', [PasswordChangeController::class, 'store']);
 
     Route::post('/produk', [ProdukController::class, 'store']);
     Route::put('/produk/{id}', [ProdukController::class, 'update']);
@@ -49,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'show']);
     Route::put('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'update']);
     Route::delete('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'destroy']);
+
 
     // ...etc
 });
