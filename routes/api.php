@@ -37,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/karyawan/{id}', [KaryawanController::class, 'changePassword']);
     Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
     Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
+    Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
+    Route::get('/karyawan', [KaryawanController::class, 'index']);
 
     Route::post('/produk', [ProdukController::class, 'store']);
     Route::put('/produk/{id}', [ProdukController::class, 'update']);

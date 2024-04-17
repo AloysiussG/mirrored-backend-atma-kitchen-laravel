@@ -14,10 +14,66 @@ class KaryawanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
+            $karyawan = Karyawan::query()->with('role');
+
+            if ($request->search) {
+                $karyawan
+                    ->whereHas('role', function ($query) use ($request) {
+                        $query->where('nama', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhere('email', 'like', '%' . $request->search . '%')
+                    ->orWhere('no_telp', 'like', '%' . $request->search . '%')
+                    ->orWhere('hire_date', 'like', '%' . $request->search . '%')
+                    ->orWhere('gaji', 'like', '%' . $request->search . '%')
+                    ->orWhere('bonus_gaji', 'like', '%' . $request->search . '%');
+            }
+
+            if ($request->role) {
+                $karyawan->whereHas('role', function ($query) use ($request) {
+                    $query->where('role_name', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            if ($request->sortBy && in_array($request->sortBy, [
+                'id',
+                'role_id',
+                'nama',
+                'hire_date',
+                'gaji',
+                'bonus_gaji',
+                'created_at'
+            ])) {
+                $sortBy = $request->sortBy;
+            } else {
+                $sortBy = 'id';
+            }
+
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
+            }
+
+            $karyawanData = $karyawan->orderBy($sortBy, $sortOrder)->get();
+
+            return response()->json(
+                [
+                    'data' => $karyawanData,
+                    'message' => 'Berhasil mengambil data karyawan.'
+                ],
+                200
+            );
         } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage()
+                ],
+                500
+            );
         }
     }
 
@@ -76,7 +132,35 @@ class KaryawanController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try {
+            $karyawan = Karyawan::with('role')->find($id);
+
+            if (!$karyawan) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Karyawan tidak ditemukan.',
+                    ],
+                    404
+                );
+            }
+
+            return response()->json(
+                [
+                    'data' => $karyawan,
+                    'message' => 'Berhasil mengambil 1 data Karyawan.',
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
 
     /**
