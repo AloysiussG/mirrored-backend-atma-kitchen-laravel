@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailHampersController;
 use App\Http\Controllers\Api\HampersController;
 use App\Http\Controllers\Api\KaryawanController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Api\PengadaanBahanBakuController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PasswordChangeController;
+use App\Http\Controllers\Api\PresensiController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -38,17 +40,24 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Karyawans
     Route::post('/karyawan', [KaryawanController::class, 'store']);
-    Route::put('/karyawan/{id}', [KaryawanController::class, 'changePassword']);
+    Route::post('/karyawan/changePassword', [KaryawanController::class, 'changePassword']);
     Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
     Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
     Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
     Route::get('/karyawan', [KaryawanController::class, 'index']);
+    Route::put('/karyawan/changeGaji/{id}', [KaryawanController::class, 'changeGaji']);
 
     //Presensis
-    Route::get('/presensi', [KaryawanController::class, 'index']);
-    Route::post('/presensi', [KaryawanController::class, 'store']);
-    Route::put('/presensi/{id}', [KaryawanController::class, 'update']);
-    Route::get('/presensi/{id}', [KaryawanController::class, 'show']);
+    Route::get('/presensi', [PresensiController::class, 'index']);
+    Route::post('/presensi', [PresensiController::class, 'store']);
+    Route::put('/presensi/{id}', [PresensiController::class, 'update']);
+    Route::get('/presensi/{id}', [PresensiController::class, 'show']);
+
+    //Customers
+    Route::post('/customer/update', [CustomerController::class, 'update']);
+    Route::get('/customer', [CustomerController::class, 'show']);
+    Route::get('/customer/showHistory', [CustomerController::class, 'showHistory']);
+    Route::post('/customer/searchHistory', [CustomerController::class, 'searchHistory']);
 
      // --- PASSWORD CHANGE
     Route::post('/password-change', [PasswordChangeController::class, 'store']);

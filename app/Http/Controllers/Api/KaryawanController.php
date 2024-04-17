@@ -8,6 +8,7 @@ use App\Models\Karyawan;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class KaryawanController extends Controller
 {
@@ -187,6 +188,7 @@ class KaryawanController extends Controller
             $validate = Validator::make($karyawan, [
                 'email' => 'unique:karyawans,email|unique:customers,email',
                 'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
+                'hire_date' => 'date|before:tomorrow'
             ]);
 
             if ($validate->fails()) {
@@ -265,16 +267,16 @@ class KaryawanController extends Controller
 
     //mengubah password biasa
     //hanya untuk karyawan
-    public function changePassword(Request $request, $id)
+    public function changePassword(Request $request)
     {
         try {
             //find karyawan yang sedang melakukan ganti password
-            $karyawan = Karyawan::find($id);
+            $karyawan = Karyawan::find(Auth::id());
             if (!$karyawan) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'User tidak ditemukan.',
+                        'message' => 'Karyawan tidak ditemukan.',
                     ],
                     404
                 );
@@ -299,7 +301,69 @@ class KaryawanController extends Controller
             return response()->json(
                 [
                     'data' => $karyawan,
-                    'message' => 'Berhasil mengupdate password user.',
+                    'message' => 'Berhasil mengupdate password Karyawan.',
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    //mengubah gaji
+    //hanya untuk owner
+    public function changeGaji(Request $request, $id)
+    {
+        try {
+            //find karyawan
+            $karyawan = Karyawan::find($id);
+            if (!$karyawan) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Karyawan tidak ditemukan.',
+                    ],
+                    404
+                );
+            }
+
+            //validator
+            $validate = Validator::make($request->all(), [
+                'bonus_gaji' => 'required_without:gaji',
+                'gaji' => 'required_without:bonus_gaji',
+            ]);
+            if ($validate->fails()) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => $validate->messages(),
+                    ],
+                    400
+                );
+            }
+
+            //update
+            if ($request->has('gaji')) {
+                $updateData['gaji'] = $request['gaji'];
+            }
+
+            if ($request->has('bonus_gaji')) {
+                $updateData['bonus_gaji'] = $request['bonus_gaji'];
+            }
+
+            if (!empty($updateData)) {
+                $karyawan->update($updateData);
+            }
+            return response()->json(
+                [
+                    'data' => $karyawan,
+                    'message' => 'Berhasil mengupdate gaji/bonus Karyawan.',
                 ],
                 200
             );
