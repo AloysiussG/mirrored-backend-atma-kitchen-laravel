@@ -170,7 +170,7 @@ class CustomerController extends Controller
             $validate = Validator::make($customer, [
                 'email' => 'unique:karyawans,email|unique:customers,email',
                 'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
-                'tanggal_lahir' => 'date|after:2007-01-01'
+                'tanggal_lahir' => 'date|before:2007-01-01'
             ]);
 
             if ($validate->fails()) {

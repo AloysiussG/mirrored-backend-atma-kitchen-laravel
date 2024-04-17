@@ -183,8 +183,7 @@ class PresensiController extends Controller
             }
             //validator
             $validate = Validator::make($presensi, [
-                'karyawan_id' => 'required',
-                'tanggal_bolos' => 'required|date|before:tomorrow',
+                'tanggal_bolos' => 'date|before:tomorrow',
             ]);
 
             if ($validate->fails()) {

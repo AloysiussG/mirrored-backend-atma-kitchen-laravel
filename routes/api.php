@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PengadaanBahanBakuController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PasswordChangeController;
+use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
 
 // --- PUBLIC ROUTES
@@ -58,6 +59,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer', [CustomerController::class, 'show']);
     Route::get('/customer/showHistory', [CustomerController::class, 'showHistory']);
     Route::post('/customer/searchHistory', [CustomerController::class, 'searchHistory']);
+
+    //Penggajians
+    Route::get('/penggajian', [PenggajianController::class, 'index']);
+    Route::post('/penggajian', [PenggajianController::class, 'store']);
+    Route::get('/penggajian/{id}', [PenggajianController::class, 'show']);
+    Route::put('/penggajian/{id}', [PenggajianController::class, 'update']);
+    Route::delete('/penggajian/{id}', [PenggajianController::class, 'destroy']);
+
 
      // --- PASSWORD CHANGE
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
