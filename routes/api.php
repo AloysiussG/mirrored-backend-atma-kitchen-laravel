@@ -44,6 +44,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
     Route::get('/karyawan', [KaryawanController::class, 'index']);
 
+    //Presensis
+    Route::get('/presensi', [KaryawanController::class, 'index']);
+    Route::post('/presensi', [KaryawanController::class, 'store']);
+    Route::put('/presensi/{id}', [KaryawanController::class, 'update']);
+    Route::get('/presensi/{id}', [KaryawanController::class, 'show']);
 
      // --- PASSWORD CHANGE
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
