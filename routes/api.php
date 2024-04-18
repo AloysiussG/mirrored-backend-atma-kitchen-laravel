@@ -7,6 +7,10 @@ use App\Http\Controllers\Api\PengadaanBahanBakuController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PasswordChangeController;
+use App\Http\Controllers\Api\PenitipController;
+use App\Http\Controllers\Api\PengeluaranController;
+use App\Http\Controllers\Api\BahanBakuController;
+
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -46,6 +50,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/hampers', [HampersController::class, 'store']);
     Route::put('/hampers/{id}', [HampersController::class, 'updateAll']);
     Route::delete('/hampers/{id}', [HampersController::class, 'destroy']);
+
+    // route GET /pengeluaran juga bisa search juga menggunakan URL query parameter
+    Route::get('/pengeluaran', [PengeluaranController::class, 'index']);
+    Route::get('/pengeluaran/{id}', [PengeluaranController::class, 'show']);
+    Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
+    Route::put('/pengeluaran/{id}', [PengeluaranController::class, 'update']);
+    Route::destroy('/pengeluaran/{id}', [PengeluaranController::class, 'destroy']);
+
+    // route GET /penitip juga bisa search juga menggunakan URL query parameter
+    Route::get('/penitip', [PenitipController::class, 'index']);
+    Route::get('/penitip/{id}', [PenitipController::class, 'show']);
+    Route::post('/penitip', [PenitipController::class, 'store']);
+    Route::put('/penitip/{id}', [PenitipController::class, 'update']);
+    Route::delete('/penitip/{id}', [PenitipController::class, 'destroy']);
+
+    //route GET /bahanBaku juga bisa search juga menggunakan URL query parameter
+    Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
+    Route::get('/bahan-baku/{id}', [BahanBakuController::class, 'show']);
+    Route::post('/bahan-baku', [BahanBakuController::class, 'store']);
+    Route::put('/bahan-baku/{id}', [BahanBakuController::class, 'update']);
+    Route::delete('/bahan-baku/{id}', [BahanBakuController::class, 'destroy']);
 
     Route::post('/detail-hampers/store/{hampersId}', [DetailHampersController::class, 'store']);
     Route::put('/detail-hampers/{id}', [DetailHampersController::class, 'update']);
