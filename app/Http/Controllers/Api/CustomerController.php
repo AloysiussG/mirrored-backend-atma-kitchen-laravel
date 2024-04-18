@@ -30,89 +30,92 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    // public function store(Request $request)
-    // {
-    //     // validasi request
-    //     $request->validate([
-    //         'oldPass' => 'required',
-    //         'newPass' => 'required',
-    //         'id' => 'required',
-    //     ]);
+    public function store(Request $request)
+    {
+        try {
+            // validasi request
+            $customer = $request->all();
+            $validate = Validator::make($customer, [
+                'nama' => 'required',
+                'password' => 'required',
+                'email' => 'unique:karyawans,email|unique:customers,email',
+                'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
+                'tanggal_lahir' => 'date|before:2007-01-01'
+            ]);
+            if ($validate->fails()) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Data customer tidak valid.',
+                    ],
+                    400
+                );
+            }
+            $customer['saldo'] = 0;
+            $customer['poin'] = 0;
+            $customer['status'] = 'Not Verified';
+            //verify code
+            $customer['verifyID'] = Str::random(8);
+            $customer = Customer::create($customer);
+            //detail email
+            $domain = URL::to('/');
+            $detailEmail = [
+                'name' => $customer['nama'],
+                'link' =>  $domain . '/api/password-change/verify/' . $customer['verifyID'],
+            ];
+            //kirim email
+            mail::to($customer['email'])->send(new verifyPassChangeMail($detailEmail));
+            //response json
+            return response()->json(
+                [
+                    'message' => 'Email verification request submitted successfully',
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
 
-    //     //simpan data request change pass
-    //     $passwordChange->customer_id = Customer::find($request->id)->id;
-    //     //cek apakah user ada atau tidak, klo gada ya otomatis error somting wong
-    //     if($passwordChange->customer_id == null){
-    //         return response()->json([
-    //             'message' => 'User not found',
-    //         ],404);
-    //     }
+    public function verify($verifyID)
+    {
+        //cari data password change request
+        $customer = Customer::where('verifyID', $verifyID)->first();
 
-    //     //cek password lama sama kek password akun ato ndak
-    //     if(!Hash::check($request->oldPass, Customer::find($request->id)->password)){
-    //         return response()->json([
-    //             'message' => 'Old password is incorrect',
-    //         ],404);
-    //     }
-    //     //cek password lama sama ato ngga dengan password baru
-    //     if(Hash::check($request->newPass, Customer::find($request->id)->password)){
-    //         return response()->json([
-    //             'message' => 'New password cannot be the same as the old password',
-    //         ],404);
-    //     }
+        if ($customer == null) {
+            return response()->json(
+                [
+                    'message' => 'Email verification request not found',
+                ],
+                404
+            );
+        }
 
-    //     $passwordChange->status = 'Not Verified';
-    //     $passwordChange->oldPass = $request->oldPass;
-    //     $passwordChange->newPass = $request->newPass;
-    //     //verify code
-    //     $passwordChange->verifyID = Str::random(8);;
-    //     $passwordChange->save();
-    //     //detail email
-    //     $domain = URL::to('/');
-    //     $detailEmail = [
-    //         'name' => Customer::find($request->id)->nama,
-    //         'link' =>  $domain . '/api/password-change/verify/'.$passwordChange->verifyID,
+        //cek apakah password change request sudah di verify atau belum
+        if ($customer->verified_at != null) {
+            return response()->json([
+                'message' => 'Email verification request already verified',
+            ], 404);
+        }
 
-    //     ];
-    //     //kirim email
-    //     mail::to(Customer::find($request->id)->email)->send(new verifyPassChangeMail($detailEmail));
-    //     //response json
-    //     return response()->json([
-    //         'message' => 'Password change request submitted successfully',
-    //     ],200);
-    // }
+        //simpen data verified at
+        $customer->verified_at = now();
+        $customer->status = 'Verified';
+        $customer->save();
 
-    // public function verify($verifyID){
-    //     //cari data password change request
-    //     $verifying = passwordChanges::where('verifyID', $verifyID)->first();
-
-    //     if($verifying == null){
-    //         return response()->json([
-    //             'message' => 'Password change request not found',
-    //         ],404);
-    //     }
-
-    //     //cari user yang lagi verifying
-    //     $user = Customer::findOrFail($verifying->customer_id);
-
-    //     //cek apakah password change request sudah di verify atau belum
-    //     if($verifying->verified_at != null){
-    //         return response()->json([
-    //             'message' => 'Password change request already verified',
-    //         ],404);
-    //     }
-
-    //     //simpen data verified at, ganti password pengguna, update status password change request
-    //     $verifying->verified_at = now();
-    //     $user->password = Hash::make($verifying->newPass);
-    //     $verifying->status = 'Verified';
-    //     $verifying->save();
-    //     $user->save();
-
-    //     return response()->json([
-    //         'message' => 'Password changed successfully',
-    //     ],200);
-    // }
+        return response()->json(
+            [
+                'message' => 'Email verification is done successfully',
+            ],
+            200
+        );
+    }
 
     /**
      * Display the specified resource.
@@ -242,7 +245,7 @@ class CustomerController extends Controller
     {
         try {
             $namaProduk = $request['nama_produk'];
-            //get all current customer carts 
+            //get all current customer carts
             $cart = Cart::where('customer_id', Auth::id())->get();
             //get id produk based on nama
             $produk = Produk::where('nama_produk', $namaProduk)->first();
@@ -264,7 +267,7 @@ class CustomerController extends Controller
                     ->where('produk_id', $produk->id)
                     ->where('cart_id', $i->id)->get();
                 if ($detailCart->isNotEmpty()) {
-                    $detailCartAll= array_merge($detailCartAll, $detailCart->toArray());
+                    $detailCartAll = array_merge($detailCartAll, $detailCart->toArray());
                 }
             }
             if (!$detailCartAll) {

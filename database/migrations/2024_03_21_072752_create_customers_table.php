@@ -27,6 +27,10 @@ return new class extends Migration
             $table->integer('poin');
             $table->date('tanggal_lahir');
             $table->timestamps();
+            
+            $table->string('verifyID');
+            $table->timestamp('verified_at')->nullable();
+            $table->string('status');
         });
     }
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailHampersController;
+use App\Http\Controllers\Api\DetailResepController;
 use App\Http\Controllers\Api\HampersController;
 use App\Http\Controllers\Api\KaryawanController;
 use App\Http\Controllers\Api\PengadaanBahanBakuController;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PasswordChangeController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
+use App\Http\Controllers\Api\ResepController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -56,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Customers
     Route::post('/customer/update', [CustomerController::class, 'update']);
+    Route::post('/customer', [CustomerController::class, 'store']);
     Route::get('/customer', [CustomerController::class, 'show']);
     Route::get('/customer/showHistory', [CustomerController::class, 'showHistory']);
     Route::post('/customer/searchHistory', [CustomerController::class, 'searchHistory']);
@@ -67,6 +70,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/penggajian/{id}', [PenggajianController::class, 'update']);
     Route::delete('/penggajian/{id}', [PenggajianController::class, 'destroy']);
 
+    //Reseps
+    Route::post('/resep', [ResepController::class, 'store']);
+    Route::get('/resep', [ResepController::class, 'index']);
+    Route::get('/resep/{id}', [ResepController::class, 'show']);
+    Route::delete('/resep/{id}', [ResepController::class, 'destroy']);
+    Route::put('/resep/{id}', [ResepController::class, 'update']);
+
+    //DetailReseps
+    Route::post('/detail-resep', [DetailResepController::class, 'store']);
+    Route::get('/detail-resep/{id}', [DetailResepController::class, 'show']);
+    Route::put('/detail-resep/{id}', [DetailResepController::class, 'update']);
+    Route::delete('/detail-resep/{id}', [DetailResepController::class, 'destroy']);
 
      // --- PASSWORD CHANGE
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
