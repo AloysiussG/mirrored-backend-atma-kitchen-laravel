@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailHampersController;
 use App\Http\Controllers\Api\HampersController;
 use App\Http\Controllers\Api\KaryawanController;
