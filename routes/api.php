@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DetailHampersController;
+use App\Http\Controllers\Api\DetailResepController;
 use App\Http\Controllers\Api\HampersController;
 use App\Http\Controllers\Api\KaryawanController;
 use App\Http\Controllers\Api\PengadaanBahanBakuController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
+use App\Http\Controllers\Api\ResepController;
 
 
 // --- PUBLIC ROUTES
@@ -35,6 +37,9 @@ Route::get('/hampers/{id}', [HampersController::class, 'show']);
 // route GET /detail-hampers juga bisa search juga menggunakan URL query parameter
 Route::get('/detail-hampers-by-hampers/{hampersId}', [DetailHampersController::class, 'indexByHampers']);
 Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
+
+Route::post('/customer', [CustomerController::class, 'store']);
+Route::get('/customer/verify/{verifyID}', [CustomerController::class, 'verify']);
 
 
 
@@ -72,6 +77,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/penggajian/{id}', [PenggajianController::class, 'update']);
     Route::delete('/penggajian/{id}', [PenggajianController::class, 'destroy']);
 
+    //Reseps
+    Route::post('/resep', [ResepController::class, 'store']);
+    Route::get('/resep', [ResepController::class, 'index']);
+    Route::get('/resep/{id}', [ResepController::class, 'show']);
+    Route::delete('/resep/{id}', [ResepController::class, 'destroy']);
+    Route::put('/resep/{id}', [ResepController::class, 'update']);
+
+    //DetailReseps
+    Route::post('/detail-resep', [DetailResepController::class, 'store']);
+    Route::get('/detail-resep/{id}', [DetailResepController::class, 'show']);
+    Route::put('/detail-resep/{id}', [DetailResepController::class, 'update']);
+    Route::delete('/detail-resep/{id}', [DetailResepController::class, 'destroy']);
 
      // --- PASSWORD CHANGE
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
