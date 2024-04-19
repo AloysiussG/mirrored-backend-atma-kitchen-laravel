@@ -116,7 +116,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'update']);
     Route::delete('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'destroy']);
 
-
     //Lihat customer by admin
     Route::get('/customer', [CustomerController::class, 'index']);
 
