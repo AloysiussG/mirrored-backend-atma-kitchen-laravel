@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Customer;
-use Throwable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
@@ -67,7 +66,7 @@ class CustomerController extends Controller
                 'data' => null
             ],404);
         }
-
+   }
     /**
      * Store a newly created resource in storage.
      */
@@ -239,7 +238,7 @@ class CustomerController extends Controller
     public function showHistory()
     {
         try {
-            //get all current customer carts 
+            //get all current customer carts
             $cart = Cart::where('customer_id', Auth::id())->get();
             $history = [];
 
@@ -283,7 +282,7 @@ class CustomerController extends Controller
     {
         try {
             $namaProduk = $request['nama_produk'];
-            //get all current customer carts 
+            //get all current customer carts
             $cart = Cart::where('customer_id', Auth::id())->get();
             //get id produk based on nama
             $produk = Produk::where('nama_produk', $namaProduk)->first();
