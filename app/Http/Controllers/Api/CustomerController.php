@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\verifyPassChangeMail;
+use App\Mail\verifyRegisterMail;
 use App\Models\Cart;
 use App\Models\DetailCart;
 use App\Models\Produk;
@@ -40,7 +40,7 @@ class CustomerController extends Controller
                 'password' => 'required',
                 'email' => 'unique:karyawans,email|unique:customers,email',
                 'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
-                'tanggal_lahir' => 'date|before:2007-01-01'
+                'tanggal_lahir' => 'date|before:2008-01-01'
             ]);
             if ($validate->fails()) {
                 return response()->json(
@@ -61,10 +61,10 @@ class CustomerController extends Controller
             $domain = URL::to('/');
             $detailEmail = [
                 'name' => $customer['nama'],
-                'link' =>  $domain . '/api/password-change/verify/' . $customer['verifyID'],
+                'link' =>  $domain . '/api/customer/verify/' . $customer['verifyID'],
             ];
             //kirim email
-            mail::to($customer['email'])->send(new verifyPassChangeMail($detailEmail));
+            mail::to($customer['email'])->send(new VerifyRegisterMail($detailEmail));
             //response json
             return response()->json(
                 [

@@ -33,6 +33,9 @@ Route::get('/hampers/{id}', [HampersController::class, 'show']);
 Route::get('/detail-hampers-by-hampers/{hampersId}', [DetailHampersController::class, 'indexByHampers']);
 Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
 
+Route::post('/customer', [CustomerController::class, 'store']);
+Route::get('/customer/verify/{verifyID}', [CustomerController::class, 'verify']);
+
 
 
 // --- PROTECTED ROUTES
@@ -58,7 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Customers
     Route::post('/customer/update', [CustomerController::class, 'update']);
-    Route::post('/customer', [CustomerController::class, 'store']);
     Route::get('/customer', [CustomerController::class, 'show']);
     Route::get('/customer/showHistory', [CustomerController::class, 'showHistory']);
     Route::post('/customer/searchHistory', [CustomerController::class, 'searchHistory']);
