@@ -13,6 +13,16 @@ class Cart extends Model
         'id',
     ];
 
+    public function transaksi()
+    {
+        return $this->hasOne(Transaksi::class);
+    }
+
+    public function detailCart()
+    {
+        return $this->hasMany(DetailCart::class);
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class);

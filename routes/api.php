@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailHampersController;
 use App\Http\Controllers\Api\DetailResepController;
 use App\Http\Controllers\Api\HampersController;
@@ -10,9 +9,15 @@ use App\Http\Controllers\Api\PengadaanBahanBakuController;
 use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PasswordChangeController;
+use App\Http\Controllers\Api\PenitipController;
+use App\Http\Controllers\Api\PengeluaranController;
+use App\Http\Controllers\Api\BahanBakuController;
+use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
 use App\Http\Controllers\Api\ResepController;
+
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -96,6 +101,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/hampers/{id}', [HampersController::class, 'updateAll']);
     Route::delete('/hampers/{id}', [HampersController::class, 'destroy']);
 
+    // route GET /pengeluaran juga bisa search juga menggunakan URL query parameter
+    Route::get('/pengeluaran', [PengeluaranController::class, 'index']);
+    Route::get('/pengeluaran/{id}', [PengeluaranController::class, 'show']);
+    Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
+    Route::put('/pengeluaran/{id}', [PengeluaranController::class, 'update']);
+    Route::delete('/pengeluaran/{id}', [PengeluaranController::class, 'destroy']);
+
+    // route GET /penitip juga bisa search juga menggunakan URL query parameter
+    Route::get('/penitip', [PenitipController::class, 'index']);
+    Route::get('/penitip/{id}', [PenitipController::class, 'show']);
+    Route::post('/penitip', [PenitipController::class, 'store']);
+    Route::put('/penitip/{id}', [PenitipController::class, 'update']);
+    Route::delete('/penitip/{id}', [PenitipController::class, 'destroy']);
+
+    //route GET /bahanBaku juga bisa search juga menggunakan URL query parameter
+    Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
+    Route::get('/bahan-baku/{id}', [BahanBakuController::class, 'show']);
+    Route::post('/bahan-baku', [BahanBakuController::class, 'store']);
+    Route::put('/bahan-baku/{id}', [BahanBakuController::class, 'update']);
+    Route::delete('/bahan-baku/{id}', [BahanBakuController::class, 'destroy']);
+
     Route::post('/detail-hampers/store/{hampersId}', [DetailHampersController::class, 'store']);
     Route::put('/detail-hampers/{id}', [DetailHampersController::class, 'update']);
     Route::delete('/detail-hampers/{id}', [DetailHampersController::class, 'destroy']);
@@ -107,6 +133,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'update']);
     Route::delete('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'destroy']);
 
+    //Lihat customer by admin
+    Route::get('/customer', [CustomerController::class, 'index']);
+
+    //liat history & show transaksi di admin
+    Route::get('/findTransaksiByCust', [TransaksiController::class, 'findByCustomer']);
+    Route::get('/transaksiProducts/{id}', [TransaksiController::class, 'showWithProducts']);
 
     // ...etc
 });
