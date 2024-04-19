@@ -5,27 +5,50 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Penitip;
+use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class PenitipController extends Controller
 {
     //CRUDS biasa untuk penitip, terdiri dari index, show, store, update, destroy
-    public function index() {
-        $penitips = Penitip::all();
+    public function index(Request $request) {
+        try{
+            $penitips = Penitip::query();
+            if ($request->search) {
+                $penitips->where('nama_penitip', 'like', '%' . $request->search . '%');
+            }
 
-        if($penitips){
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_penitip', 'created_at'])) {
+                $sortBy = $request->sortBy;
+            } else {
+                $sortBy = 'id';
+            }
+
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
+            }
+
+            $penitipHasil = $penitips->orderBy($sortBy, $sortOrder)->get();
+
+            if($penitipHasil){
+                return response([
+                    'message' => 'Retrieve Success',
+                    'data' => $penitipHasil
+                ],200);
+            }
+
+        }catch(Throwable $e){
             return response([
-                'message' => 'Retrieve All Success',
-                'data' => $penitips
-            ],200);
+                'message' => $e->getMessage(),
+                'data' => null
+            ],500);
         }
-
-        return reponse([
-            'message' => 'Empty',
-            'data' => null
-        ],404);
     }
 
     public function show($id) {
+       try{
         $penitip = Penitip::find($id);
 
         if($penitip){
@@ -34,65 +57,92 @@ class PenitipController extends Controller
                 'data' => $penitip
             ],200);
         }
-
+       }catch(Throwable $e){
         return response([
-            'message' => 'ID Not Found',
+            'message' => $e->getMessage(),
             'data' => null
         ],404);
+        }
     }
 
     public function store(Request $request) {
-        $penitip = new Penitip;
+       try{
+            $validate = Validator::make($request->all(), [
+                'nama_penitip' => 'required'
+            ]);
 
-        $penitip->nama_penitip = $request->nama_penitip;
-        $penitip->alamat = $request->alamat;
-        $penitip->no_hp = $request->no_hp;
+            $penitip = new Penitip;
 
-        $penitip->save();
-
-        return response([
-            'message' => 'Add Penitip Success',
-            'data' => $penitip
-        ],200);
-    }
-
-    public function update(Request $request, $id) {
-        $penitip = Penitip::find($id);
-
-        if($penitip){
             $penitip->nama_penitip = $request->nama_penitip;
-            $penitip->alamat = $request->alamat;
-            $penitip->no_hp = $request->no_hp;
 
             $penitip->save();
 
             return response([
-                'message' => 'Update Penitip Success',
+                'message' => 'Add Penitip Success',
                 'data' => $penitip
             ],200);
-        }
-
+       }catch(Throwable $e){
         return response([
-            'message' => 'ID Not Found',
+            'message' => $e->getMessage(),
             'data' => null
-        ],404);
+        ],500);
+       }
+    }
+
+    public function update(Request $request, $id) {
+       try{
+            $penitip = Penitip::find($id);
+
+            if($penitip){
+
+                $validate = Validator::make($request->all(), [
+                    'nama_penitip' => 'required'
+                ]);
+                $penitip->nama_penitip = $request->nama_penitip;
+
+                $penitip->save();
+
+                return response([
+                    'message' => 'Update Penitip Success',
+                    'data' => $penitip
+                ],200);
+            }
+
+            return response([
+                'message' => 'ID Not Found',
+                'data' => null
+            ],404);
+       }catch(Throwable $e){
+        return response([
+            'message' => $e->getMessage(),
+            'data' => null
+        ],500);
+       }
     }
 
     public function destroy($id) {
-        $penitip = Penitip::find($id);
+        try{
+            $penitip = Penitip::find($id);
 
-        if($penitip){
-            $penitip->delete();
+            if($penitip){
+                $penitip->delete();
+
+                return response([
+                    'message' => 'Delete Penitip Success',
+                    'data' => $penitip
+                ],200);
+            }
 
             return response([
-                'message' => 'Delete Penitip Success',
-                'data' => $penitip
-            ],200);
+                'message' => 'ID Not Found',
+                'data' => null
+            ],404);
+        }catch(Throwable $e){
+            return response([
+                'message' => $e->getMessage(),
+                'data' => null
+            ],500);
         }
-
-        return response([
-            'message' => 'ID Not Found',
-            'data' => null
-        ],404);
     }
+
 }
