@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\PasswordChangeController;
 use App\Http\Controllers\Api\PenitipController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\BahanBakuController;
+use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\TransaksiController;
 
 
 // --- PUBLIC ROUTES
@@ -56,7 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pengeluaran/{id}', [PengeluaranController::class, 'show']);
     Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
     Route::put('/pengeluaran/{id}', [PengeluaranController::class, 'update']);
-    Route::destroy('/pengeluaran/{id}', [PengeluaranController::class, 'destroy']);
+    Route::delete('/pengeluaran/{id}', [PengeluaranController::class, 'destroy']);
 
     // route GET /penitip juga bisa search juga menggunakan URL query parameter
     Route::get('/penitip', [PenitipController::class, 'index']);
@@ -83,6 +85,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'update']);
     Route::delete('/pengadaan-bahan-baku/{id}', [PengadaanBahanBakuController::class, 'destroy']);
 
+
+    //Lihat customer by admin
+    Route::get('/customer', [CustomerController::class, 'index']);
+
+    //liat history & show transaksi di admin
+    Route::get('/findTransaksiByCust', [TransaksiController::class, 'findByCustomer']);
+    Route::get('/transaksiProducts/{id}', [TransaksiController::class, 'showWithProducts']);
 
     // ...etc
 });

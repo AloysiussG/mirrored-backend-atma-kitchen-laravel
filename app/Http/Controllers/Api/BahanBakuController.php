@@ -15,10 +15,10 @@ class BahanBakuController extends Controller
        try{
         $bahanBakus = BahanBaku::query();
         if ($request->search) {
-            $bahanBakus->where('nama_bahan', 'like', '%' . $request->search . '%');
+            $bahanBakus->where('nama_bahan_baku', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_bahan', 'created_at'])) {
+        if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_bahan_baku', 'created_at'])) {
             $sortBy = $request->sortBy;
         } else {
             $sortBy = 'id';
@@ -77,9 +77,9 @@ class BahanBakuController extends Controller
             $validate = Validator::make($request->all(), [
                 'nama_bahan_baku' => 'required',
                 'satuan_bahan' => 'required',
-                'jumlah_bahan_baku' => 'required',
+                'jumlah_bahan_baku' => 'required|numeric',
             ]);
-            $bahanBaku->nama_bahan = $request->nama_bahan_baku;
+            $bahanBaku->nama_bahan_baku = $request->nama_bahan_baku;
             $bahanBaku->satuan_bahan = $request->satuan_bahan;
             $bahanBaku->jumlah_bahan_baku = $request->jumlah_bahan_baku;
 
@@ -100,13 +100,16 @@ class BahanBakuController extends Controller
     public function update(Request $request, $id) {
         try{
             $bahanBaku = BahanBaku::find($id);
+            $validate = Validator::make($request->all(), [
+                'nama_bahan_baku' => 'required',
+                'satuan_bahan' => 'required',
+                'jumlah_bahan_baku' => 'required|numeric',
+            ]);
 
         if($bahanBaku){
-            $bahanBaku->nama_bahan = $request->nama_bahan;
-            $bahanBaku->stok = $request->stok;
-            $bahanBaku->satuan = $request->satuan;
-            $bahanBaku->harga = $request->harga;
-
+            $bahanBaku->nama_bahan_baku = $request->nama_bahan_baku;
+            $bahanBaku->satuan_bahan = $request->satuan_bahan;
+            $bahanBaku->jumlah_bahan_baku = $request->jumlah_bahan_baku;
             $bahanBaku->save();
 
             return response([

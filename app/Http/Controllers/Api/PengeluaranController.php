@@ -16,7 +16,7 @@ class PengeluaranController extends Controller
         try{
             $pengeluarans = Pengeluaran::query();
             if ($request->search) {
-                $pengeluarans->where('nama_pengeluaran', 'like', '%' . $request->search . '%');
+                $pengeluarans->where('jenis_pengeluaran', 'like', '%' . $request->search . '%');
             }
 
             if ($request->sortBy && in_array($request->sortBy, ['id', 'jenis_pengeluaran', 'created_at'])) {
@@ -71,8 +71,8 @@ class PengeluaranController extends Controller
 
             $validate = Validator::make($request->all(), [
                 'jenis_pengeluaran' => 'required',
-                'total_pengeluaran' => 'required',
-                'tanggal_pengeluaran' => 'required'
+                'total_pengeluaran' => 'required|numeric',
+                'tanggal_pengeluaran' => 'required|date|date_format:Y-m-d'
             ]);
 
             if($validate->fails()){
@@ -111,19 +111,20 @@ class PengeluaranController extends Controller
 
                 $validate = Validator::make($request->all(), [
                     'jenis_pengeluaran' => 'required',
-                    'total_pengeluaran' => 'required',
-                    'tanggal_pengeluaran' => 'required'
+                    'total_pengeluaran' => 'required|numeric',
+                    'tanggal_pengeluaran' => 'required|date'
                 ]);
+
                 $pengeluaran->jenis_pengeluaran = $request->jenis_pengeluaran;
                 $pengeluaran->total_pengeluaran = $request->total_pengeluaran;
                 $pengeluaran->tanggal_pengeluaran = $request->tanggal_pengeluaran;
 
                 $pengeluaran->save();
-
                 return response([
                     'message' => 'Update Success',
                     'data' => $pengeluaran
                 ],200);
+
             }
         }catch(Throwable $e){
             return response([

@@ -67,6 +67,10 @@ class PenitipController extends Controller
 
     public function store(Request $request) {
        try{
+            $validate = Validator::make($request->all(), [
+                'nama_penitip' => 'required'
+            ]);
+
             $penitip = new Penitip;
 
             $penitip->nama_penitip = $request->nama_penitip;
