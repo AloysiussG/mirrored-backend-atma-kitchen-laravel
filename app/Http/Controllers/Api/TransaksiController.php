@@ -53,7 +53,7 @@ class TransaksiController extends Controller
 
     public function showWithProducts($id){
         try{
-            $transaksi = Transaksi::with(['cart.detailCart.produk'])->find($id);
+            $transaksi = Transaksi::with(['cart.detailCart.produk','cart.customer'])->find($id);
             return response([
                 'message' => 'Retrieve Success',
                 'data' => $transaksi
