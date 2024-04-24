@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Throwable;
 
 class AuthController extends Controller
@@ -104,8 +105,14 @@ class AuthController extends Controller
                 );
             }
 
+            // buat token ability berdasarkan role name
+            $roleName = 'customer';
+            if ($userData->role?->role_name) {
+                $roleName = Str::of($userData->role->role_name)->slug('-');
+            }
+
             // jika ditemukan dan password benar, authorize dengan token juga 
-            $userToken = $userData->createToken('Login Token')->plainTextToken;
+            $userToken = $userData->createToken('Login Token', [$roleName])->plainTextToken;
             return response()->json(
                 [
                     'data' => $userData,

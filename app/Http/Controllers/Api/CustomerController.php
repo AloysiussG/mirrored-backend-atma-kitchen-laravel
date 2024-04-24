@@ -22,51 +22,49 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function index(Request $request){
-        try{
+    public function index(Request $request)
+    {
+        try {
             $customerQuery = Customer::query();
-        if($request->has('search')){
-            $customerQuery->where('nama', 'like', '%'.$request->search.'%');
-        }
-        if($request->has('email')){
-            $customerQuery->where('email', 'like', '%'.$request->email.'%');
-        }
-        if($request->has('no_telp')){
-            $customerQuery->where('no_telp', 'like', '%'.$request->no_telp.'%');
-        }
+            if ($request->has('search')) {
+                $customerQuery->where('nama', 'like', '%' . $request->search . '%');
+            }
+            if ($request->has('email')) {
+                $customerQuery->where('email', 'like', '%' . $request->email . '%');
+            }
+            if ($request->has('no_telp')) {
+                $customerQuery->where('no_telp', 'like', '%' . $request->no_telp . '%');
+            }
 
-        if ($request->sortBy && in_array($request->sortBy, ['id', 'nama', 'email', 'no_telp'])) {
-            $sortBy = $request->sortBy;
-        } else {
-            $sortBy = 'id';
-        }
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'nama', 'email', 'no_telp'])) {
+                $sortBy = $request->sortBy;
+            } else {
+                $sortBy = 'id';
+            }
 
-        if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
-            $sortOrder = $request->sortOrder;
-        } else {
-            $sortOrder = 'desc';
-        }
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
+            }
 
-        $customers = $customerQuery->orderBy($sortBy, $sortOrder)->get();
-        return response([
-            'message' => 'Retrieve All Success',
-            'data' => $customers
-        ],200);
-
-        }
-        catch(Throwable $e){
+            $customers = $customerQuery->orderBy($sortBy, $sortOrder)->get();
+            return response([
+                'message' => 'Retrieve All Success',
+                'data' => $customers
+            ], 200);
+        } catch (Throwable $e) {
             return response([
                 'message' => $e->getMessage(),
                 'data' => null
-            ],404);
-        }
-        catch(Throwable $e){
+            ], 404);
+        } catch (Throwable $e) {
             return response([
                 'message' => $e->getMessage(),
                 'data' => null
-            ],404);
+            ], 404);
         }
-   }
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -177,7 +175,7 @@ class CustomerController extends Controller
             return response()->json(
                 [
                     'data' => $customer,
-                    'message' => 'Berhasil mengambil 1 data Karyawan.',
+                    'message' => 'Berhasil mengambil 1 data Customer.',
                 ],
                 200
             );
@@ -230,7 +228,7 @@ class CustomerController extends Controller
             return response()->json(
                 [
                     'data' => $customerUpdate,
-                    'message' => 'Berhasil mengubah data karyawan.',
+                    'message' => 'Berhasil mengubah data Customer.',
                 ],
                 200
             );
@@ -357,6 +355,5 @@ class CustomerController extends Controller
                 500
             );
         }
-
     }
 }
