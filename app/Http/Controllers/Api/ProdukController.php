@@ -24,6 +24,10 @@ class ProdukController extends Controller
                 $produksQuery->where('nama_produk', 'like', '%' . $request->search . '%');
             }
 
+            if ($request->status) {
+                $produksQuery->where('status', 'like', '%' . $request->status . '%');
+            }
+
             if ($request->kategori) {
                 $produksQuery->whereHas('kategoriProduk', function ($query) use ($request) {
                     $query->where('nama_kategori_produk', 'like', '%' . $request->kategori . '%');
@@ -36,7 +40,7 @@ class ProdukController extends Controller
                 });
             }
 
-            if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_produk', 'created_at'])) {
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_produk', 'created_at', 'harga'])) {
                 $sortBy = $request->sortBy;
             } else {
                 $sortBy = 'id';
