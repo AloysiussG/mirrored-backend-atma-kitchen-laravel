@@ -77,7 +77,7 @@ class CustomerController extends Controller
                 'nama' => 'required',
                 'password' => 'required',
                 'email' => 'unique:karyawans,email|unique:customers,email',
-                'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
+                'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15|starts_with:08',
                 'tanggal_lahir' => 'date|before:2008-01-01'
             ]);
             if ($validate->fails()) {
@@ -91,22 +91,12 @@ class CustomerController extends Controller
             }
             $customer['saldo'] = 0;
             $customer['poin'] = 0;
-            $customer['status'] = 'Not Verified';
-            //verify code
-            $customer['verifyID'] = Str::random(8);
             $customer = Customer::create($customer);
-            //detail email
-            $domain = URL::to('/');
-            $detailEmail = [
-                'name' => $customer['nama'],
-                'link' =>  $domain . '/api/customer/verify/' . $customer['verifyID'],
-            ];
-            //kirim email
-            mail::to($customer['email'])->send(new VerifyRegisterMail($detailEmail));
             //response json
             return response()->json(
                 [
-                    'message' => 'Email verification request submitted successfully',
+                    'data' => $customer,
+                    'message' => 'Register Berhasil.',
                 ],
                 200
             );
@@ -119,40 +109,6 @@ class CustomerController extends Controller
                 500
             );
         }
-    }
-
-    public function verify($verifyID)
-    {
-        //cari data password change request
-        $customer = Customer::where('verifyID', $verifyID)->first();
-
-        if ($customer == null) {
-            return response()->json(
-                [
-                    'message' => 'Email verification request not found',
-                ],
-                404
-            );
-        }
-
-        //cek apakah password change request sudah di verify atau belum
-        if ($customer->verified_at != null) {
-            return response()->json([
-                'message' => 'Email verification request already verified',
-            ], 404);
-        }
-
-        //simpen data verified at
-        $customer->verified_at = now();
-        $customer->status = 'Verified';
-        $customer->save();
-
-        return response()->json(
-            [
-                'message' => 'Email verification is done successfully',
-            ],
-            200
-        );
     }
 
     /**

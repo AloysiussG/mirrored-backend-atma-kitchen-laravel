@@ -39,9 +39,9 @@ Route::get('/hampers/{id}', [HampersController::class, 'show']);
 Route::get('/detail-hampers-by-hampers/{hampersId}', [DetailHampersController::class, 'indexByHampers']);
 Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
 
-// register customer dan verify email customer
-Route::post('/customer', [CustomerController::class, 'store']);
-// Route::get('/customer/verify/{verifyID}', [CustomerController::class, 'verify']);
+// register customer
+Route::post('/my-customer/', [CustomerController::class, 'store']);
+
 
 
 
