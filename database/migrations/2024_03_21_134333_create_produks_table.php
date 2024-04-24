@@ -20,7 +20,8 @@ return new class extends Migration
             $table->integer('jumlah_stock')->nullable();
             $table->string('status');
             $table->float('harga');
-            // $table->float('harga_setengah')->nullable();
+            $table->float('porsi')->nullable();
+            $table->string('satuan_porsi')->nullable();
             $table->integer('kuota_harian');
             $table->timestamps();
         });
