@@ -7,6 +7,7 @@ use App\Models\KategoriProduk;
 use App\Models\Penitip;
 use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -115,6 +116,7 @@ class ProdukController extends Controller
                 'status' => 'required',
                 'harga' => 'required',
                 'kuota_harian' => 'required',
+                'foto_produk' => 'required|image:jpeg,png,jpg,gif,svg|max:4096',
             ]);
 
             if ($validate->fails()) {
@@ -149,6 +151,19 @@ class ProdukController extends Controller
                         404
                     );
                 }
+            }
+
+            // jika ada request image
+            if ($request->file('foto_produk')) {
+                $uploadFolder = '/produk';
+
+                $fileImage = $produkDataRequest['foto_produk'];
+                $imageUploadedPath = $fileImage->store($uploadFolder, 'public');
+
+                // ambil url image yang disimpan di storage link
+                // lalu masukkan ke db
+                // $imageURL = Storage::url($imageUploadedPath);
+                $produkDataRequest['foto_produk'] = $imageUploadedPath;
             }
 
             $produkData = Produk::create($produkDataRequest);
@@ -236,6 +251,7 @@ class ProdukController extends Controller
                 'status' => 'required',
                 'harga' => 'required',
                 'kuota_harian' => 'required',
+                'foto_produk' => 'image:jpeg,png,jpg,gif,svg|max:4096',
             ]);
 
             if ($validate->fails()) {
@@ -269,6 +285,24 @@ class ProdukController extends Controller
                         ],
                         404
                     );
+                }
+            }
+
+            // jika ada request image
+            if ($request->file('foto_produk')) {
+                $uploadFolder = '/produk';
+
+                $fileImage = $produkDataRequest['foto_produk'];
+                $imageUploadedPath = $fileImage->store($uploadFolder, 'public');
+
+                // ambil url image yang disimpan di storage link
+                // lalu masukkan ke db
+                // $imageURL = Storage::url($imageUploadedPath);
+                $produkDataRequest['foto_produk'] = $imageUploadedPath;
+
+                // delete image lama di storage ketika berhasil set image baru
+                if (!is_null($produkDataUpdated->foto_produk) && Storage::disk('public')->exists($produkDataUpdated->foto_produk)) {
+                    Storage::disk('public')->delete($produkDataUpdated->foto_produk);
                 }
             }
 
@@ -308,6 +342,10 @@ class ProdukController extends Controller
                     ],
                     404
                 );
+            }
+
+            if (!is_null($produkDataDeleted->foto_produk) && Storage::disk('public')->exists($produkDataDeleted->foto_produk)) {
+                Storage::disk('public')->delete($produkDataDeleted->foto_produk);
             }
 
             if (!$produkDataDeleted->delete()) {

@@ -25,6 +25,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 1,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 'kategori_produk_id' => 1,
@@ -36,6 +37,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 0.5,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 //id =  2
@@ -48,6 +50,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 1,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 //id =  2
@@ -60,6 +63,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 0.5,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 //id =  3
@@ -72,6 +76,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 1,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 //id =  3
@@ -84,6 +89,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 0.5,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 //id =  4
@@ -96,6 +102,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 1,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 //id =  4
@@ -108,6 +115,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 0.5,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 //id =  5
@@ -120,6 +128,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 20,
+                'foto_produk' => null,
             ],
             [
                 //id =  6
@@ -132,6 +141,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 20,
+                'foto_produk' => null,
             ],
             [
                 //id =  7
@@ -144,6 +154,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 20,
+                'foto_produk' => null,
             ],
             [
                 //id =  8
@@ -156,6 +167,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
             [
                 //id =  9
@@ -168,6 +180,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 10,
+                'foto_produk' => null,
             ],
         ]);
     }

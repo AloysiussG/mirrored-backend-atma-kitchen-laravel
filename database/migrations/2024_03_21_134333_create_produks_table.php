@@ -23,6 +23,7 @@ return new class extends Migration
             $table->float('porsi')->nullable();
             $table->string('satuan_porsi')->nullable();
             $table->integer('kuota_harian');
+            $table->string('foto_produk')->nullable();
             $table->timestamps();
         });
     }

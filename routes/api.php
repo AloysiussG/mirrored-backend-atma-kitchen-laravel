@@ -90,7 +90,9 @@ Route::middleware(['auth:sanctum', 'ability:owner'])->group(function () {
 Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     // Admin
     Route::post('/produk', [ProdukController::class, 'store']);
-    Route::put('/produk/{id}', [ProdukController::class, 'update']);
+    // bukan PUT, karena PHP cuma bisa nerima request file di POST request
+    // kalo PUT gabisa update foto nanti...
+    Route::post('/produk/{id}', [ProdukController::class, 'update']);
     Route::delete('/produk/{id}', [ProdukController::class, 'destroy']);
 
     Route::post('/hampers', [HampersController::class, 'store']);
