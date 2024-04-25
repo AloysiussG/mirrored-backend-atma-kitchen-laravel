@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_hampers');
             $table->float('harga_hampers');
+            $table->string('foto_hampers')->nullable();
             $table->timestamps();
         });
     }

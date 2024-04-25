@@ -96,7 +96,9 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     Route::delete('/produk/{id}', [ProdukController::class, 'destroy']);
 
     Route::post('/hampers', [HampersController::class, 'store']);
-    Route::put('/hampers/{id}', [HampersController::class, 'updateAll']);
+    // bukan PUT, karena PHP cuma bisa nerima request file di POST request
+    // kalo PUT gabisa update foto nanti...
+    Route::post('/hampers/{id}', [HampersController::class, 'updateAll']);
     Route::delete('/hampers/{id}', [HampersController::class, 'destroy']);
 
     Route::post('/detail-hampers/store/{hampersId}', [DetailHampersController::class, 'store']);
