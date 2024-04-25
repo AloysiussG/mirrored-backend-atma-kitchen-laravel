@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\PenitipController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\BahanBakuController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\KategoriProdukController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
@@ -30,6 +31,8 @@ Route::get('/password-change/verify/{verifyID}', [PasswordChangeController::clas
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk-by-kategori', [ProdukController::class, 'indexByKategoriProduk']);
 Route::get('/produk/{id}', [ProdukController::class, 'show']);
+
+Route::get('/kategori', [KategoriProdukController::class, 'index']);
 
 // route GET /hampers juga bisa search juga menggunakan URL query parameter
 Route::get('/hampers', [HampersController::class, 'index']);

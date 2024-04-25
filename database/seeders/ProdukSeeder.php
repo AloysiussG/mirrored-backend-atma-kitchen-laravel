@@ -22,7 +22,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => null,
                 'status' => 'Pre Order',
                 'harga' => 850000,
-                // 'harga_setengah' => 450000,
+                'porsi' => 1,
+                'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
             ],
             [
@@ -32,7 +33,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => 1,
                 'status' => 'Ready Stock',
                 'harga' => 450000,
-                // 'harga_setengah' => null,
+                'porsi' => 0.5,
+                'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
             ],
             [
@@ -43,7 +45,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => 1,
                 'status' => 'Ready Stock',
                 'harga' => 550000,
-                // 'harga_setengah' => 300000,
+                'porsi' => 1,
+                'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
             ],
             [
@@ -54,7 +57,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => 1,
                 'status' => 'Ready Stock',
                 'harga' => 300000,
-                // 'harga_setengah' => 300000,
+                'porsi' => 0.5,
+                'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
             ],
             [
@@ -65,7 +69,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => null,
                 'status' => 'Pre Order',
                 'harga' => 250000,
-                // 'harga_setengah' => 150000,
+                'porsi' => 1,
+                'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
             ],
             [
@@ -76,7 +81,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => null,
                 'status' => 'Pre Order',
                 'harga' => 150000,
-                // 'harga_setengah' => 150000,
+                'porsi' => 0.5,
+                'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
             ],
             [
@@ -87,7 +93,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => null,
                 'status' => 'Pre Order',
                 'harga' => 350000,
-                // 'harga_setengah' => 200000,
+                'porsi' => 1,
+                'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
             ],
             [
@@ -98,7 +105,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => null,
                 'status' => 'Pre Order',
                 'harga' => 200000,
-                // 'harga_setengah' => 200000,
+                'porsi' => 0.5,
+                'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
             ],
             [
@@ -109,7 +117,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => null,
                 'status' => 'Pre Order',
                 'harga' => 180000,
-                // 'harga_setengah' => null,
+                'porsi' => null,
+                'satuan_porsi' => null,
                 'kuota_harian' => 20,
             ],
             [
@@ -120,7 +129,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => 1,
                 'status' => 'Ready Stock',
                 'harga' => 120000,
-                // 'harga_setengah' => null,
+                'porsi' => null,
+                'satuan_porsi' => null,
                 'kuota_harian' => 20,
             ],
             [
@@ -131,7 +141,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => 0,
                 'status' => 'Pre Order',
                 'harga' => 100000,
-                // 'harga_setengah' => null,
+                'porsi' => null,
+                'satuan_porsi' => null,
                 'kuota_harian' => 20,
             ],
             [
@@ -142,7 +153,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => 10,
                 'status' => 'Ready Stock',
                 'harga' => 75000,
-                // 'harga_setengah' => null,
+                'porsi' => null,
+                'satuan_porsi' => null,
                 'kuota_harian' => 10,
             ],
             [
@@ -153,7 +165,8 @@ class ProdukSeeder extends Seeder
                 'jumlah_stock' => 10,
                 'status' => 'Ready Stock',
                 'harga' => 250000,
-                // 'harga_setengah' => null,
+                'porsi' => null,
+                'satuan_porsi' => null,
                 'kuota_harian' => 10,
             ],
         ]);
