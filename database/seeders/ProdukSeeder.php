@@ -25,6 +25,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 1,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/lapislegit1.jpeg',
             ],
             [
                 'kategori_produk_id' => 1,
@@ -36,6 +37,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 0.5,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/lapislegit2.jpeg',
             ],
             [
                 //id =  2
@@ -48,6 +50,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 1,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/lapissurabaya1.jpg',
             ],
             [
                 //id =  2
@@ -60,6 +63,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 0.5,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/lapissurabaya2.jpg',
             ],
             [
                 //id =  3
@@ -72,6 +76,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 1,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/brownies1.jpg',
             ],
             [
                 //id =  3
@@ -84,6 +89,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 0.5,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/brownies2.jpg',
             ],
             [
                 //id =  4
@@ -96,6 +102,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 1,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/spikoe1.jpg',
             ],
             [
                 //id =  4
@@ -108,6 +115,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => 0.5,
                 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/spikoe2.jpg',
             ],
             [
                 //id =  5
@@ -120,6 +128,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 20,
+                'foto_produk' => 'sample/rotisosis.jpg',
             ],
             [
                 //id =  6
@@ -132,6 +141,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 20,
+                'foto_produk' => 'sample/milkbun.jpg',
             ],
             [
                 //id =  7
@@ -144,6 +154,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 20,
+                'foto_produk' => 'sample/matcha.jpg',
             ],
             [
                 //id =  8
@@ -156,6 +167,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/keripikkentang1.jpeg',
             ],
             [
                 //id =  9
@@ -168,6 +180,7 @@ class ProdukSeeder extends Seeder
                 'porsi' => null,
                 'satuan_porsi' => null,
                 'kuota_harian' => 10,
+                'foto_produk' => 'sample/kopiluwak.jpg',
             ],
         ]);
     }

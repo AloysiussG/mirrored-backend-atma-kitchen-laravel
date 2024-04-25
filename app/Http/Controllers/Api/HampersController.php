@@ -7,6 +7,7 @@ use App\Models\DetailHampers;
 use App\Models\Hampers;
 use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -93,6 +94,7 @@ class HampersController extends Controller
                 'detail_hampers' => 'required|array',
                 'detail_hampers.*.produk_id' => 'required|exists:produks,id',
                 'detail_hampers.*.jumlah_produk' => 'required',
+                'foto_hampers' => 'required|image:jpeg,png,jpg,gif,svg|max:4096',
             ]);
 
             if ($validate->fails()) {
@@ -103,6 +105,19 @@ class HampersController extends Controller
                     ],
                     400
                 );
+            }
+
+            // jika ada request image
+            if ($request->file('foto_hampers')) {
+                $uploadFolder = '/hampers';
+
+                $fileImage = $hampersDataRequest['foto_hampers'];
+                $imageUploadedPath = $fileImage->store($uploadFolder, 'public');
+
+                // ambil url image yang disimpan di storage link
+                // lalu masukkan ke db
+                // $imageURL = Storage::url($imageUploadedPath);
+                $hampersDataRequest['foto_hampers'] = $imageUploadedPath;
             }
 
             // create hampers
@@ -233,6 +248,7 @@ class HampersController extends Controller
                 'detail_hampers' => 'required|array',
                 'detail_hampers.*.produk_id' => 'required|exists:produks,id',
                 'detail_hampers.*.jumlah_produk' => 'required',
+                'foto_hampers' => 'image:jpeg,png,jpg,gif,svg|max:4096',
             ]);
 
             if ($validate->fails()) {
@@ -243,6 +259,24 @@ class HampersController extends Controller
                     ],
                     400
                 );
+            }
+
+            // jika ada request image
+            if ($request->file('foto_hampers')) {
+                $uploadFolder = '/hampers';
+
+                $fileImage = $hampersDataRequest['foto_hampers'];
+                $imageUploadedPath = $fileImage->store($uploadFolder, 'public');
+
+                // ambil url image yang disimpan di storage link
+                // lalu masukkan ke db
+                // $imageURL = Storage::url($imageUploadedPath);
+                $hampersDataRequest['foto_hampers'] = $imageUploadedPath;
+
+                // delete image lama di storage ketika berhasil set image baru
+                if (!is_null($hampersDataUpdated->foto_hampers) && Storage::disk('public')->exists($hampersDataUpdated->foto_hampers)) {
+                    Storage::disk('public')->delete($hampersDataUpdated->foto_hampers);
+                }
             }
 
             // update hampers
@@ -313,6 +347,11 @@ class HampersController extends Controller
                     ],
                     404
                 );
+            }
+
+            // delete image lama di storage ketika berhasil set image baru
+            if (!is_null($hampersDataDeleted->foto_hampers) && Storage::disk('public')->exists($hampersDataDeleted->foto_hampers)) {
+                Storage::disk('public')->delete($hampersDataDeleted->foto_hampers);
             }
 
             if (!$hampersDataDeleted->delete()) {
