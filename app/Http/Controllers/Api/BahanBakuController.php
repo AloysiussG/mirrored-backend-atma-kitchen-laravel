@@ -15,10 +15,10 @@ class BahanBakuController extends Controller
        try{
         $bahanBakus = BahanBaku::query();
         if ($request->search) {
-            $bahanBakus->where('nama_bahan_baku', 'like', '%' . $request->search . '%');
+            $bahanBakus->where('nama_bahan_baku', 'like', '%' . $request->search . '%')->orWhere('satuan_bahan', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_bahan_baku', 'created_at'])) {
+        if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_bahan_baku','jumlah_bahan_baku', 'created_at'])) {
             $sortBy = $request->sortBy;
         } else {
             $sortBy = 'id';
