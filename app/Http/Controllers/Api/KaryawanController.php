@@ -34,7 +34,7 @@ class KaryawanController extends Controller
 
             if ($request->role) {
                 $karyawan->whereHas('role', function ($query) use ($request) {
-                    $query->where('role_name', 'like', '%' . $request->search . '%');
+                    $query->where('role_name', 'like', '%' . $request->role . '%');
                 });
             }
 

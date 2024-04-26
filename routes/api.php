@@ -18,7 +18,7 @@ use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
 use App\Http\Controllers\Api\ResepController;
-
+use App\Http\Controllers\API\RoleController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -43,7 +43,10 @@ Route::get('/detail-hampers-by-hampers/{hampersId}', [DetailHampersController::c
 Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
 
 // register customer
-Route::post('/my-customer/', [CustomerController::class, 'store']);
+Route::post('/register', [CustomerController::class, 'store']);
+
+//role
+Route::get('/role', [RoleController::class, 'index']);
 
 
 
