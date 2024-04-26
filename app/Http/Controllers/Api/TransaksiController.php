@@ -12,15 +12,11 @@ class TransaksiController extends Controller
     public function findByCustomer(Request $request){
         try{
             $transaksiQuery = Transaksi::query()->with(['cart.customer', 'statusTransaksi']);
-            if($request->customer){
+            if($request->search){
                 $transaksiQuery->whereHas('cart.customer', function ($query) use ($request) {
-                    $query->where('nama','like', '%'. $request->customer.'%');
-                });
-            }
-
-            if($request->status){
-                $transaksiQuery->whereHas('statusTransaksi', function ($query) use ($request) {
-                    $query->where('nama_status','like', '%'. $request->status.'%');
+                    $query->where('nama','like', '%'. $request->search.'%');
+                })->orwhereHas('statusTransaksi', function ($query) use ($request) {
+                    $query->where('nama_status','like', '%'. $request->search.'%');
                 });
             }
 

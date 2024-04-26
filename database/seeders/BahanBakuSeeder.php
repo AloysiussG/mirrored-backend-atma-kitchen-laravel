@@ -84,7 +84,7 @@ class BahanBakuSeeder extends Seeder
             [
                 //12
                 'nama_bahan_baku' => 'whipped cream',
-                'satuan_bahan' => 'mililiter',
+                'satuan_bahan' => 'milliliter',
                 'jumlah_bahan_baku' => 3000
             ],
             [
@@ -96,13 +96,13 @@ class BahanBakuSeeder extends Seeder
             [
                 //14
                 'nama_bahan_baku' => 'susu cair',
-                'satuan_bahan' => 'mililiter',
+                'satuan_bahan' => 'milliliter',
                 'jumlah_bahan_baku' => 20000
             ],
             [
                 //15
                 'nama_bahan_baku' => 'minyak goreng',
-                'satuan_bahan' => 'mililiter',
+                'satuan_bahan' => 'milliliter',
                 'jumlah_bahan_baku' => 20000
             ],
 
