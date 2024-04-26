@@ -69,6 +69,11 @@ Route::middleware(['auth:sanctum', 'ability:owner,mo'])->group(function () {
     // nanti route API untuk laporan yang bisa dilihat Owner + MO ditaruh disini
 });
 
+// --- --- OWNER + MANAGER OPERASIONAL + ADMIN
+Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional,admin'])->group(function () {
+    Route::post('/karyawan/changePassword', [KaryawanController::class, 'changePassword']);
+});
+
 // --- --- CUSTOMER ONLY
 Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     // Customers
@@ -147,7 +152,6 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
 
     // Karyawans
     Route::post('/karyawan', [KaryawanController::class, 'store']);
-    Route::post('/karyawan/changePassword', [KaryawanController::class, 'changePassword']);
     Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
     Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
     Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
