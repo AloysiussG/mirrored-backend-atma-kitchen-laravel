@@ -16,10 +16,10 @@ class PengeluaranController extends Controller
         try{
             $pengeluarans = Pengeluaran::query();
             if ($request->search) {
-                $pengeluarans->where('jenis_pengeluaran', 'like', '%' . $request->search . '%');
+                $pengeluarans->where('jenis_pengeluaran', 'like', '%' . $request->search . '%')->orWhereMonth('tanggal_pengeluaran','=', $request->search)->orWhereDate('tanggal_pengeluaran','=', $request->search);
             }
 
-            if ($request->sortBy && in_array($request->sortBy, ['id', 'jenis_pengeluaran', 'created_at'])) {
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'jenis_pengeluaran','total_pengeluaran','created_at'])) {
                 $sortBy = $request->sortBy;
             } else {
                 $sortBy = 'id';
