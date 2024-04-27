@@ -9,6 +9,7 @@ use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class ProdukController extends Controller
@@ -110,25 +111,6 @@ class ProdukController extends Controller
         try {
             $produkDataRequest = $request->all();
 
-            $validate = Validator::make($produkDataRequest, [
-                'kategori_produk_id' => 'required',
-                'nama_produk' => 'required',
-                'status' => 'required',
-                'harga' => 'required',
-                'kuota_harian' => 'required',
-                'foto_produk' => 'required|image:jpeg,png,jpg,gif,svg|max:4096',
-            ]);
-
-            if ($validate->fails()) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'Data produk tidak valid.',
-                    ],
-                    400
-                );
-            }
-
             $kategoriProduk = KategoriProduk::find($produkDataRequest['kategori_produk_id']);
             if (!$kategoriProduk) {
                 return response()->json(
@@ -137,6 +119,56 @@ class ProdukController extends Controller
                         'message' => 'Kategori produk tidak ditemukan.',
                     ],
                     404
+                );
+            }
+
+            if ($kategoriProduk->nama_kategori_produk === 'Titipan') {
+                $produkDataRequest['status'] = 'Ready Stock';
+            }
+
+            $validate = Validator::make($produkDataRequest, [
+                'kategori_produk_id' => 'required|exists:kategori_produks,id',
+                'nama_produk' => 'required',
+                'harga' => 'required|numeric|min:1000',
+                'kuota_harian' => 'required|numeric|min:1',
+                'penitip_id' => [
+                    Rule::requiredIf(function () use ($kategoriProduk) {
+                        return $kategoriProduk->nama_kategori_produk === 'Titipan';
+                    }),
+                    'nullable',
+                    'exists:penitips,id',
+                ],
+                'status' => [
+                    'required',
+                    Rule::in(
+                        $kategoriProduk->nama_kategori_produk === 'Titipan' ? ['Ready Stock'] : ['Pre Order', 'Ready Stock']
+                    )
+                ],
+                'jumlah_stock' => [
+                    // jumlah stock required untuk ready stock, kalo PO opsional
+                    Rule::requiredIf(fn () => $produkDataRequest['status'] === 'Ready Stock'),
+                    'nullable',
+                    'numeric',
+                    // kalau ready stock, jumlah stok harus > 0, kalau PO boleh 0
+                    $produkDataRequest['status'] === 'Ready Stock' ? 'min:1' : 'min:0',
+                ],
+                'porsi' => [
+                    Rule::requiredIf(function () use ($kategoriProduk) {
+                        return $kategoriProduk->nama_kategori_produk === 'Cake';
+                    }),
+                    'nullable',
+                    'numeric',
+                ],
+                'foto_produk' => 'required|image:jpeg,png,jpg,gif,svg|max:4096',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => $validate->messages()->first(),
+                    ],
+                    400
                 );
             }
 

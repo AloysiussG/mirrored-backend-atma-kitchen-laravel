@@ -9,15 +9,21 @@ class Produk extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'kategori_produk_id',
-        'penitip_id',
-        'nama_produk',
-        'jumlah_stock',
-        'status',
-        'harga',
-        'kuota_harian',
-        'foto_produk',
+    // protected $fillable = [
+    //     'kategori_produk_id',
+    //     'penitip_id',
+    //     'nama_produk',
+    //     'jumlah_stock',
+    //     'status',
+    //     'harga',
+    //     'kuota_harian',
+    //     'foto_produk',
+    // ];
+
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
     ];
 
     public function kategoriProduk()
