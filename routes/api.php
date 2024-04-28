@@ -122,7 +122,7 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
 
     // DetailReseps
     Route::post('/detail-resep', [DetailResepController::class, 'store']);
-    Route::get('/detail-resep/{id}', [DetailResepController::class, 'show']);
+    Route::get('/detail-resep/{id}', [DetailResepController::class, 'index']);
     Route::put('/detail-resep/{id}', [DetailResepController::class, 'update']);
     Route::delete('/detail-resep/{id}', [DetailResepController::class, 'destroy']);
 
