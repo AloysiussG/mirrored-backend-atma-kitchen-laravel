@@ -11,6 +11,51 @@ use Throwable;
 
 class DetailResepController extends Controller
 {
+    public function index(Request $request, string $id)
+    {
+        try {
+            $detailResep = DetailResep::query()->with(['bahanBaku', 'resep'])->where('resep_id', $id);
+
+            if ($request->search) {
+                $detailResep->where('id', 'like', '%' . $request->search . '%')
+                ->orWhere('jumlah_bahan_resep', 'like', '%' . $request->search . '%')
+                ->orWhere('satuan_detail_resep', 'like', '%' . $request->search . '%')
+                ->orWhere('resep.nama_resep', 'like', '%' . $request->search . '%')
+                ->orWhere('bahanBaku.nama_bahan_baku', 'like', '%' . $request->search . '%');
+            }
+
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'created_at'])) {
+                $sortBy = $request->sortBy;
+            } else {
+                $sortBy = 'id';
+            }
+
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
+            }
+
+            $resep = $detailResep->orderBy($sortBy, $sortOrder)->get();
+
+            return response()->json(
+                [
+                    'data' => $resep,
+                    'message' => 'Berhasil mengambil data resep.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -34,7 +79,7 @@ class DetailResepController extends Controller
                     400
                 );
             }
-            
+
             $resepData = Resep::find($request['resep_id']);
 
             if (!$resepData) {

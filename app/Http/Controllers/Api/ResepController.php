@@ -17,7 +17,7 @@ class ResepController extends Controller
     public function index(Request $request)
     {
         try {
-            $resepQuery = Resep::query()->with('detailResep.bahanBaku');
+            $resepQuery = Resep::query()->with(['detailResep.bahanBaku', 'produk']);
 
             if ($request->search) {
                 $resepQuery->where('nama_resep', 'like', '%' . $request->search . '%');
