@@ -76,15 +76,27 @@ class CustomerController extends Controller
             $validate = Validator::make($customer, [
                 'nama' => 'required',
                 'password' => 'required',
-                'email' => 'unique:karyawans,email|unique:customers,email',
-                'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15|starts_with:08',
-                'tanggal_lahir' => 'date|before:2008-01-01'
+                'email' => 'required|unique:karyawans,email|unique:customers,email',
+                'no_telp' => 'required|unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15|starts_with:08',
+                'tanggal_lahir' => 'required|before:2008-01-01'
+            ], [
+                'nama.required' => 'Nama tidak boleh kosong.',
+                'password.required' => 'Password Tidak Boleh Kosong',
+                'email.required' => 'Email Tidak Boleh Kosong',
+                'no_telp.required' => 'Nomor Telepon Tidak Boleh Kosong',
+                'tanggal_lahir.required' => 'Tanggal Lahir Tidak Boleh Kosong',
+                'email.unique' => 'Email sudah terdaftar.',
+                'no_telp.unique' => 'Nomor telepon sudah terdaftar.',
+                'no_telp.digits_between' => 'Nomor telepon tidak valid',
+                'no_telp.starts_with' => 'Nomor telepon harus diawali dengan 08.',
+                'tanggal_lahir.date' => 'Kolom tanggal lahir harus berupa tanggal.',
+                'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.'
             ]);
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'Data customer tidak valid.',
+                        'message' => $validate->errors()->first(),
                     ],
                     400
                 );
