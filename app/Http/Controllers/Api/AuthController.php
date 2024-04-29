@@ -32,6 +32,14 @@ class AuthController extends Controller
                     ->first();
             }
 
+            // tambah role 'Customer' ke Customer untuk bedain Customer & Guest
+            // Karyawan sudah punya role
+            if ($userData && !$userData['role']) {
+                $userData['role'] = [
+                    'role_name' => 'Customer',
+                ];
+            }
+
             return response()->json(
                 [
                     'data' => $userData,
@@ -113,6 +121,15 @@ class AuthController extends Controller
 
             // jika ditemukan dan password benar, authorize dengan token juga 
             $userToken = $userData->createToken('Login Token', [$roleName])->plainTextToken;
+
+            // tambah role 'Customer' ke Customer untuk bedain Customer & Guest
+            // Karyawan sudah punya role
+            if ($userData && !$userData['role']) {
+                $userData['role'] = [
+                    'role_name' => 'Customer',
+                ];
+            }
+
             return response()->json(
                 [
                     'data' => $userData,
