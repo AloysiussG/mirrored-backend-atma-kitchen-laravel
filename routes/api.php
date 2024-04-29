@@ -65,8 +65,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // --- --- OWNER + MANAGER OPERASIONAL
-Route::middleware(['auth:sanctum', 'ability:owner,mo'])->group(function () {
+Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(function () {
     // nanti route API untuk laporan yang bisa dilihat Owner + MO ditaruh disini
+});
+
+// --- --- ADMIN + MANAGER OPERASIONAL
+Route::middleware(['auth:sanctum', 'ability:admin,manager-operasional'])->group(function () {
+    // route GET /penitip juga bisa search juga menggunakan URL query parameter
+    Route::get('/penitip', [PenitipController::class, 'index']);
 });
 
 // --- --- OWNER + MANAGER OPERASIONAL + ADMIN
@@ -170,8 +176,6 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     Route::put('/penggajian/{id}', [PenggajianController::class, 'update']);
     Route::delete('/penggajian/{id}', [PenggajianController::class, 'destroy']);
 
-    // route GET /penitip juga bisa search juga menggunakan URL query parameter
-    Route::get('/penitip', [PenitipController::class, 'index']);
     Route::get('/penitip/{id}', [PenitipController::class, 'show']);
     Route::post('/penitip', [PenitipController::class, 'store']);
     Route::put('/penitip/{id}', [PenitipController::class, 'update']);
