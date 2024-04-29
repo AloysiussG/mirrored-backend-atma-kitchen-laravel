@@ -16,6 +16,7 @@ use App\Models\Produk;
 use App\Models\Transaksi;
 use Throwable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
@@ -177,16 +178,38 @@ class CustomerController extends Controller
 
             $customer = $request->all();
             $validate = Validator::make($customer, [
-                'email' => 'unique:karyawans,email|unique:customers,email',
-                'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
-                'tanggal_lahir' => 'date|before:2007-01-01'
+                'nama' => 'required',
+                'tanggal_lahir' => 'required|before:2008-01-01',
+                'email' => [
+                    'required',
+                    Rule::unique('customers')->ignore(Auth::id()), 
+                ],
+                'no_telp' => [
+                    'required',
+                    'unique:karyawans,no_telp',
+                    'digits_between:1,15',
+                    'starts_with:08',
+                    'unique:karyawans,email',
+                    Rule::unique('customers')->ignore(Auth::id()), 
+                ],
+            ], [
+                'nama.required' => 'Nama tidak boleh kosong.',
+                'email.required' => 'Email Tidak Boleh Kosong',
+                'no_telp.required' => 'Nomor Telepon Tidak Boleh Kosong',
+                'tanggal_lahir.required' => 'Tanggal Lahir Tidak Boleh Kosong',
+                'email.unique' => 'Email sudah terdaftar.',
+                'no_telp.unique' => 'Nomor telepon sudah terdaftar.',
+                'no_telp.digits_between' => 'Nomor telepon tidak valid',
+                'no_telp.starts_with' => 'Nomor telepon harus diawali dengan 08.',
+                'tanggal_lahir.date' => 'Kolom tanggal lahir harus berupa tanggal.',
+                'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.'
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'Data customer tidak valid',
+                        'message' => $validate->errors()->first(),
                     ],
                     400
                 );
