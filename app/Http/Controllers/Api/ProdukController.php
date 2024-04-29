@@ -23,7 +23,14 @@ class ProdukController extends Controller
             $produksQuery = Produk::query()->with('kategoriProduk', 'penitip');
 
             if ($request->search) {
-                $produksQuery->where('nama_produk', 'like', '%' . $request->search . '%');
+                $produksQuery->where('nama_produk', 'like', '%' . $request->search . '%')
+                    ->orWhere('status', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('kategoriProduk', function ($query) use ($request) {
+                        $query->where('nama_kategori_produk', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('penitip', function ($query) use ($request) {
+                        $query->where('nama_penitip', 'like', '%' . $request->search . '%');
+                    });
             }
 
             if ($request->status) {
@@ -42,7 +49,14 @@ class ProdukController extends Controller
                 });
             }
 
-            if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_produk', 'created_at', 'harga'])) {
+            if ($request->sortBy && in_array($request->sortBy, [
+                'id',
+                'nama_produk',
+                'created_at',
+                'harga',
+                'jumlah_stock',
+                'kuota_harian'
+            ])) {
                 $sortBy = $request->sortBy;
             } else {
                 $sortBy = 'id';
