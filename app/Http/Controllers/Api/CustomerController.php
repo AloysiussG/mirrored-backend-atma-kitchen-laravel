@@ -25,15 +25,9 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         try {
-            $customerQuery = Customer::query();
-            if ($request->has('search')) {
-                $customerQuery->where('nama', 'like', '%' . $request->search . '%');
-            }
-            if ($request->has('email')) {
-                $customerQuery->where('email', 'like', '%' . $request->email . '%');
-            }
-            if ($request->has('no_telp')) {
-                $customerQuery->where('no_telp', 'like', '%' . $request->no_telp . '%');
+            $customerQuery = Customer::query()->with(['alamat']);
+            if ($request->search) {
+                $customerQuery->where('nama', 'like', '%' . $request->search . '%')->OrWhere('email', 'like', '%' . $request->search . '%')->OrWhere('no_telp', 'like', '%' . $request->search . '%');
             }
 
             if ($request->sortBy && in_array($request->sortBy, ['id', 'nama', 'email', 'no_telp'])) {
