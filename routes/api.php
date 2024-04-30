@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
 use App\Http\Controllers\Api\ResepController;
 use App\Http\Controllers\API\RoleController;
+use App\Http\Controllers\API\StatusController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -47,6 +48,9 @@ Route::post('/register', [CustomerController::class, 'store']);
 
 //role
 Route::get('/role', [RoleController::class, 'index']);
+
+//status transaksi
+Route::get('/status', [StatusController::class, 'index']);
 
 
 
@@ -85,8 +89,9 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     // Customers
     Route::post('/my-customer/update', [CustomerController::class, 'update']);
     Route::get('/my-customer', [CustomerController::class, 'show']);
-    Route::get('/my-customer/showHistory', [CustomerController::class, 'showHistory']);
+    Route::get('/my-customer/indexPesanan', [CustomerController::class, 'indexPesanan']);
     Route::post('/my-customer/searchHistory', [CustomerController::class, 'searchHistory']);
+
 
     // --- PASSWORD CHANGE CUSTOMER
     Route::post('/password-change', [PasswordChangeController::class, 'store']);

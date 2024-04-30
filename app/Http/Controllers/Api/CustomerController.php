@@ -176,7 +176,7 @@ class CustomerController extends Controller
                 'tanggal_lahir' => 'required|before:2008-01-01',
                 'email' => [
                     'required',
-                    Rule::unique('customers')->ignore(Auth::id()), 
+                    Rule::unique('customers')->ignore(Auth::id()),
                 ],
                 'no_telp' => [
                     'required',
@@ -184,7 +184,7 @@ class CustomerController extends Controller
                     'digits_between:1,15',
                     'starts_with:08',
                     'unique:karyawans,email',
-                    Rule::unique('customers')->ignore(Auth::id()), 
+                    Rule::unique('customers')->ignore(Auth::id()),
                 ],
             ], [
                 'nama.required' => 'Nama tidak boleh kosong.',
@@ -218,6 +218,58 @@ class CustomerController extends Controller
                 200
             );
         } catch (Throwable $th) {
+        }
+    }
+
+    public function indexPesanan(Request $request)
+    {
+        try {
+            $transaksi = Transaksi::query()
+            ->whereHas('cart.customer', function ($query) {
+                $query->where('customer_id', Auth::id());
+            })
+            ->with(['statusTransaksi', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers', 'cart.customer']);
+
+            if ($request->search) {
+                $transaksi->where(function ($query) use ($request) {
+                    $query->whereHas('cart.detailCart.produk', function ($query) use ($request) {
+                        $query->where('nama_produk', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('cart.detailCart.hampers', function ($query) use ($request) {
+                        $query->where('nama_hampers', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('statusTransaksi', function ($query) use ($request) {
+                        $query->where('nama_status', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhere('tanggal_pesan', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            $sortBy = 'created_at';
+
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
+            }
+
+            $transaksi = $transaksi->orderBy($sortBy, $sortOrder)->get();
+
+            return response()->json(
+                [
+                    'data' => $transaksi,
+                    'message' => 'Berhasil mengambil data transaksi.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
         }
     }
 
