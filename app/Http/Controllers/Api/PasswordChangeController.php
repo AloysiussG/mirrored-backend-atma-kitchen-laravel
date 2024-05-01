@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\verifyPassChangeMail;
-use auth;
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 
 class PasswordChangeController extends Controller
@@ -24,7 +24,6 @@ class PasswordChangeController extends Controller
             $validate = validator::make($request->all(), [
                 'oldPass' => 'required',
                 'newPass' => 'required',
-                'id' => 'required',
             ]);
 
             if($validate->fails()){
@@ -35,7 +34,7 @@ class PasswordChangeController extends Controller
 
             //simpan data request change pass
             $passwordChange = new passwordChanges();
-            $passwordChange->customer_id = Customer::find($request->id)->id;
+            $passwordChange->customer_id = Customer::find(Auth::id())->id;
             //cek apakah user ada atau tidak, klo gada ya otomatis error somting wong
             if($passwordChange->customer_id == null){
                 return response()->json([
@@ -44,13 +43,13 @@ class PasswordChangeController extends Controller
             }
 
             //cek password lama sama kek password akun ato ndak
-            if(!Hash::check($request->oldPass, Customer::find($request->id)->password)){
+            if(!Hash::check($request->oldPass, Customer::find(Auth::id())->password)){
                 return response()->json([
                     'message' => 'Old password is incorrect',
                 ],404);
             }
             //cek password lama sama ato ngga dengan password baru
-            if(Hash::check($request->newPass, Customer::find($request->id)->password)){
+            if(Hash::check($request->newPass, Customer::find(Auth::id())->password)){
                 return response()->json([
                     'message' => 'New password cannot be the same as the old password',
                 ],404);
@@ -65,12 +64,12 @@ class PasswordChangeController extends Controller
             //detail email
             $domain = URL::to('/');
             $detailEmail = [
-                'name' => Customer::find($request->id)->nama,
+                'name' => Customer::find(Auth::id())->nama,
                 'link' =>  $domain . '/api/password-change/verify/'.$passwordChange->verifyID,
 
             ];
             //kirim email
-            mail::to(Customer::find($request->id)->email)->send(new verifyPassChangeMail($detailEmail));
+            mail::to(Customer::find(Auth::id())->email)->send(new verifyPassChangeMail($detailEmail));
             //response json
             return response()->json([
                 'message' => 'Password change request submitted successfully',

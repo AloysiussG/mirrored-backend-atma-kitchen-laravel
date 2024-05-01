@@ -34,4 +34,9 @@ class Customer extends Authenticatable
     {
         return $this->belongsTo(User::class);
     }
+
+    function alamat()
+    {
+        return $this->hasMany(Alamat::class);
+    }
 }
