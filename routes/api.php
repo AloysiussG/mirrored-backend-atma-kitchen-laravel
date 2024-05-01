@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
 use App\Http\Controllers\Api\ResepController;
 use App\Http\Controllers\API\RoleController;
+use App\Http\Controllers\API\StatusController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -49,8 +50,6 @@ Route::post('/register', [CustomerController::class, 'store']);
 Route::get('/role', [RoleController::class, 'index']);
 
 
-
-
 // --- PROTECTED ROUTES
 
 // ability vs abilities, misal: [customer, admin] 
@@ -67,6 +66,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 // --- --- OWNER + MANAGER OPERASIONAL
 Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(function () {
     // nanti route API untuk laporan yang bisa dilihat Owner + MO ditaruh disini
+    Route::get('/karyawan', [KaryawanController::class, 'index']);
 });
 
 // --- --- ADMIN + MANAGER OPERASIONAL
@@ -85,8 +85,9 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     // Customers
     Route::post('/my-customer/update', [CustomerController::class, 'update']);
     Route::get('/my-customer', [CustomerController::class, 'show']);
-    Route::get('/my-customer/showHistory', [CustomerController::class, 'showHistory']);
-    Route::post('/my-customer/searchHistory', [CustomerController::class, 'searchHistory']);
+    Route::get('/my-customer/indexPesanan', [CustomerController::class, 'indexPesanan']);
+    Route::get('/my-customer/{id}', [CustomerController::class, 'showPesanan']);
+
 
     // --- PASSWORD CHANGE CUSTOMER
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
@@ -161,7 +162,6 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
     Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
     Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
-    Route::get('/karyawan', [KaryawanController::class, 'index']);
 
     // Presensis
     Route::get('/presensi', [PresensiController::class, 'index']);
