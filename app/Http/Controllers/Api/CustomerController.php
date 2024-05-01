@@ -225,24 +225,37 @@ class CustomerController extends Controller
     {
         try {
             $transaksi = Transaksi::query()
-            ->whereHas('cart.customer', function ($query) {
-                $query->where('customer_id', Auth::id());
-            })
-            ->with(['statusTransaksi', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers', 'cart.customer']);
+                ->whereHas('cart.customer', function ($query) {
+                    $query->where('customer_id', Auth::id());
+                })
+                ->with(['statusTransaksi', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers', 'cart.customer']);
 
             if ($request->search) {
                 $transaksi->where(function ($query) use ($request) {
                     $query->whereHas('cart.detailCart.produk', function ($query) use ($request) {
                         $query->where('nama_produk', 'like', '%' . $request->search . '%');
                     })
-                    ->orWhereHas('cart.detailCart.hampers', function ($query) use ($request) {
-                        $query->where('nama_hampers', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhereHas('statusTransaksi', function ($query) use ($request) {
-                        $query->where('nama_status', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhere('tanggal_pesan', 'like', '%' . $request->search . '%');
+                        ->orWhereHas('cart.detailCart.hampers', function ($query) use ($request) {
+                            $query->where('nama_hampers', 'like', '%' . $request->search . '%');
+                        })
+                        ->orWhereHas('statusTransaksi', function ($query) use ($request) {
+                            $query->where('nama_status', 'like', '%' . $request->search . '%');
+                        });
                 });
+            }
+
+            if ($request->tanggal) {
+                $transaksi->where('tanggal_pesan', 'like', '%' . $request->tanggal . '%');
+            }
+
+            if ($request->status) {
+                if ($request->status != 12) {
+                    $transaksi->where(function ($query) use ($request) {
+                        $query->WhereHas('statusTransaksi', function ($query) use ($request) {
+                            $query->where('id', 'like', '%' . $request->status . '%');
+                        });
+                    });
+                }
             }
 
             $sortBy = 'created_at';
@@ -273,113 +286,20 @@ class CustomerController extends Controller
         }
     }
 
-    public function showHistory()
+    public function showPesanan(String $id)
     {
         try {
-            //get all current customer carts
-            $cart = Cart::where('customer_id', Auth::id())->get();
-            $history = [];
-
-            //get each transaksi with customer cart_id
-            foreach ($cart as $cartItem) {
-                $transaksi = Transaksi::with('statusTransaksi')->where('cart_id', $cartItem->id)->get();
-                if ($transaksi->isNotEmpty()) {
-                    $history = array_merge($history, $transaksi->toArray());
-                }
-            }
-            //if history is null or not found
-            if (!$history) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'History Transaksi tidak ditemukan.',
-                    ],
-                    404
-                );
-            }
-            return response()->json(
-                [
-                    'data' => $history,
-                    'message' => 'Berhasil mengambil data History Transaksi.',
-                ],
-                200
-            );
-        } catch (Throwable $th) {
-            return response()->json(
-                [
-                    'data' => null,
-                    'message' => $th->getMessage(),
-                ],
-                500
-            );
-        }
-    }
-
-    //find history by nama produk
-    public function searchHistory(Request $request)
-    {
-        try {
-            $namaProduk = $request['nama_produk'];
-            //get all current customer carts
-            $cart = Cart::where('customer_id', Auth::id())->get();
-            //get id produk based on nama
-            $produk = Produk::where('nama_produk', $namaProduk)->first();
-            if (!$produk) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'Nama Produk tidak ditemukan.',
-                    ],
-                    404
-                );
-            }
-            $detailCartAll = [];
-            $history = [];
-            //find all detailCart with idProduk and idCart
-
-            foreach ($cart as $i) {
-                $detailCart = DetailCart::with('produk')
-                    ->where('produk_id', $produk->id)
-                    ->where('cart_id', $i->id)->get();
-                if ($detailCart->isNotEmpty()) {
-                    $detailCartAll = array_merge($detailCartAll, $detailCart->toArray());
-                }
-            }
-            if (!$detailCartAll) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'Customer belum membeli produk ini.',
-                    ],
-                    404
-                );
-            }
-
-            //get each transaksi with customer cart_id
-            foreach ($detailCartAll as $i) {
-                $transaksi = Transaksi::where('cart_id', $i['cart_id'])->get();
-                foreach ($transaksi as $t) {
-                    $t['nama_produk'] = $i['produk']['nama_produk'];
-                }
-                if ($transaksi->isNotEmpty()) {
-                    $history = array_merge($history, $transaksi->toArray());
-                }
-            }
-            //if history is null or not found
-            if (!$history) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'History Transaksi tidak ditemukan.',
-                    ],
-                    404
-                );
-            }
+            $transaksi = Transaksi::query()
+                ->where('id', $id)
+                ->whereHas('cart.customer', function ($query) {
+                    $query->where('customer_id', Auth::id());
+                })
+                ->with(['statusTransaksi', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers', 'cart.customer'])->get()->first();
 
             return response()->json(
                 [
-                    'data' => $history,
-                    'message' => 'Berhasil mengambil data History Transaksi.',
+                    'data' => $transaksi,
+                    'message' => 'Berhasil show data transaksi.'
                 ],
                 200
             );
