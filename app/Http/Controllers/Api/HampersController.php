@@ -31,7 +31,7 @@ class HampersController extends Controller
                 });
             }
 
-            if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_hampers', 'created_at'])) {
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_hampers', 'created_at', 'harga_hampers'])) {
                 $sortBy = $request->sortBy;
             } else {
                 $sortBy = 'id';
@@ -93,7 +93,7 @@ class HampersController extends Controller
                 'harga_hampers' => 'required',
                 'detail_hampers' => 'required|array',
                 'detail_hampers.*.produk_id' => 'required|exists:produks,id',
-                'detail_hampers.*.jumlah_produk' => 'required',
+                'detail_hampers.*.jumlah_produk' => 'required|numeric|min:1',
                 'foto_hampers' => 'required|image:jpeg,png,jpg,gif,svg|max:4096',
             ]);
 
@@ -101,7 +101,7 @@ class HampersController extends Controller
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );
@@ -349,12 +349,12 @@ class HampersController extends Controller
                 );
             }
 
-            // delete image lama di storage ketika berhasil set image baru
-            if (!is_null($hampersDataDeleted->foto_hampers) && Storage::disk('public')->exists($hampersDataDeleted->foto_hampers)) {
-                Storage::disk('public')->delete($hampersDataDeleted->foto_hampers);
-            }
-
             if (!$hampersDataDeleted->delete()) {
+                // delete image lama di storage ketika berhasil set image baru
+                if (!is_null($hampersDataDeleted->foto_hampers) && Storage::disk('public')->exists($hampersDataDeleted->foto_hampers)) {
+                    Storage::disk('public')->delete($hampersDataDeleted->foto_hampers);
+                }
+
                 return response()->json(
                     [
                         'data' => $hampersDataDeleted,
@@ -372,10 +372,21 @@ class HampersController extends Controller
                 200
             );
         } catch (Throwable $th) {
+            if ($th->errorInfo[0] == 23000 && $th->errorInfo[1] == 1451) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Hampers tidak dapat dihapus karena sudah pernah ditransaksikan.',
+                    ],
+                    500
+                );
+            }
+
             return response()->json(
                 [
                     'data' => null,
                     'message' => $th->getMessage(),
+                    'exception' => $th
                 ],
                 500
             );
