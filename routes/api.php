@@ -67,6 +67,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(function () {
     // nanti route API untuk laporan yang bisa dilihat Owner + MO ditaruh disini
     Route::get('/karyawan', [KaryawanController::class, 'index']);
+    Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
 });
 
 // --- --- ADMIN + MANAGER OPERASIONAL
@@ -96,7 +97,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
 // --- --- OWNER ONLY
 Route::middleware(['auth:sanctum', 'ability:owner'])->group(function () {
     // ubah data gaji dan bonus karyawan
-    Route::put('/karyawan/changeGaji/{id}', [KaryawanController::class, 'changeGaji']);
+    Route::put('/changeGaji/{id}', [KaryawanController::class, 'changeGaji']);
 
     // ... nanti route API untuk laporan yang bisa dilihat Owner ditaruh juga disini
 });
@@ -130,6 +131,7 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     // DetailReseps
     Route::post('/detail-resep', [DetailResepController::class, 'store']);
     Route::get('/detail-resep/{id}', [DetailResepController::class, 'index']);
+    Route::get('/detail-resep/show/{id}', [DetailResepController::class, 'show']);
     Route::put('/detail-resep/{id}', [DetailResepController::class, 'update']);
     Route::delete('/detail-resep/{id}', [DetailResepController::class, 'destroy']);
 
@@ -161,7 +163,6 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     Route::post('/karyawan', [KaryawanController::class, 'store']);
     Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
     Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
-    Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
 
     // Presensis
     Route::get('/presensi', [PresensiController::class, 'index']);

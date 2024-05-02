@@ -139,7 +139,7 @@ class ResepController extends Controller
     public function show(string $id)
     {
         try {
-            $resepData = Resep::with('detailResep.bahanBaku')->find($id);
+            $resepData = Resep::with(['detailResep.bahanBaku', 'produk'])->find($id);
 
             if (!$resepData) {
                 return response()->json(
@@ -190,16 +190,19 @@ class ResepController extends Controller
             $resepDataRequest = $request->all();
 
             $validate = Validator::make($resepDataRequest, [
-                'detail_resep' => 'array',
-                'detail_resep.*.resep_id' => 'exists:reseps,id',
-                'detail_resep.*.bahan_baku_id' => 'exists:bahan_bakus,id',    
+                'produk_id' => 'required|exists:produks,id',
+                'nama_resep' => 'required',   
+            ], [
+                'produk_id.required' => 'Produk harus dipilih.',
+                'produk_id.exists' => 'Produk tidak ditemukan.',
+                'nama_resep.required' => 'Nama resep harus diisi.',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->errors()->first(),
                     ],
                     400
                 );
@@ -208,41 +211,10 @@ class ResepController extends Controller
             // update resep
             $resepUpdate->update($resepDataRequest);
 
-            // update detail resep
-            // dengan cara: delete all detail resep terlebih dahulu, baru create lagi dari awal
-            // create detail resep dengan foreach loop (detail resep harus berupa array)
-            $detailResepDeleted = DetailResep::query()
-                ->where('resep_id', $resepUpdate->id);
-
-            $detailResepDeleted->delete();
-
-            foreach ($resepDataRequest['detail_resep'] as $value) {
-                // assign detail resep ke resep, lalu create detail resep
-                $value['resep_id'] = $resepUpdate->id;
-
-                // cek unik, dalam 1 resep tidak boleh ada 2 bahan baku yang sama namun beda jumlah bahan baku
-                // jika ada bahan baku yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
-                $detailResep = DetailResep::query()
-                    ->where('resep_id', $resepUpdate->id)
-                    ->where('bahan_baku_id', $value['bahan_baku_id'])
-                    ->first();
-
-                if ($detailResep) {
-                    $detailResep->jumlah_bahan_resep = $detailResep->jumlah_bahan_resep + $value['jumlah_bahan_resep'];
-                    $detailResep->save();
-                } else {
-                    DetailResep::create($value);
-                }
-            }
-
-            $resepUpdate = Resep::query()
-                ->with('detailResep.bahanBaku')
-                ->find($resepUpdate->id);
-
             return response()->json(
                 [
                     'data' => $resepUpdate,
-                    'message' => 'Berhasil mengupdate data resep dan detail resep.',
+                    'message' => 'Berhasil mengupdate data resep.',
                 ],
                 200
             );
