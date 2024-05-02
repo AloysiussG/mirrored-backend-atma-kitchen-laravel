@@ -441,11 +441,11 @@ class ProdukController extends Controller
                 );
             }
 
-            if (!is_null($produkDataDeleted->foto_produk) && Storage::disk('public')->exists($produkDataDeleted->foto_produk)) {
-                Storage::disk('public')->delete($produkDataDeleted->foto_produk);
-            }
 
             if (!$produkDataDeleted->delete()) {
+                if (!is_null($produkDataDeleted->foto_produk) && Storage::disk('public')->exists($produkDataDeleted->foto_produk)) {
+                    Storage::disk('public')->delete($produkDataDeleted->foto_produk);
+                }
                 return response()->json(
                     [
                         'data' => $produkDataDeleted,
@@ -463,6 +463,16 @@ class ProdukController extends Controller
                 200
             );
         } catch (Throwable $th) {
+            if ($th->errorInfo[0] == 23000 && $th->errorInfo[1] == 1451) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Produk tidak dapat dihapus karena sudah pernah ditransaksikan.',
+                    ],
+                    500
+                );
+            }
+
             return response()->json(
                 [
                     'data' => null,
