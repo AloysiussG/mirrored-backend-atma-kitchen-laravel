@@ -90,7 +90,7 @@ class HampersController extends Controller
 
             $validate = Validator::make($hampersDataRequest, [
                 'nama_hampers' => 'required',
-                'harga_hampers' => 'required',
+                'harga_hampers' => 'required|numeric|min:1000',
                 'detail_hampers' => 'required|array',
                 'detail_hampers.*.produk_id' => 'required|exists:produks,id',
                 'detail_hampers.*.jumlah_produk' => 'required|numeric|min:1',
@@ -244,10 +244,10 @@ class HampersController extends Controller
 
             $validate = Validator::make($hampersDataRequest, [
                 'nama_hampers' => 'required',
-                'harga_hampers' => 'required',
+                'harga_hampers' => 'required|numeric|min:1000',
                 'detail_hampers' => 'required|array',
                 'detail_hampers.*.produk_id' => 'required|exists:produks,id',
-                'detail_hampers.*.jumlah_produk' => 'required',
+                'detail_hampers.*.jumlah_produk' => 'required|numeric|min:1',
                 'foto_hampers' => 'image:jpeg,png,jpg,gif,svg|max:4096',
             ]);
 
@@ -255,7 +255,7 @@ class HampersController extends Controller
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );
