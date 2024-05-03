@@ -70,20 +70,19 @@ class ResepController extends Controller
             $resepDataRequest = $request->all();
 
             $validate = Validator::make($resepDataRequest, [
-                'produk_id' => 'required|exists:produks,id',
                 'nama_resep' => 'required',
-                'detail_resep' => 'required|array',
-                'detail_resep.*.resep_id' => 'required|exists:reseps,id',
-                'detail_resep.*.bahan_baku_id' => 'required|exists:bahan_bakus,id',
-                'detail_resep.*.jumlah_bahan_resep' => 'required',
-                'detail_resep.*.satuan_detail_resep' => 'required',
+                'produk_id' => 'required|exists:produks,id',
+            ],[
+                'produk_id.required' => 'Produk harus dipilih.',
+                'produk_id.exists' => 'Produk tidak ditemukan.',
+                'nama_resep.required' => 'Nama resep harus diisi.',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );
