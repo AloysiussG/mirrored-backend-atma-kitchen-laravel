@@ -18,7 +18,8 @@ use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
 use App\Http\Controllers\Api\ResepController;
-
+use App\Http\Controllers\API\RoleController;
+use App\Http\Controllers\API\StatusController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -43,9 +44,10 @@ Route::get('/detail-hampers-by-hampers/{hampersId}', [DetailHampersController::c
 Route::get('/detail-hampers/{id}', [DetailHampersController::class, 'show']);
 
 // register customer
-Route::post('/my-customer/', [CustomerController::class, 'store']);
+Route::post('/register', [CustomerController::class, 'store']);
 
-
+//role
+Route::get('/role', [RoleController::class, 'index']);
 
 
 // --- PROTECTED ROUTES
@@ -62,8 +64,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // --- --- OWNER + MANAGER OPERASIONAL
-Route::middleware(['auth:sanctum', 'ability:owner,mo'])->group(function () {
+Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(function () {
     // nanti route API untuk laporan yang bisa dilihat Owner + MO ditaruh disini
+    Route::get('/karyawan', [KaryawanController::class, 'index']);
+});
+
+// --- --- ADMIN + MANAGER OPERASIONAL
+Route::middleware(['auth:sanctum', 'ability:admin,manager-operasional'])->group(function () {
+    // route GET /penitip juga bisa search juga menggunakan URL query parameter
+    Route::get('/penitip', [PenitipController::class, 'index']);
+});
+
+// --- --- OWNER + MANAGER OPERASIONAL + ADMIN
+Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional,admin'])->group(function () {
+    Route::post('/karyawan/changePassword', [KaryawanController::class, 'changePassword']);
 });
 
 // --- --- CUSTOMER ONLY
@@ -71,8 +85,9 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     // Customers
     Route::post('/my-customer/update', [CustomerController::class, 'update']);
     Route::get('/my-customer', [CustomerController::class, 'show']);
-    Route::get('/my-customer/showHistory', [CustomerController::class, 'showHistory']);
-    Route::post('/my-customer/searchHistory', [CustomerController::class, 'searchHistory']);
+    Route::get('/my-customer/indexPesanan', [CustomerController::class, 'indexPesanan']);
+    Route::get('/my-customer/{id}', [CustomerController::class, 'showPesanan']);
+
 
     // --- PASSWORD CHANGE CUSTOMER
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
@@ -114,7 +129,7 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
 
     // DetailReseps
     Route::post('/detail-resep', [DetailResepController::class, 'store']);
-    Route::get('/detail-resep/{id}', [DetailResepController::class, 'show']);
+    Route::get('/detail-resep/{id}', [DetailResepController::class, 'index']);
     Route::put('/detail-resep/{id}', [DetailResepController::class, 'update']);
     Route::delete('/detail-resep/{id}', [DetailResepController::class, 'destroy']);
 
@@ -144,11 +159,9 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
 
     // Karyawans
     Route::post('/karyawan', [KaryawanController::class, 'store']);
-    Route::post('/karyawan/changePassword', [KaryawanController::class, 'changePassword']);
     Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
     Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
     Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
-    Route::get('/karyawan', [KaryawanController::class, 'index']);
 
     // Presensis
     Route::get('/presensi', [PresensiController::class, 'index']);
@@ -163,8 +176,6 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     Route::put('/penggajian/{id}', [PenggajianController::class, 'update']);
     Route::delete('/penggajian/{id}', [PenggajianController::class, 'destroy']);
 
-    // route GET /penitip juga bisa search juga menggunakan URL query parameter
-    Route::get('/penitip', [PenitipController::class, 'index']);
     Route::get('/penitip/{id}', [PenitipController::class, 'show']);
     Route::post('/penitip', [PenitipController::class, 'store']);
     Route::put('/penitip/{id}', [PenitipController::class, 'update']);

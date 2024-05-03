@@ -16,6 +16,7 @@ use App\Models\Produk;
 use App\Models\Transaksi;
 use Throwable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
@@ -70,15 +71,27 @@ class CustomerController extends Controller
             $validate = Validator::make($customer, [
                 'nama' => 'required',
                 'password' => 'required',
-                'email' => 'unique:karyawans,email|unique:customers,email',
-                'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15|starts_with:08',
-                'tanggal_lahir' => 'date|before:2008-01-01'
+                'email' => 'required|unique:karyawans,email|unique:customers,email',
+                'no_telp' => 'required|unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15|starts_with:08',
+                'tanggal_lahir' => 'required|before:2008-01-01'
+            ], [
+                'nama.required' => 'Nama tidak boleh kosong.',
+                'password.required' => 'Password Tidak Boleh Kosong',
+                'email.required' => 'Email Tidak Boleh Kosong',
+                'no_telp.required' => 'Nomor Telepon Tidak Boleh Kosong',
+                'tanggal_lahir.required' => 'Tanggal Lahir Tidak Boleh Kosong',
+                'email.unique' => 'Email sudah terdaftar.',
+                'no_telp.unique' => 'Nomor telepon sudah terdaftar.',
+                'no_telp.digits_between' => 'Nomor telepon tidak valid',
+                'no_telp.starts_with' => 'Nomor telepon harus diawali dengan 08.',
+                'tanggal_lahir.date' => 'Kolom tanggal lahir harus berupa tanggal.',
+                'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.'
             ]);
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'Data customer tidak valid.',
+                        'message' => $validate->errors()->first(),
                     ],
                     400
                 );
@@ -159,16 +172,38 @@ class CustomerController extends Controller
 
             $customer = $request->all();
             $validate = Validator::make($customer, [
-                'email' => 'unique:karyawans,email|unique:customers,email',
-                'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
-                'tanggal_lahir' => 'date|before:2007-01-01'
+                'nama' => 'required',
+                'tanggal_lahir' => 'required|before:2008-01-01',
+                'email' => [
+                    'required',
+                    Rule::unique('customers')->ignore(Auth::id()),
+                ],
+                'no_telp' => [
+                    'required',
+                    'unique:karyawans,no_telp',
+                    'digits_between:1,15',
+                    'starts_with:08',
+                    'unique:karyawans,email',
+                    Rule::unique('customers')->ignore(Auth::id()),
+                ],
+            ], [
+                'nama.required' => 'Nama tidak boleh kosong.',
+                'email.required' => 'Email Tidak Boleh Kosong',
+                'no_telp.required' => 'Nomor Telepon Tidak Boleh Kosong',
+                'tanggal_lahir.required' => 'Tanggal Lahir Tidak Boleh Kosong',
+                'email.unique' => 'Email sudah terdaftar.',
+                'no_telp.unique' => 'Nomor telepon sudah terdaftar.',
+                'no_telp.digits_between' => 'Nomor telepon tidak valid',
+                'no_telp.starts_with' => 'Nomor telepon harus diawali dengan 08.',
+                'tanggal_lahir.date' => 'Kolom tanggal lahir harus berupa tanggal.',
+                'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.'
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'Data customer tidak valid',
+                        'message' => $validate->errors()->first(),
                     ],
                     400
                 );
@@ -186,34 +221,57 @@ class CustomerController extends Controller
         }
     }
 
-    public function showHistory()
+    public function indexPesanan(Request $request)
     {
         try {
-            //get all current customer carts
-            $cart = Cart::where('customer_id', Auth::id())->get();
-            $history = [];
+            $transaksi = Transaksi::query()
+                ->whereHas('cart.customer', function ($query) {
+                    $query->where('customer_id', Auth::id());
+                })
+                ->with(['statusTransaksi', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers', 'cart.customer']);
 
-            //get each transaksi with customer cart_id
-            foreach ($cart as $cartItem) {
-                $transaksi = Transaksi::with('statusTransaksi')->where('cart_id', $cartItem->id)->get();
-                if ($transaksi->isNotEmpty()) {
-                    $history = array_merge($history, $transaksi->toArray());
+            if ($request->search) {
+                $transaksi->where(function ($query) use ($request) {
+                    $query->whereHas('cart.detailCart.produk', function ($query) use ($request) {
+                        $query->where('nama_produk', 'like', '%' . $request->search . '%');
+                    })
+                        ->orWhereHas('cart.detailCart.hampers', function ($query) use ($request) {
+                            $query->where('nama_hampers', 'like', '%' . $request->search . '%');
+                        })
+                        ->orWhereHas('statusTransaksi', function ($query) use ($request) {
+                            $query->where('nama_status', 'like', '%' . $request->search . '%');
+                        });
+                });
+            }
+
+            if ($request->tanggal) {
+                $transaksi->where('tanggal_pesan', 'like', '%' . $request->tanggal . '%');
+            }
+
+            if ($request->status) {
+                if ($request->status != 12) {
+                    $transaksi->where(function ($query) use ($request) {
+                        $query->WhereHas('statusTransaksi', function ($query) use ($request) {
+                            $query->where('id', 'like', '%' . $request->status . '%');
+                        });
+                    });
                 }
             }
-            //if history is null or not found
-            if (!$history) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'History Transaksi tidak ditemukan.',
-                    ],
-                    404
-                );
+
+            $sortBy = 'created_at';
+
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
             }
+
+            $transaksi = $transaksi->orderBy($sortBy, $sortOrder)->get();
+
             return response()->json(
                 [
-                    'data' => $history,
-                    'message' => 'Berhasil mengambil data History Transaksi.',
+                    'data' => $transaksi,
+                    'message' => 'Berhasil mengambil data transaksi.'
                 ],
                 200
             );
@@ -228,71 +286,20 @@ class CustomerController extends Controller
         }
     }
 
-    //find history by nama produk
-    public function searchHistory(Request $request)
+    public function showPesanan(String $id)
     {
         try {
-            $namaProduk = $request['nama_produk'];
-            //get all current customer carts
-            $cart = Cart::where('customer_id', Auth::id())->get();
-            //get id produk based on nama
-            $produk = Produk::where('nama_produk', $namaProduk)->first();
-            if (!$produk) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'Nama Produk tidak ditemukan.',
-                    ],
-                    404
-                );
-            }
-            $detailCartAll = [];
-            $history = [];
-            //find all detailCart with idProduk and idCart
-
-            foreach ($cart as $i) {
-                $detailCart = DetailCart::with('produk')
-                    ->where('produk_id', $produk->id)
-                    ->where('cart_id', $i->id)->get();
-                if ($detailCart->isNotEmpty()) {
-                    $detailCartAll = array_merge($detailCartAll, $detailCart->toArray());
-                }
-            }
-            if (!$detailCartAll) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'Customer belum membeli produk ini.',
-                    ],
-                    404
-                );
-            }
-
-            //get each transaksi with customer cart_id
-            foreach ($detailCartAll as $i) {
-                $transaksi = Transaksi::where('cart_id', $i['cart_id'])->get();
-                foreach ($transaksi as $t) {
-                    $t['nama_produk'] = $i['produk']['nama_produk'];
-                }
-                if ($transaksi->isNotEmpty()) {
-                    $history = array_merge($history, $transaksi->toArray());
-                }
-            }
-            //if history is null or not found
-            if (!$history) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'History Transaksi tidak ditemukan.',
-                    ],
-                    404
-                );
-            }
+            $transaksi = Transaksi::query()
+                ->where('id', $id)
+                ->whereHas('cart.customer', function ($query) {
+                    $query->where('customer_id', Auth::id());
+                })
+                ->with(['statusTransaksi', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers', 'cart.customer'])->get()->first();
 
             return response()->json(
                 [
-                    'data' => $history,
-                    'message' => 'Berhasil mengambil data History Transaksi.',
+                    'data' => $transaksi,
+                    'message' => 'Berhasil show data transaksi.'
                 ],
                 200
             );

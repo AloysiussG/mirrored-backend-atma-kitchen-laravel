@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Throwable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class KaryawanController extends Controller
 {
@@ -34,7 +35,7 @@ class KaryawanController extends Controller
 
             if ($request->role) {
                 $karyawan->whereHas('role', function ($query) use ($request) {
-                    $query->where('role_name', 'like', '%' . $request->search . '%');
+                    $query->where('role_name', 'like', '%' . $request->role . '%');
                 });
             }
 
@@ -284,20 +285,40 @@ class KaryawanController extends Controller
 
             //validator
             $validate = Validator::make($request->all(), [
-                'password' => 'required',
+                'old_password' => 'required',
+                'new_password' => 'required',
+                'new_password_confirm' => 'required|same:new_password',
+            ], [
+                'old_password.required' => 'Password lama tidak boleh kosong.',
+                'new_password.required' => 'Password baru tidak boleh kosong.',
+                'new_password_confirm.required' => 'Konfirmasi password tidak boleh kosong.',
+                'new_password_confirm.same' => 'Konfirmasi password wajib sama.'
             ]);
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->errors()->first(),
                     ],
                     400
                 );
             }
 
+            // password salah
+            if (!Hash::check($request['old_password'], $karyawan->password)) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Password lama salah.',
+                    ],
+                    404
+                );
+            }
+
             //update
-            $karyawan->update($request->all());
+            $karyawan->update([
+                'password' => $request['new_password']
+            ]);
             return response()->json(
                 [
                     'data' => $karyawan,

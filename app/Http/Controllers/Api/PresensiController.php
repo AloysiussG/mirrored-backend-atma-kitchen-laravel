@@ -18,6 +18,32 @@ class PresensiController extends Controller
     {
         try {
             $presensi = Presensi::query()->with('karyawan');
+            
+            if ($request->jumlah) {
+                $presensiTemp = Presensi::query()->with('karyawan');
+                if ($request->jumlah === 'Terbanyak') {
+                    $presensiTemp = $presensiTemp->selectRaw('karyawan_id, COUNT(*) as jumlah_bolos')
+                        ->groupBy('karyawan_id')
+                        ->orderByDesc('jumlah_bolos')
+                        ->withCount('karyawan')
+                        ->get();
+                    if ($presensiTemp->isNotEmpty()) {
+                        $jumlahId = $presensiTemp->first()->karyawan_id;
+                    }
+                } elseif ($request->jumlah === 'Tersedikit') {
+                    $presensiTemp = $presensiTemp->selectRaw('karyawan_id, COUNT(*) as jumlah_bolos')
+                        ->groupBy('karyawan_id')
+                        ->orderBy('jumlah_bolos')
+                        ->withCount('karyawan')
+                        ->get();
+
+                    if ($presensiTemp->isNotEmpty()) {
+                        $jumlahId = $presensiTemp->first()->karyawan_id;
+                    }
+                }
+                $presensi
+                    ->where('karyawan_id', 'like', '%' . $jumlahId . '%');
+            }
 
             if ($request->search) {
                 $presensi
@@ -27,14 +53,15 @@ class PresensiController extends Controller
 
             if ($request->karyawan) {
                 $presensi->whereHas('karyawan', function ($query) use ($request) {
-                    $query->where('nama', 'like', '%' . $request->search . '%');
+                    $query->where('nama', 'like', '%' . $request->karyawan . '%');
                 });
             }
 
             if ($request->sortBy && in_array($request->sortBy, [
                 'id',
                 'karyawan_id',
-                'created_at'
+                'created_at',
+                'nama_karyawan'
             ])) {
                 $sortBy = $request->sortBy;
             } else {
@@ -47,7 +74,15 @@ class PresensiController extends Controller
                 $sortOrder = 'desc';
             }
 
-            $presensiData = $presensi->orderBy($sortBy, $sortOrder)->get();
+            if ($sortBy === 'nama_karyawan') {
+                $presensi->join('karyawans', 'presensis.karyawan_id', '=', 'karyawans.id')
+                         ->select('presensis.*')
+                         ->orderBy('karyawans.nama', $sortOrder);
+            } else {
+                $presensi->orderBy($sortBy, $sortOrder);
+            }
+
+            $presensiData = $presensi->get();
 
             return response()->json(
                 [
@@ -72,9 +107,9 @@ class PresensiController extends Controller
      */
     public function store(Request $request)
     {
-        try{
+        try {
             $karyawan = Karyawan::find($request['karyawan_id']);
-            if(!$karyawan){
+            if (!$karyawan) {
                 return response()->json(
                     [
                         'data' => null,
@@ -107,7 +142,7 @@ class PresensiController extends Controller
                 ],
                 200
             );
-        }catch (Throwable $th){
+        } catch (Throwable $th) {
             return response()->json(
                 [
                     'data' => null,
@@ -123,7 +158,7 @@ class PresensiController extends Controller
      */
     public function show(string $id)
     {
-        try{
+        try {
             $presensi = Presensi::with('karyawan')->find($id);
             if (!$presensi) {
                 return response()->json(
@@ -142,7 +177,7 @@ class PresensiController extends Controller
                 ],
                 200
             );
-        }catch (Throwable $th){
+        } catch (Throwable $th) {
             return response()->json(
                 [
                     'data' => null,
@@ -158,7 +193,7 @@ class PresensiController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try{
+        try {
             $presensiUpdate = Presensi::find($id);
             if (!$presensiUpdate) {
                 return response()->json(
@@ -172,7 +207,7 @@ class PresensiController extends Controller
 
             $karyawan = Karyawan::find($request['karyawan_id']);
             $presensi = $request->all();
-            if(!$karyawan){
+            if (!$karyawan) {
                 return response()->json(
                     [
                         'data' => null,
