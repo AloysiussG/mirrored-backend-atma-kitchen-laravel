@@ -19,8 +19,15 @@ class TransaksiController extends Controller
                     $query->where('nama_status','like', '%'. $request->search.'%');
                 });
             }
+            if($request->date){
+                $transaksiQuery->whereDate('tanggal_pesan',$request->date);
+            }
 
-            if($request->sortBy && in_array($request->sortBy, ['id','total_harga', 'status', 'tanggal_transaksi'])) {
+            if($request->status){
+                $transaksiQuery->where('status_transaksi_id',$request->status);
+            }
+
+            if($request->sortBy && in_array($request->sortBy, ['id','total_harga', 'status', 'tanggal_pesan'])) {
                 $sortBy = $request->sortBy;
             } else {
                 $sortBy = 'id';
