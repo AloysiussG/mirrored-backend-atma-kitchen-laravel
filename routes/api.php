@@ -73,6 +73,8 @@ Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(
 Route::middleware(['auth:sanctum', 'ability:admin,manager-operasional'])->group(function () {
     // route GET /penitip juga bisa search juga menggunakan URL query parameter
     Route::get('/penitip', [PenitipController::class, 'index']);
+    // route GET /bahanBaku juga bisa search juga menggunakan URL query parameter
+    Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
 });
 
 // --- --- OWNER + MANAGER OPERASIONAL + ADMIN
@@ -133,8 +135,6 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     Route::put('/detail-resep/{id}', [DetailResepController::class, 'update']);
     Route::delete('/detail-resep/{id}', [DetailResepController::class, 'destroy']);
 
-    // route GET /bahanBaku juga bisa search juga menggunakan URL query parameter
-    Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
     Route::get('/bahan-baku/{id}', [BahanBakuController::class, 'show']);
     Route::post('/bahan-baku', [BahanBakuController::class, 'store']);
     Route::put('/bahan-baku/{id}', [BahanBakuController::class, 'update']);
