@@ -71,7 +71,7 @@ class CustomerController extends Controller
             $validate = Validator::make($customer, [
                 'nama' => 'required',
                 'password' => 'required',
-                'email' => 'required|unique:karyawans,email|unique:customers,email',
+                'email' => 'required|unique:karyawans,email|unique:customers,email|email',
                 'no_telp' => 'required|unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15|starts_with:08',
                 'tanggal_lahir' => 'required|before:2008-01-01'
             ], [
@@ -85,7 +85,8 @@ class CustomerController extends Controller
                 'no_telp.digits_between' => 'Nomor telepon tidak valid',
                 'no_telp.starts_with' => 'Nomor telepon harus diawali dengan 08.',
                 'tanggal_lahir.date' => 'Kolom tanggal lahir harus berupa tanggal.',
-                'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.'
+                'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.',
+                'email.email' => 'Email tidak valid.',
             ]);
             if ($validate->fails()) {
                 return response()->json(
@@ -176,6 +177,8 @@ class CustomerController extends Controller
                 'tanggal_lahir' => 'required|before:2008-01-01',
                 'email' => [
                     'required',
+                    'email',
+                    'unique:karyawans,email',
                     Rule::unique('customers')->ignore(Auth::id()),
                 ],
                 'no_telp' => [
@@ -183,9 +186,9 @@ class CustomerController extends Controller
                     'unique:karyawans,no_telp',
                     'digits_between:1,15',
                     'starts_with:08',
-                    'unique:karyawans,email',
                     Rule::unique('customers')->ignore(Auth::id()),
                 ],
+                'foto_profile' => 'image:jpeg,png,jpg,gif,svg|max:4096',
             ], [
                 'nama.required' => 'Nama tidak boleh kosong.',
                 'email.required' => 'Email Tidak Boleh Kosong',
@@ -196,7 +199,10 @@ class CustomerController extends Controller
                 'no_telp.digits_between' => 'Nomor telepon tidak valid',
                 'no_telp.starts_with' => 'Nomor telepon harus diawali dengan 08.',
                 'tanggal_lahir.date' => 'Kolom tanggal lahir harus berupa tanggal.',
-                'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.'
+                'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.',
+                'email.email' => 'Email tidak valid.',
+                'foto_profile.image' => 'Foto harus berupa file gambar.',
+                'foto_profile.max' => 'Ukuran foto terlalu besar, maksimal 4MB.',
             ]);
 
             if ($validate->fails()) {
@@ -207,6 +213,19 @@ class CustomerController extends Controller
                     ],
                     400
                 );
+            }
+
+            // jika ada request image
+            if ($request->file('foto_profile')) {
+                $uploadFolder = '/customer';
+
+                $fileImage = $customer['foto_profile'];
+                $imageUploadedPath = $fileImage->store($uploadFolder, 'public');
+
+                // ambil url image yang disimpan di storage link
+                // lalu masukkan ke db
+                // $imageURL = Storage::url($imageUploadedPath);
+                $customer['foto_profile'] = $imageUploadedPath;
             }
 
             $customerUpdate->update($customer);

@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Karyawan;
+use App\Models\Penggajian;
+use App\Models\Presensi;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class KaryawanController extends Controller
 {
@@ -93,21 +96,52 @@ class KaryawanController extends Controller
             $validate = Validator::make($karyawan, [
                 'role_id' => 'required',
                 'nama' => 'required',
+                'email' => 'required|unique:karyawans,email|unique:customers,email|email',
                 'password' => 'required',
-                'email' => 'required|unique:karyawans,email|unique:customers,email',
-                'no_telp' => 'required|unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
-                'gaji' => 'required',
-                'bonus_gaji' => 'required',
+                'no_telp' => 'required|unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15|starts_with:08',
+                'hire_date' => 'required|before:tomorrow',
+            ], [
+                'nama.required' => 'Nama tidak boleh kosong.',
+                'password.required' => 'Password tidak boleh kosong.',
+                'email.required' => 'Email Tidak Boleh Kosong',
+                'no_telp.required' => 'Nomor Telepon Tidak Boleh Kosong',
+                'role_id.required' => 'Role harus dipilih.',
+                'email.unique' => 'Email sudah terdaftar.',
+                'no_telp.unique' => 'Nomor telepon sudah terdaftar.',
+                'no_telp.digits_between' => 'Nomor telepon tidak valid',
+                'no_telp.starts_with' => 'Nomor telepon harus diawali dengan 08.',
+                'email.email' => 'Email tidak valid.',
+                'hire_date.required' => 'Tanggal masuk tidak boleh kosong.',
+                'hire_date.before' => 'Tanggal masuk tidak valid.',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'Data karyawan tidak valid.',
+                        'message' => $validate->errors()->first(),
                     ],
                     400
                 );
+            }
+
+            if ($karyawan['role_id'] == 1) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Role tidak valid.',
+                    ],
+                    400
+                );
+            } else if ($karyawan['role_id'] == 2) {
+                $karyawan['bonus_gaji'] = 250000;
+                $karyawan['gaji'] = 4500000;
+            } else if ($karyawan['role_id'] == 3) {
+                $karyawan['bonus_gaji'] = 500000;
+                $karyawan['gaji'] = 6000000;
+            } else if ($karyawan['role_id'] == 4) {
+                $karyawan['bonus_gaji'] = 100000;
+                $karyawan['gaji'] = 3000000;
             }
 
             $newKaryawan = Karyawan::create($karyawan);
@@ -187,19 +221,63 @@ class KaryawanController extends Controller
 
             //validator
             $validate = Validator::make($karyawan, [
-                'email' => 'unique:karyawans,email|unique:customers,email',
-                'no_telp' => 'unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15',
-                'hire_date' => 'date|before:tomorrow'
+                'role_id' => 'required',
+                'nama' => 'required',
+                'hire_date' => 'required|before:tomorrow',
+                'email' => [
+                    'required',
+                    'email',
+                    'unique:customers,email',
+                    Rule::unique('karyawans')->ignore($id),
+                ],
+                'no_telp' => [
+                    'required',
+                    'unique:customers,no_telp',
+                    'digits_between:1,15',
+                    'starts_with:08',
+                    Rule::unique('karyawans')->ignore($id),
+                ],
+            ], [
+                'nama.required' => 'Nama tidak boleh kosong.',
+                'email.required' => 'Email Tidak Boleh Kosong',
+                'no_telp.required' => 'Nomor Telepon Tidak Boleh Kosong',
+                'role_id.required' => 'Role harus dipilih.',
+                'email.unique' => 'Email sudah terdaftar.',
+                'no_telp.unique' => 'Nomor telepon sudah terdaftar.',
+                'no_telp.digits_between' => 'Nomor telepon tidak valid',
+                'no_telp.starts_with' => 'Nomor telepon harus diawali dengan 08.',
+                'email.email' => 'Email tidak valid.',
+                'hire_date.required' => 'Tanggal masuk tidak boleh kosong.',
+                'hire_date.before' => 'Tanggal masuk tidak valid.',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'Data karyawan tidak valid',
+                        'message' => $validate->errors()->first(),
                     ],
                     400
                 );
+            }
+
+            if ($karyawan['role_id'] == 1) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Role tidak valid.',
+                    ],
+                    400
+                );
+            } else if ($karyawan['role_id'] == 2) {
+                $karyawan['bonus_gaji'] = 250000;
+                $karyawan['gaji'] = 4500000;
+            } else if ($karyawan['role_id'] == 3) {
+                $karyawan['bonus_gaji'] = 500000;
+                $karyawan['gaji'] = 6000000;
+            } else if ($karyawan['role_id'] == 4) {
+                $karyawan['bonus_gaji'] = 100000;
+                $karyawan['gaji'] = 3000000;
             }
 
             $karyawanUpdate->update($karyawan);
@@ -232,10 +310,24 @@ class KaryawanController extends Controller
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'Karywan tidak ditemukan.',
+                        'message' => 'Karyawan tidak ditemukan.',
                     ],
                     404
                 );
+            }
+
+            $penggajian = Penggajian::where('karyawan_id', $id)->get();
+            if($penggajian){
+                foreach($penggajian as $gaji){
+                    $gaji->delete();
+                }
+            }
+
+            $presensi = Presensi::where('karyawan_id', $id)->get();
+            if($presensi){
+                foreach($presensi as $presensi){
+                    $presensi->delete();
+                }
             }
 
             if (!$karyawan->delete()) {
@@ -356,35 +448,29 @@ class KaryawanController extends Controller
 
             //validator
             $validate = Validator::make($request->all(), [
-                'bonus_gaji' => 'required_without:gaji',
-                'gaji' => 'required_without:bonus_gaji',
+                'bonus_gaji' => 'required|gt:0',
+                'gaji' => 'required|gt:0',
+            ], [
+                'bonus_gaji.required' => 'Bonus gaji harus diisi.',
+                'gaji.required' => 'Gaji harus diisi.',
+                'bonus_gaji.gt' => 'Bonus gaji tidak boleh kurang dari 0.',
+                'gaji.gt' => 'Gaji tidak boleh kurang dari 0.',
             ]);
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );
             }
 
-            //update
-            if ($request->has('gaji')) {
-                $updateData['gaji'] = $request['gaji'];
-            }
-
-            if ($request->has('bonus_gaji')) {
-                $updateData['bonus_gaji'] = $request['bonus_gaji'];
-            }
-
-            if (!empty($updateData)) {
-                $karyawan->update($updateData);
-            }
+            $karyawan->update($request->only(['bonus_gaji', 'gaji']));
             return response()->json(
                 [
                     'data' => $karyawan,
-                    'message' => 'Berhasil mengupdate gaji/bonus Karyawan.',
+                    'message' => 'Berhasil mengupdate gaji dan bonus gaji Karyawan.',
                 ],
                 200
             );
