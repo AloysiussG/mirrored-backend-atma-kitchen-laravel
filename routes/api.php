@@ -26,6 +26,7 @@ Route::post('/login', [AuthController::class, 'loginByEmail']);
 
 // password change
 Route::get('/password-change/verify/{verifyID}', [PasswordChangeController::class, 'verify']);
+Route::post('/forgotPassword', [PasswordChangeController::class, 'forgotPass']);
 
 // khusus route GET /produk bisa search juga menggunakan URL query parameter
 // contoh: /produk?search=milk&kategori=titipan
@@ -52,11 +53,11 @@ Route::get('/role', [RoleController::class, 'index']);
 
 // --- PROTECTED ROUTES
 
-// ability vs abilities, misal: [customer, admin] 
+// ability vs abilities, misal: [customer, admin]
 // ability === at least 1 ability terpenuhi, grant access
 // abilities === semua abilities dalam array harus terpenuhi baru bisa grant access
 
-// --- --- ALL ABILITIES, SEMUA TOKEN BISA AKSES ['*'] 
+// --- --- ALL ABILITIES, SEMUA TOKEN BISA AKSES ['*']
 Route::middleware(['auth:sanctum'])->group(function () {
     // auth/login user
     Route::get('/user-by-token', [AuthController::class, 'getUserDataByToken']);

@@ -81,6 +81,61 @@ class PasswordChangeController extends Controller
             }
     }
 
+    public function forgotPass(Request $request){
+        try{
+            // validasi request
+            $validate = validator::make($request->all(), [
+                'email' => 'required|email',
+                'newPass' => 'required',
+            ],[
+                'email.required' => 'Email is required',
+                'email.email' => 'Email is not valid',
+                'newPass.required' => 'New password is required',
+            ]);
+
+            if($validate->fails()){
+                return response()->json([
+                    'message' => $validate->errors(),
+                ],400);
+            }
+
+            //cari user
+            $user = Customer::where('email', $request->email)->first();
+            if($user == null){
+                return response()->json([
+                    'message' => 'Email is not registered',
+                ],404);
+            }
+
+            //simpan data request change pass
+            $passwordChange = new passwordChanges();
+            $passwordChange->customer_id = $user->id;
+            $passwordChange->oldPass = 'tidak teringat';
+            $passwordChange->newPass = $request->newPass;
+            $passwordChange->status = 'Not Verified';
+            //verify code
+            $passwordChange->verifyID = Str::random(8);;
+            $passwordChange->save();
+            //detail email
+            $domain = URL::to('/');
+            $detailEmail = [
+                'name' => $user->nama,
+                'link' =>  $domain . '/api/password-change/verify/'.$passwordChange->verifyID,
+
+            ];
+            //kirim email
+            mail::to($user->email)->send(new verifyPassChangeMail($detailEmail));
+            //response json
+            return response()->json([
+                'message' => 'Password change request submitted successfully',
+            ],200);
+            }catch(Throwable $e){
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ],500);
+            }
+    }
+
     public function verify($verifyID){
 
         try{
