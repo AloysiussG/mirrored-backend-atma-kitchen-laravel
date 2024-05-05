@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('cart_id')->constrained('carts');
             $table->foreignId('alamat_id')->nullable()->constrained('alamats');
             $table->date('tanggal_pesan');
-            $table->date('tanggal_lunas');
+            $table->date('tanggal_lunas')->nullable();
             $table->date('tanggal_ambil');
             $table->integer('poin_dipakai');
             $table->integer('poin_didapat');
