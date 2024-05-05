@@ -77,7 +77,7 @@ class TransaksiSeeder extends Seeder
                 'cart_id' => 5,
                 'alamat_id' => 3,
                 'tanggal_pesan' => '2024-02-10',
-                'tanggal_lunas' => '2024-02-11',
+                'tanggal_lunas' => null,
                 'tanggal_ambil' => '2024-02-20',
                 'poin_dipakai' => 0,
                 'poin_didapat' => 0,
