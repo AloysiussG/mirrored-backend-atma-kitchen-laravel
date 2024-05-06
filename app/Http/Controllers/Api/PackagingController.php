@@ -3,16 +3,50 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Packaging;
 use Illuminate\Http\Request;
+use Throwable;
 
 class PackagingController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function indexByItemId(Request $request)
     {
-        //
+        try {
+            $packagingQuery = Packaging::query()->with('bahanBaku');
+
+            if ($request->produk) {
+                $packagingQuery->where('produk_id', $request->produk);
+            }
+
+            if ($request->hampers) {
+                $packagingQuery->where('hampers_id', $request->hampers);
+            }
+
+            if ($request->transaksi) {
+                $packagingQuery->where('transaksi_id', $request->transaksi);
+            }
+
+            $packaging = $packagingQuery->get();
+
+            return response()->json(
+                [
+                    'data' => $packaging,
+                    'message' => 'Berhasil mengambil data packaging.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
 
     /**

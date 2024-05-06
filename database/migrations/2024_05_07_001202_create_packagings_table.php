@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('packagings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('bahan_baku_id')->constrained('bahan_bakus');
-            $table->foreignId('produk_id')->nullable()->constrained('produks');
-            $table->foreignId('hampers_id')->nullable()->constrained('hampers');
-            $table->foreignId('transaksi_id')->nullable()->constrained('transaksis');
+            $table->foreignId('bahan_baku_id')->constrained('bahan_bakus')->onDelete('cascade');
+            $table->foreignId('produk_id')->nullable()->constrained('produks')->onDelete('cascade');
+            $table->foreignId('hampers_id')->nullable()->constrained('hampers')->onDelete('cascade');
+            $table->foreignId('transaksi_id')->nullable()->constrained('transaksis')->onDelete('cascade');
             $table->integer('jumlah');
             $table->timestamps();
         });

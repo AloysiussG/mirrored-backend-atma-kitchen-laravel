@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\KategoriProduk;
+use App\Models\Packaging;
 use App\Models\Penitip;
 use App\Models\Produk;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class ProdukController extends Controller
     public function index(Request $request)
     {
         try {
-            $produksQuery = Produk::query()->with('kategoriProduk', 'penitip');
+            $produksQuery = Produk::query()->with('kategoriProduk', 'penitip', 'packagings.bahanBaku');
 
             if ($request->search) {
                 $produksQuery->where('nama_produk', 'like', '%' . $request->search . '%')
@@ -174,6 +175,10 @@ class ProdukController extends Controller
                     'numeric',
                 ],
                 'foto_produk' => 'required|image:jpeg,png,jpg,gif,svg|max:4096',
+                // ::: accept packagings :::
+                'packagings' => 'required|array',
+                'packagings.*.bahan_baku_id' => 'required|exists:bahan_bakus,id',
+                'packagings.*.jumlah' => 'required|numeric|min:1',
             ]);
 
             if ($validate->fails()) {
@@ -213,8 +218,30 @@ class ProdukController extends Controller
             }
 
             $produkData = Produk::create($produkDataRequest);
+
+            // --- CREATE PACKAGING ---
+            // create packaging dengan foreach loop (packaging harus berupa array)
+            foreach ($produkDataRequest['packagings'] as $value) {
+                // assign packaging ke produk, lalu create packaging
+                $value['produk_id'] = $produkData->id;
+
+                // cek unik, dalam 1 produk tidak boleh ada 2 bahan baku Packaging yang sama namun beda jumlah bahan baku Packaging
+                // jika ada bahan baku Packaging yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
+                $packaging = Packaging::query()
+                    ->where('produk_id', $produkData->id)
+                    ->where('bahan_baku_id', $value['bahan_baku_id'])
+                    ->first();
+
+                if ($packaging) {
+                    $packaging->jumlah = $packaging->jumlah + $value['jumlah'];
+                    $packaging->save();
+                } else {
+                    Packaging::create($value);
+                }
+            }
+
             $produkData = Produk::query()
-                ->with('kategoriProduk', 'penitip')
+                ->with('kategoriProduk', 'penitip', 'packagings.bahanBaku')
                 ->find($produkData->id);
 
             return response()->json(
@@ -241,7 +268,7 @@ class ProdukController extends Controller
     public function show(string $id)
     {
         try {
-            $produkData = Produk::with('kategoriProduk', 'penitip')->find($id);
+            $produkData = Produk::with('kategoriProduk', 'penitip', 'packagings.bahanBaku')->find($id);
 
             if (!$produkData) {
                 return response()->json(
@@ -349,6 +376,10 @@ class ProdukController extends Controller
                     'numeric',
                 ],
                 'foto_produk' => 'image:jpeg,png,jpg,gif,svg|max:4096',
+                // ::: accept packagings :::
+                'packagings' => 'required|array',
+                'packagings.*.bahan_baku_id' => 'required|exists:bahan_bakus,id',
+                'packagings.*.jumlah' => 'required|numeric|min:1',
             ]);
 
             if ($validate->fails()) {
@@ -404,6 +435,39 @@ class ProdukController extends Controller
             }
 
             $produkDataUpdated->update($produkDataRequest);
+
+            // update packaging
+            // dengan cara: delete all packaging terlebih dahulu, baru create lagi dari awal
+            // create packaging dengan foreach loop (packaging harus berupa array) 
+            $packagingsDataDeleted = Packaging::query()
+                ->where('produk_id', $produkDataUpdated->id);
+
+            $packagingsDataDeleted->delete();
+
+            // --- CREATE PACKAGING ---
+            // create packaging dengan foreach loop (packaging harus berupa array)
+            foreach ($produkDataRequest['packagings'] as $value) {
+                // assign packaging ke produk, lalu create packaging
+                $value['produk_id'] = $produkDataUpdated->id;
+
+                // cek unik, dalam 1 produk tidak boleh ada 2 bahan baku Packaging yang sama namun beda jumlah bahan baku Packaging
+                // jika ada bahan baku Packaging yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
+                $packaging = Packaging::query()
+                    ->where('produk_id', $produkDataUpdated->id)
+                    ->where('bahan_baku_id', $value['bahan_baku_id'])
+                    ->first();
+
+                if ($packaging) {
+                    $packaging->jumlah = $packaging->jumlah + $value['jumlah'];
+                    $packaging->save();
+                } else {
+                    Packaging::create($value);
+                }
+            }
+
+            $produkDataUpdated = Produk::query()
+                ->with('kategoriProduk', 'penitip', 'packagings.bahanBaku')
+                ->find($produkDataUpdated->id);
 
             return response()->json(
                 [

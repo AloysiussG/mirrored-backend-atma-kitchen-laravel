@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\DetailHampers;
 use App\Models\Hampers;
+use App\Models\Packaging;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -19,7 +20,7 @@ class HampersController extends Controller
     public function index(Request $request)
     {
         try {
-            $hampersQuery = Hampers::query()->with('detailHampers.produk');
+            $hampersQuery = Hampers::query()->with('detailHampers.produk', 'packagings.bahanBaku');
 
             if ($request->search) {
                 $hampersQuery->where('nama_hampers', 'like', '%' . $request->search . '%');
@@ -95,6 +96,10 @@ class HampersController extends Controller
                 'detail_hampers.*.produk_id' => 'required|exists:produks,id',
                 'detail_hampers.*.jumlah_produk' => 'required|numeric|min:1',
                 'foto_hampers' => 'required|image:jpeg,png,jpg,gif,svg|max:4096',
+                // ::: accept packagings :::
+                'packagings' => 'required|array',
+                'packagings.*.bahan_baku_id' => 'required|exists:bahan_bakus,id',
+                'packagings.*.jumlah' => 'required|numeric|min:1',
             ]);
 
             if ($validate->fails()) {
@@ -143,8 +148,29 @@ class HampersController extends Controller
                 }
             }
 
+            // --- CREATE PACKAGING ---
+            // create packaging dengan foreach loop (packaging harus berupa array)
+            foreach ($hampersDataRequest['packagings'] as $value) {
+                // assign packaging ke produk, lalu create packaging
+                $value['hampers_id'] = $hampersData->id;
+
+                // cek unik, dalam 1 produk tidak boleh ada 2 bahan baku Packaging yang sama namun beda jumlah bahan baku Packaging
+                // jika ada bahan baku Packaging yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
+                $packaging = Packaging::query()
+                    ->where('hampers_id', $hampersData->id)
+                    ->where('bahan_baku_id', $value['bahan_baku_id'])
+                    ->first();
+
+                if ($packaging) {
+                    $packaging->jumlah = $packaging->jumlah + $value['jumlah'];
+                    $packaging->save();
+                } else {
+                    Packaging::create($value);
+                }
+            }
+
             $hampersData = Hampers::query()
-                ->with('detailHampers.produk')
+                ->with('detailHampers.produk', 'packagings.bahanBaku')
                 ->find($hampersData->id);
 
             return response()->json(
@@ -171,7 +197,7 @@ class HampersController extends Controller
     public function show(string $id)
     {
         try {
-            $hampersData = Hampers::with('detailHampers.produk')->find($id);
+            $hampersData = Hampers::with('detailHampers.produk', 'packagings.bahanBaku')->find($id);
 
             if (!$hampersData) {
                 return response()->json(
@@ -310,7 +336,7 @@ class HampersController extends Controller
             }
 
             $hampersDataUpdated = Hampers::query()
-                ->with('detailHampers.produk')
+                ->with('detailHampers.produk', 'packagings.bahanBaku')
                 ->find($hampersDataUpdated->id);
 
             return response()->json(

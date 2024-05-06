@@ -17,6 +17,10 @@ class BahanBakuController extends Controller
         if ($request->search) {
             $bahanBakus->where('nama_bahan_baku', 'like', '%' . $request->search . '%')->orWhere('satuan_bahan', 'like', '%' . $request->search . '%');
         }
+        
+        if ($request->jenisBahanBaku) {
+            $bahanBakus->where('jenis_bahan_baku', 'like', '%' . $request->jenisBahanBaku . '%');
+        }
 
         if ($request->sortBy && in_array($request->sortBy, ['id', 'nama_bahan_baku','jumlah_bahan_baku', 'created_at'])) {
             $sortBy = $request->sortBy;
