@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('resep_id')->constrained('reseps');
             $table->foreignId('bahan_baku_id')->constrained('bahan_bakus');
             $table->integer('jumlah_bahan_resep');
-            $table->string('satuan_detail_resep');
             $table->timestamps();
         });
     }

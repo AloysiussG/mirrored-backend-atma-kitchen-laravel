@@ -26,6 +26,7 @@ return new class extends Migration
             $table->float('saldo');
             $table->integer('poin');
             $table->date('tanggal_lahir');
+            $table->string('foto_profile')->nullable();
             $table->timestamps();
         });
     }

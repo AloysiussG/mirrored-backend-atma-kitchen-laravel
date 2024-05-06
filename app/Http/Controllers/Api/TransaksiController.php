@@ -17,7 +17,7 @@ class TransaksiController extends Controller
                     $query->where('nama','like', '%'. $request->search.'%');
                 })->orwhereHas('statusTransaksi', function ($query) use ($request) {
                     $query->where('nama_status','like', '%'. $request->search.'%');
-                });
+                })->orWhere('no_nota','like', '%'. $request->search.'%');
             }
             if($request->date){
                 $transaksiQuery->whereDate('tanggal_pesan',$request->date);

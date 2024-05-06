@@ -26,6 +26,7 @@ Route::post('/login', [AuthController::class, 'loginByEmail']);
 
 // password change
 Route::get('/password-change/verify/{verifyID}', [PasswordChangeController::class, 'verify']);
+Route::post('/forgotPassword', [PasswordChangeController::class, 'forgotPass']);
 
 // khusus route GET /produk bisa search juga menggunakan URL query parameter
 // contoh: /produk?search=milk&kategori=titipan
@@ -52,11 +53,11 @@ Route::get('/role', [RoleController::class, 'index']);
 
 // --- PROTECTED ROUTES
 
-// ability vs abilities, misal: [customer, admin] 
+// ability vs abilities, misal: [customer, admin]
 // ability === at least 1 ability terpenuhi, grant access
 // abilities === semua abilities dalam array harus terpenuhi baru bisa grant access
 
-// --- --- ALL ABILITIES, SEMUA TOKEN BISA AKSES ['*'] 
+// --- --- ALL ABILITIES, SEMUA TOKEN BISA AKSES ['*']
 Route::middleware(['auth:sanctum'])->group(function () {
     // auth/login user
     Route::get('/user-by-token', [AuthController::class, 'getUserDataByToken']);
@@ -67,12 +68,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(function () {
     // nanti route API untuk laporan yang bisa dilihat Owner + MO ditaruh disini
     Route::get('/karyawan', [KaryawanController::class, 'index']);
+    Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
 });
 
 // --- --- ADMIN + MANAGER OPERASIONAL
 Route::middleware(['auth:sanctum', 'ability:admin,manager-operasional'])->group(function () {
     // route GET /penitip juga bisa search juga menggunakan URL query parameter
     Route::get('/penitip', [PenitipController::class, 'index']);
+    // route GET /bahanBaku juga bisa search juga menggunakan URL query parameter
+    Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
 });
 
 // --- --- OWNER + MANAGER OPERASIONAL + ADMIN
@@ -96,7 +100,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
 // --- --- OWNER ONLY
 Route::middleware(['auth:sanctum', 'ability:owner'])->group(function () {
     // ubah data gaji dan bonus karyawan
-    Route::put('/karyawan/changeGaji/{id}', [KaryawanController::class, 'changeGaji']);
+    Route::put('/changeGaji/{id}', [KaryawanController::class, 'changeGaji']);
 
     // ... nanti route API untuk laporan yang bisa dilihat Owner ditaruh juga disini
 });
@@ -130,11 +134,10 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     // DetailReseps
     Route::post('/detail-resep', [DetailResepController::class, 'store']);
     Route::get('/detail-resep/{id}', [DetailResepController::class, 'index']);
+    Route::get('/detail-resep/show/{id}', [DetailResepController::class, 'show']);
     Route::put('/detail-resep/{id}', [DetailResepController::class, 'update']);
     Route::delete('/detail-resep/{id}', [DetailResepController::class, 'destroy']);
 
-    // route GET /bahanBaku juga bisa search juga menggunakan URL query parameter
-    Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
     Route::get('/bahan-baku/{id}', [BahanBakuController::class, 'show']);
     Route::post('/bahan-baku', [BahanBakuController::class, 'store']);
     Route::put('/bahan-baku/{id}', [BahanBakuController::class, 'update']);
@@ -161,7 +164,6 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     Route::post('/karyawan', [KaryawanController::class, 'store']);
     Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
     Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
-    Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
 
     // Presensis
     Route::get('/presensi', [PresensiController::class, 'index']);
