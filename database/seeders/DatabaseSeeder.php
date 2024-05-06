@@ -41,6 +41,8 @@ class DatabaseSeeder extends Seeder
             DetailHampersSeeder::class,
             DetailCartSeeder::class,
             TransaksiSeeder::class,
+
+            PackagingSeeder::class,
         ]);
 
         // User::factory(10)->create();

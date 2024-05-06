@@ -35,4 +35,9 @@ class Produk extends Model
     {
         return $this->belongsTo(Penitip::class);
     }
+
+    public function packagings()
+    {
+        return $this->hasMany(Packaging::class);
+    }
 }
