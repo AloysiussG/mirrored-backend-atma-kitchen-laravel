@@ -15,10 +15,17 @@ class RoleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $role = Role::all();
+            $role = Role::query();
+            
+            if($request->withOwner === "true") {
+                $role = $role->get();
+            }else{
+                $role = Role::where('role_name', '!=', 'owner')->get();
+            }
+
             return response()->json(
                 [
                     'data' => $role,
