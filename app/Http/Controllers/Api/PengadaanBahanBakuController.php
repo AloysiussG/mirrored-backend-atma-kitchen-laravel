@@ -40,7 +40,7 @@ class PengadaanBahanBakuController extends Controller
             ])) {
                 $sortBy = $request->sortBy;
             } else {
-                $sortBy = 'tanggal_pengadaan';
+                $sortBy = 'id';
             }
 
             if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
@@ -78,18 +78,18 @@ class PengadaanBahanBakuController extends Controller
             $pengadaanRequest = $request->all();
 
             $validate = Validator::make($pengadaanRequest, [
-                'bahan_baku_id' => 'required|exists:bahan_bakus,id',
-                'jumlah_bahan' => 'required|numeric',
-                'harga_pengadaan_bahan_baku' => 'required',
-                'satuan_pengadaan' => 'required',
                 'tanggal_pengadaan' => 'required',
+                'bahan_baku_id' => 'required|exists:bahan_bakus,id',
+                'jumlah_bahan' => 'required|numeric|min:1',
+                'satuan_pengadaan' => 'required',
+                'harga_pengadaan_bahan_baku' => 'required|numeric|min:1000',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );
@@ -191,23 +191,21 @@ class PengadaanBahanBakuController extends Controller
 
             $bahanBakuPrev = $pengadaanDataPrev->bahanBaku;
 
-
-
             $pengadaanRequest = $request->all();
 
             $validate = Validator::make($pengadaanRequest, [
-                'bahan_baku_id' => 'required|exists:bahan_bakus,id',
-                'jumlah_bahan' => 'required|numeric',
-                'harga_pengadaan_bahan_baku' => 'required',
-                'satuan_pengadaan' => 'required',
                 'tanggal_pengadaan' => 'required',
+                'bahan_baku_id' => 'required|exists:bahan_bakus,id',
+                'jumlah_bahan' => 'required|numeric|min:1',
+                'satuan_pengadaan' => 'required',
+                'harga_pengadaan_bahan_baku' => 'required|numeric|min:1000',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );

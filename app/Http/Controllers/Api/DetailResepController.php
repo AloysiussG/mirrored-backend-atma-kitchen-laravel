@@ -18,10 +18,10 @@ class DetailResepController extends Controller
 
             if ($request->search) {
                 $detailResep->where('id', 'like', '%' . $request->search . '%')
-                ->orWhere('jumlah_bahan_resep', 'like', '%' . $request->search . '%')
-                ->orWhere('satuan_detail_resep', 'like', '%' . $request->search . '%')
-                ->orWhere('resep.nama_resep', 'like', '%' . $request->search . '%')
-                ->orWhere('bahanBaku.nama_bahan_baku', 'like', '%' . $request->search . '%');
+                    ->orWhere('jumlah_bahan_resep', 'like', '%' . $request->search . '%')
+                    ->orWhere('satuan_detail_resep', 'like', '%' . $request->search . '%')
+                    ->orWhere('resep.nama_resep', 'like', '%' . $request->search . '%')
+                    ->orWhere('bahanBaku.nama_bahan_baku', 'like', '%' . $request->search . '%');
             }
 
             if ($request->sortBy && in_array($request->sortBy, ['id', 'created_at'])) {
@@ -66,15 +66,21 @@ class DetailResepController extends Controller
             $validate = Validator::make($detailResepDataRequest, [
                 'resep_id' => 'required|exists:reseps,id',
                 'bahan_baku_id' => 'required|exists:bahan_bakus,id',
-                'jumlah_bahan_resep' => 'required',
-                'satuan_detail_resep' => 'required',
+                'jumlah_bahan_resep' => 'required|gt:0',
+            ], [
+                'resep_id.required' => 'Resep harus dipilih.',
+                'resep_id.exists' => 'Resep tidak ditemukan.',
+                'bahan_baku_id.required' => 'Bahan baku harus dipilih.',
+                'bahan_baku_id.exists' => 'Bahan baku tidak ditemukan.',
+                'jumlah_bahan_resep.required' => 'Jumlah bahan harus diisi.',
+                'jumlah_bahan_resep.gt' => 'Jumlah bahan tidak boleh kurang dari 0.',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );
@@ -133,7 +139,7 @@ class DetailResepController extends Controller
     public function show(string $id)
     {
         try {
-            $detailResep = DetailResep::with('resep')->find($id);
+            $detailResep = DetailResep::with(['bahanBaku', 'resep'])->find($id);
 
             if (!$detailResep) {
                 return response()->json(
@@ -183,22 +189,53 @@ class DetailResepController extends Controller
             $detailResepRequest = $request->all();
 
             $validate = Validator::make($detailResepRequest, [
-                'resep_id' => 'exists:reseps,id',
-                'bahan_baku_id' => 'exists:bahan_bakus,id',
+                'bahan_baku_id' => 'required|exists:bahan_bakus,id',
+                'jumlah_bahan_resep' => 'required|gt:0',
+            ], [
+                'bahan_baku_id.required' => 'Bahan baku tidak boleh kosong.',
+                'bahan_baku_id.exists' => 'Bahan baku tidak ditemukan.',
+                'jumlah_bahan_resep.required' => 'Jumlah bahan baku tidak boleh kosong.',
+                'jumlah_bahan_resep.gt' => 'Jumlah bahan baku tidak boleh kurang dari 0.',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );
             }
 
-            // update detail resep
-            $detailResepUpdate->update($detailResepRequest);
+            $resepData = Resep::find($request['resep_id']);
+
+            if (!$resepData) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Resep tidak ditemukan.',
+                    ],
+                    404
+                );
+            }
+
+            // create detail resep
+            // cek unik, dalam 1 resep tidak boleh ada 2 bahan baku yang sama namun beda jumlah bahan baku
+            // jika ada bahan baku yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
+            $detailResep = DetailResep::query()
+                ->where('resep_id', $resepData->id)
+                ->where('bahan_baku_id', $detailResepRequest['bahan_baku_id'])
+                ->whereNotIn('id', [$id])
+                ->first();
+
+            if ($detailResep) {
+                $detailResep->jumlah_bahan_resep = $detailResep->jumlah_bahan_resep + $detailResepUpdate['jumlah_bahan_resep'];
+                $detailResep->save();
+                $detailResepUpdate->delete();
+            } else {
+                $detailResepUpdate->update($detailResepRequest);
+            }
 
             return response()->json(
                 [

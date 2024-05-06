@@ -13,7 +13,6 @@ class DetailResep extends Model
         'resep_id',
         'bahan_baku_id',
         'jumlah_bahan_resep',
-        'satuan_detail_resep'
     ];
 
     public function resep()
