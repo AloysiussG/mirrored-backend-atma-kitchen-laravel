@@ -70,9 +70,9 @@ class CustomerController extends Controller
             $customer = $request->all();
             $validate = Validator::make($customer, [
                 'nama' => 'required',
-                'password' => 'required',
                 'email' => 'required|unique:karyawans,email|unique:customers,email|email',
                 'no_telp' => 'required|unique:karyawans,no_telp|unique:customers,no_telp|digits_between:1,15|starts_with:08',
+                'password' => 'required',
                 'tanggal_lahir' => 'required|before:2008-01-01'
             ], [
                 'nama.required' => 'Nama tidak boleh kosong.',

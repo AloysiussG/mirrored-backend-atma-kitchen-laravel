@@ -89,8 +89,6 @@ class KaryawanController extends Controller
     {
         try {
             $karyawan = $request->all();
-            //hire date == tanggal karyawan dibuat
-            $karyawan['hire_date'] = Carbon::now();
 
             //validator
             $validate = Validator::make($karyawan, [
@@ -414,7 +412,7 @@ class KaryawanController extends Controller
             return response()->json(
                 [
                     'data' => $karyawan,
-                    'message' => 'Berhasil mengupdate password Karyawan.',
+                    'message' => 'Berhasil mengupdate password.',
                 ],
                 200
             );
