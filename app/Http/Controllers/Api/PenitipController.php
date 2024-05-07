@@ -71,6 +71,13 @@ class PenitipController extends Controller
                 'nama_penitip' => 'required'
             ]);
 
+            if($validate->fails()){
+                return response([
+                    'message' => $validate->errors()->first(),
+                    'data' => null
+                ],400);
+            }
+
             $penitip = new Penitip;
 
             $penitip->nama_penitip = $request->nama_penitip;
@@ -99,6 +106,13 @@ class PenitipController extends Controller
                     'nama_penitip' => 'required'
                 ]);
                 $penitip->nama_penitip = $request->nama_penitip;
+
+                if($validate->fails()){
+                    return response([
+                        'message' => $validate->errors()->first(),
+                        'data' => null
+                    ],400);
+                }
 
                 $penitip->save();
 

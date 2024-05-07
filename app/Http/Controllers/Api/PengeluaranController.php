@@ -71,13 +71,13 @@ class PengeluaranController extends Controller
 
             $validate = Validator::make($request->all(), [
                 'jenis_pengeluaran' => 'required',
-                'total_pengeluaran' => 'required|numeric',
+                'total_pengeluaran' => 'required|gt:0',
                 'tanggal_pengeluaran' => 'required|date|date_format:Y-m-d'
             ]);
 
             if($validate->fails()){
                 return response([
-                    'message' => $validate->errors(),
+                    'message' => $validate->messages()->first(),
                     'data' => null
                 ],400);
             }
@@ -111,9 +111,16 @@ class PengeluaranController extends Controller
 
                 $validate = Validator::make($request->all(), [
                     'jenis_pengeluaran' => 'required',
-                    'total_pengeluaran' => 'required|numeric',
+                    'total_pengeluaran' => 'required|gt:0',
                     'tanggal_pengeluaran' => 'required|date'
                 ]);
+
+                if($validate->fails()){
+                    return response([
+                        'message' => $validate->messages()->first(),
+                        'data' => null
+                    ],400);
+                }
 
                 $pengeluaran->jenis_pengeluaran = $request->jenis_pengeluaran;
                 $pengeluaran->total_pengeluaran = $request->total_pengeluaran;
