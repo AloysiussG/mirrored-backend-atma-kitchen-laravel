@@ -275,6 +275,10 @@ class HampersController extends Controller
                 'detail_hampers.*.produk_id' => 'required|exists:produks,id',
                 'detail_hampers.*.jumlah_produk' => 'required|numeric|min:1',
                 'foto_hampers' => 'image:jpeg,png,jpg,gif,svg|max:4096',
+                // ::: accept packagings :::
+                'packagings' => 'required|array',
+                'packagings.*.bahan_baku_id' => 'required|exists:bahan_bakus,id',
+                'packagings.*.jumlah' => 'required|numeric|min:1',
             ]);
 
             if ($validate->fails()) {
@@ -332,6 +336,37 @@ class HampersController extends Controller
                     $detailHampers->save();
                 } else {
                     DetailHampers::create($value);
+                }
+            }
+
+            // update packaging
+            // dengan cara: delete all packaging terlebih dahulu, baru create lagi dari awal
+            // create packaging dengan foreach loop (packaging harus berupa array) 
+            $packagingsDataDeleted = Packaging::query()
+                ->where('hampers_id', $hampersDataUpdated->id);
+
+            $packagingsDataDeleted->delete();
+
+            // --- CREATE PACKAGING ---
+            // create packaging dengan foreach loop (packaging harus berupa array)
+            if (isset($hampersDataRequest['packagings'])) {
+                foreach ($hampersDataRequest['packagings'] as $value) {
+                    // assign packaging ke produk, lalu create packaging
+                    $value['hampers_id'] = $hampersDataUpdated->id;
+
+                    // cek unik, dalam 1 produk tidak boleh ada 2 bahan baku Packaging yang sama namun beda jumlah bahan baku Packaging
+                    // jika ada bahan baku Packaging yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
+                    $packaging = Packaging::query()
+                        ->where('hampers_id', $hampersDataUpdated->id)
+                        ->where('bahan_baku_id', $value['bahan_baku_id'])
+                        ->first();
+
+                    if ($packaging) {
+                        $packaging->jumlah = $packaging->jumlah + $value['jumlah'];
+                        $packaging->save();
+                    } else {
+                        Packaging::create($value);
+                    }
                 }
             }
 
