@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\BahanBakuController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\KategoriProdukController;
+use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
@@ -77,6 +78,7 @@ Route::middleware(['auth:sanctum', 'ability:admin,manager-operasional'])->group(
     Route::get('/penitip', [PenitipController::class, 'index']);
     // route GET /bahanBaku juga bisa search juga menggunakan URL query parameter
     Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
+    Route::get('/packaging', [PackagingController::class, 'indexByItemId']);
 });
 
 // --- --- OWNER + MANAGER OPERASIONAL + ADMIN

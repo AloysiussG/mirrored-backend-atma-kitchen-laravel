@@ -27,4 +27,9 @@ class Transaksi extends Model
     {
         return $this->belongsTo(Alamat::class);
     }
+
+    public function packagings()
+    {
+        return $this->hasMany(Packaging::class);
+    }
 }

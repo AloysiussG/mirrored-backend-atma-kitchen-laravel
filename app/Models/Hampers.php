@@ -17,4 +17,9 @@ class Hampers extends Model
     {
         return $this->hasMany(DetailHampers::class);
     }
+
+    public function packagings()
+    {
+        return $this->hasMany(Packaging::class);
+    }
 }

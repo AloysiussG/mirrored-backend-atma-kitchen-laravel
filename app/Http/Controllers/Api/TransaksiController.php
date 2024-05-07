@@ -11,7 +11,7 @@ class TransaksiController extends Controller
 {
     public function findByCustomer(Request $request){
         try{
-            $transaksiQuery = Transaksi::query()->with(['cart.customer', 'statusTransaksi']);
+            $transaksiQuery = Transaksi::query()->with(['cart.customer', 'statusTransaksi', 'packagings.bahanBaku']);
             if($request->search){
                 $transaksiQuery->whereHas('cart.customer', function ($query) use ($request) {
                     $query->where('nama','like', '%'. $request->search.'%');
@@ -56,7 +56,7 @@ class TransaksiController extends Controller
 
     public function showWithProducts($id){
         try{
-            $transaksi = Transaksi::with(['cart.detailCart.produk','cart.customer', 'cart.detailCart.hampers', 'statusTransaksi','alamat'])->find($id);
+            $transaksi = Transaksi::with(['cart.detailCart.produk','cart.customer', 'cart.detailCart.hampers', 'statusTransaksi','alamat','packagings.bahanBaku'])->find($id);
             return response([
                 'message' => 'Retrieve Success',
                 'data' => $transaksi
@@ -68,4 +68,8 @@ class TransaksiController extends Controller
             ],404);
         }
     }
+    
+    // nanti sewaktu transaksi === diproses
+    // jangan lupa tambah packaging 1x Tas Spunbond
+    // kurangi stok bahan baku Tas Spunbond
 }
