@@ -81,8 +81,16 @@ class BahanBakuController extends Controller
             $validate = Validator::make($request->all(), [
                 'nama_bahan_baku' => 'required',
                 'satuan_bahan' => 'required',
-                'jumlah_bahan_baku' => 'required|numeric',
+                'jumlah_bahan_baku' => 'required|numeric|gt:-1',
             ]);
+
+            if($validate->fails()){
+                return response([
+                    'message' => $validate->errors()->first(),
+                    'data' => null
+                ],400);
+            }
+
             $bahanBaku->nama_bahan_baku = $request->nama_bahan_baku;
             $bahanBaku->satuan_bahan = $request->satuan_bahan;
             $bahanBaku->jumlah_bahan_baku = $request->jumlah_bahan_baku;
@@ -107,8 +115,15 @@ class BahanBakuController extends Controller
             $validate = Validator::make($request->all(), [
                 'nama_bahan_baku' => 'required',
                 'satuan_bahan' => 'required',
-                'jumlah_bahan_baku' => 'required|numeric',
+                'jumlah_bahan_baku' => 'required|numeric|gt:-1',
             ]);
+
+            if($validate->fails()){
+                return response([
+                    'message' => $validate->errors()->first(),
+                    'data' => null
+                ],400);
+            }
 
         if($bahanBaku){
             $bahanBaku->nama_bahan_baku = $request->nama_bahan_baku;
