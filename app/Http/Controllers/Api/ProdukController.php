@@ -176,7 +176,13 @@ class ProdukController extends Controller
                 ],
                 'foto_produk' => 'required|image:jpeg,png,jpg,gif,svg|max:4096',
                 // ::: accept packagings :::
-                'packagings' => 'required|array',
+                'packagings' => [
+                    Rule::requiredIf(function () use ($kategoriProduk) {
+                        return $kategoriProduk->nama_kategori_produk !== 'Titipan';
+                    }),
+                    'nullable',
+                    'array',
+                ],
                 'packagings.*.bahan_baku_id' => 'required|exists:bahan_bakus,id',
                 'packagings.*.jumlah' => 'required|numeric|min:1',
             ]);
@@ -221,24 +227,27 @@ class ProdukController extends Controller
 
             // --- CREATE PACKAGING ---
             // create packaging dengan foreach loop (packaging harus berupa array)
-            foreach ($produkDataRequest['packagings'] as $value) {
-                // assign packaging ke produk, lalu create packaging
-                $value['produk_id'] = $produkData->id;
+            if (isset($produkDataRequest['packagings'])) {
+                foreach ($produkDataRequest['packagings'] as $value) {
+                    // assign packaging ke produk, lalu create packaging
+                    $value['produk_id'] = $produkData->id;
 
-                // cek unik, dalam 1 produk tidak boleh ada 2 bahan baku Packaging yang sama namun beda jumlah bahan baku Packaging
-                // jika ada bahan baku Packaging yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
-                $packaging = Packaging::query()
-                    ->where('produk_id', $produkData->id)
-                    ->where('bahan_baku_id', $value['bahan_baku_id'])
-                    ->first();
+                    // cek unik, dalam 1 produk tidak boleh ada 2 bahan baku Packaging yang sama namun beda jumlah bahan baku Packaging
+                    // jika ada bahan baku Packaging yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
+                    $packaging = Packaging::query()
+                        ->where('produk_id', $produkData->id)
+                        ->where('bahan_baku_id', $value['bahan_baku_id'])
+                        ->first();
 
-                if ($packaging) {
-                    $packaging->jumlah = $packaging->jumlah + $value['jumlah'];
-                    $packaging->save();
-                } else {
-                    Packaging::create($value);
+                    if ($packaging) {
+                        $packaging->jumlah = $packaging->jumlah + $value['jumlah'];
+                        $packaging->save();
+                    } else {
+                        Packaging::create($value);
+                    }
                 }
             }
+
 
             $produkData = Produk::query()
                 ->with('kategoriProduk', 'penitip', 'packagings.bahanBaku')
@@ -377,7 +386,13 @@ class ProdukController extends Controller
                 ],
                 'foto_produk' => 'image:jpeg,png,jpg,gif,svg|max:4096',
                 // ::: accept packagings :::
-                'packagings' => 'required|array',
+                'packagings' => [
+                    Rule::requiredIf(function () use ($kategoriProduk) {
+                        return $kategoriProduk->nama_kategori_produk !== 'Titipan';
+                    }),
+                    'nullable',
+                    'array',
+                ],
                 'packagings.*.bahan_baku_id' => 'required|exists:bahan_bakus,id',
                 'packagings.*.jumlah' => 'required|numeric|min:1',
             ]);
@@ -446,22 +461,24 @@ class ProdukController extends Controller
 
             // --- CREATE PACKAGING ---
             // create packaging dengan foreach loop (packaging harus berupa array)
-            foreach ($produkDataRequest['packagings'] as $value) {
-                // assign packaging ke produk, lalu create packaging
-                $value['produk_id'] = $produkDataUpdated->id;
+            if (isset($produkDataRequest['packagings'])) {
+                foreach ($produkDataRequest['packagings'] as $value) {
+                    // assign packaging ke produk, lalu create packaging
+                    $value['produk_id'] = $produkDataUpdated->id;
 
-                // cek unik, dalam 1 produk tidak boleh ada 2 bahan baku Packaging yang sama namun beda jumlah bahan baku Packaging
-                // jika ada bahan baku Packaging yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
-                $packaging = Packaging::query()
-                    ->where('produk_id', $produkDataUpdated->id)
-                    ->where('bahan_baku_id', $value['bahan_baku_id'])
-                    ->first();
+                    // cek unik, dalam 1 produk tidak boleh ada 2 bahan baku Packaging yang sama namun beda jumlah bahan baku Packaging
+                    // jika ada bahan baku Packaging yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
+                    $packaging = Packaging::query()
+                        ->where('produk_id', $produkDataUpdated->id)
+                        ->where('bahan_baku_id', $value['bahan_baku_id'])
+                        ->first();
 
-                if ($packaging) {
-                    $packaging->jumlah = $packaging->jumlah + $value['jumlah'];
-                    $packaging->save();
-                } else {
-                    Packaging::create($value);
+                    if ($packaging) {
+                        $packaging->jumlah = $packaging->jumlah + $value['jumlah'];
+                        $packaging->save();
+                    } else {
+                        Packaging::create($value);
+                    }
                 }
             }
 
