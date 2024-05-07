@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama_bahan_baku');
             $table->string('satuan_bahan');
             $table->integer('jumlah_bahan_baku');
-            $table->string('jenis_bahan_baku')->nullable();
+            $table->string('jenis_bahan_baku')->default('Resep');
             $table->timestamps();
         });
     }
