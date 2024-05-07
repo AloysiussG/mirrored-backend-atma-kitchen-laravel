@@ -327,12 +327,12 @@
         height:auto;
         max-width:280px;
       }
-  
-  
+
+
     /*
-    ATAVIST CUSTOM STYLES 
+    ATAVIST CUSTOM STYLES
      */
-  
+
     .buttonText {
       color: #4A90E2;
       text-decoration: none;
@@ -342,60 +342,60 @@
       padding: 10px 80px;
       font-family: Arial;
     }
-  
+
     #supportSection, .supportContent {
       background-color: white;
       font-family: arial;
       font-size: 12px;
       border-top: 1px solid #e4e4e4;
     }
-  
+
     .bodyContent table {
       padding-bottom: 10px;
     }
-  
-  
+
+
     .footerContent p {
       margin: 0;
       margin-top: 2px;
     }
-  
+
     .headerContent.centeredWithBackground {
       background-color: #F4EEE2;
       text-align: center;
       padding-top: 20px;
       padding-bottom: 20px;
     }
-        
+
      @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
             h1 {
                 font-size: 40px !important;
             }
-            
+
             .content {
                 font-size: 22px !important;
             }
-            
+
             .bodyContent p {
                 font-size: 22px !important;
             }
-            
+
             .buttonText {
                 font-size: 22px !important;
             }
-            
+
             p {
-                
+
                 font-size: 16px !important;
-                
+
             }
-            
+
             .footerContent p {
                 padding-left: 5px !important;
             }
-            
+
             .mainContainer {
-                padding-bottom: 0 !important;   
+                padding-bottom: 0 !important;
             }
         }
   </style>
@@ -434,7 +434,10 @@
                   <tr>
                     <td class="headerContent centeredWithBackground" style="border-collapse:collapse;color:#202020;font-family:Arial;font-size:34px;font-weight:bold;line-height:100%;padding:0;text-align:center;vertical-align:middle;background-color:#F4EEE2;padding-bottom:20px;padding-top:20px;">
                       <!-- // Begin Module: Standard Header Image \\ -->
-                      <img width="130" src="https://atavist-static.s3.amazonaws.com/prototype_assets/Atavist-logo-with-mark.png" style="width:130px;max-width:130px;border:0;height:auto;line-height:100%;outline:none;text-decoration:none;" id="headerImage campaign-icon">
+                      <img class="w-8" src={{ asset("assets/logo-atma-kitchen-png.png") }} alt="" />
+
+                        ATMA KITCHEN
+                      </span>
                       <!-- // End Module: Standard Header Image \\ -->
                     </td>
                   </tr>
@@ -457,7 +460,7 @@
 
                               <!-- <h2 class="h2">Heading 2</h2>
                                                                 <h3 class="h3">Heading 3</h3>-->
-                              <h4 class="h4">Hello {{$body['name']}}</h4> 
+                              <h4 class="h4">Hello {{$body['name']}}</h4>
                               <p>Please click the button below to verify your email for this password change.</p>
                             </div>
                           </td>
