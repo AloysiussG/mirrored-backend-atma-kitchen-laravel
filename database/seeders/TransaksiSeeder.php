@@ -16,7 +16,7 @@ class TransaksiSeeder extends Seeder
         DB::table('transaksis')->insert([
             [
                 //id =  1
-                'status_transaksi_id' => 4, //ditolak
+                'status_transaksi_id' => 5, //ditolak
                 'cart_id' => 1,
                 'alamat_id' => null,
                 'tanggal_pesan' => '2024-03-20',
@@ -35,7 +35,7 @@ class TransaksiSeeder extends Seeder
             ],
             [
                 //id =  2
-                'status_transaksi_id' => 4, //ditolak
+                'status_transaksi_id' => 5, //ditolak
                 'cart_id' => 3,
                 'alamat_id' => 8,
                 'tanggal_pesan' => '2024-03-15',
@@ -54,7 +54,7 @@ class TransaksiSeeder extends Seeder
             ],
             [
                 //id =  3
-                'status_transaksi_id' => 4, //ditolak
+                'status_transaksi_id' => 5, //ditolak
                 'cart_id' => 4,
                 'alamat_id' => null,
                 'tanggal_pesan' => '2024-03-01',
@@ -73,7 +73,7 @@ class TransaksiSeeder extends Seeder
             ],
             [
                 //id =  4
-                'status_transaksi_id' => 1, //belum dibayar
+                'status_transaksi_id' => 2, //belum dibayar
                 'cart_id' => 5,
                 'alamat_id' => 3,
                 'tanggal_pesan' => '2024-02-10',
@@ -92,7 +92,7 @@ class TransaksiSeeder extends Seeder
             ],
             [
                 //id =  5
-                'status_transaksi_id' => 10, //selesai
+                'status_transaksi_id' => 11, //selesai
                 'cart_id' => 6,
                 'alamat_id' => null,
                 'tanggal_pesan' => '2024-02-20',
