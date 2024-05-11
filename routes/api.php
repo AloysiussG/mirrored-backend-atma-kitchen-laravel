@@ -151,6 +151,8 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     //liat history & show transaksi di admin
     Route::get('/findTransaksiByCust', [TransaksiController::class, 'findByCustomer']);
     Route::get('/transaksiProducts/{id}', [TransaksiController::class, 'showWithProducts']);
+    Route::put('/updateOngkir/{id}', [TransaksiController::class, 'updateOngkir']);
+    Route::put('/updatePembayaran/{id}', [TransaksiController::class, 'updatePembayaran']);
 });
 
 // --- --- MANAGER OPERASIONAL ONLY

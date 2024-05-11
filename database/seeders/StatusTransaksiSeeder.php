@@ -15,6 +15,9 @@ class StatusTransaksiSeeder extends Seeder
     {
         $statusTransaksiArray = [
             [
+                'nama_status' => 'Pesanan menunggu dikonfirmasi',
+            ],
+            [
                 'nama_status' => 'Pesanan belum dibayar',
             ],
             [

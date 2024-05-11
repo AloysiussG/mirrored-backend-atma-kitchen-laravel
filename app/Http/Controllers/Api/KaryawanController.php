@@ -446,8 +446,8 @@ class KaryawanController extends Controller
 
             //validator
             $validate = Validator::make($request->all(), [
-                'bonus_gaji' => 'required|gt:0',
                 'gaji' => 'required|gt:0',
+                'bonus_gaji' => 'required|gt:0',
             ], [
                 'bonus_gaji.required' => 'Bonus gaji harus diisi.',
                 'gaji.required' => 'Gaji harus diisi.',
