@@ -268,7 +268,7 @@ class CustomerController extends Controller
             }
 
             if ($request->status) {
-                if ($request->status != 12) {
+                if ($request->status != 13) {
                     $transaksi->where(function ($query) use ($request) {
                         $query->WhereHas('statusTransaksi', function ($query) use ($request) {
                             $query->where('id', 'like', '%' . $request->status . '%');
