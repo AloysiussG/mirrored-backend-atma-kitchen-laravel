@@ -7,6 +7,7 @@ use App\Models\KategoriProduk;
 use App\Models\Packaging;
 use App\Models\Penitip;
 use App\Models\Produk;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -112,9 +113,40 @@ class ProdukController extends Controller
 
             $produks = $produksQuery->orderBy($sortBy, $sortOrder)->get();
 
+            $produksMapped = $produks->map(function ($item) {
+                $transaksiObj = Transaksi::query()
+                    ->whereHas('cart.detailCart.produk', function ($query) use ($item) {
+                        $query->where('id',  $item->id);
+                    })
+                    ->with('cart', function ($query) use ($item) {
+                        // $query->withCount('detailCart');
+                        $query->withSum(['detailCart' => function ($q) use ($item) {
+                            $q->where('produk_id', $item->id);
+                        }], 'jumlah');
+                    })
+                    ->where('tanggal_pesan', date('Y-m-d'))
+                    ->whereNotIn('status_transaksi_id', [5, 12])
+                    ->get();
+
+                $transaksiCount = $transaksiObj->sum('cart.detail_cart_sum_jumlah') ?? 0;
+
+                $item['count_transaksi_today'] = $transaksiCount;
+
+                $sisaKuota = $item['kuota_harian'] - $transaksiCount;
+                if ($sisaKuota < 0) {
+                    $sisaKuota = 0;
+                }
+
+                $item['sisa_kuota_harian'] = $sisaKuota;
+
+                return $item;
+            });
+
+            $produksMapped = $produksMapped;
+
             return response()->json(
                 [
-                    'data' => $produks,
+                    'data' => $produksMapped,
                     'message' => 'Berhasil mengambil data produk.'
                 ],
                 200
