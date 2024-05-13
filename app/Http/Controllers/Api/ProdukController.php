@@ -23,17 +23,7 @@ class ProdukController extends Controller
         try {
             $produksQuery = Produk::query()->with('kategoriProduk', 'penitip', 'packagings.bahanBaku');
 
-            if ($request->search) {
-                $produksQuery->where('nama_produk', 'like', '%' . $request->search . '%')
-                    ->orWhere('status', 'like', '%' . $request->search . '%')
-                    ->orWhereHas('kategoriProduk', function ($query) use ($request) {
-                        $query->where('nama_kategori_produk', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhereHas('penitip', function ($query) use ($request) {
-                        $query->where('nama_penitip', 'like', '%' . $request->search . '%');
-                    });
-            }
-
+            // FILTER METHOD #1
             if ($request->status) {
                 $produksQuery->where('status', 'like', '%' . $request->status . '%');
             }
@@ -50,6 +40,32 @@ class ProdukController extends Controller
                 });
             }
 
+            // FILTER METHOD #2
+            if ($request->kategoriProduk) {
+                $filterKategoriArr = explode(',', $request->kategoriProduk);
+                $produksQuery->whereHas('kategoriProduk', function ($query) use ($filterKategoriArr) {
+                    $query->whereIn('nama_kategori_produk', $filterKategoriArr);
+                });
+            }
+
+            if ($request->statusProduk) {
+                $filterStatusArr = explode(',', $request->statusProduk);
+                $produksQuery->whereIn('status', $filterStatusArr);
+            }
+
+            // SEARCH
+            if ($request->search) {
+                $produksQuery->where('nama_produk', 'like', '%' . $request->search . '%')
+                    ->orWhere('status', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('kategoriProduk', function ($query) use ($request) {
+                        $query->where('nama_kategori_produk', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('penitip', function ($query) use ($request) {
+                        $query->where('nama_penitip', 'like', '%' . $request->search . '%');
+                    });
+            }
+
+            // SORT METHOD #1
             if ($request->sortBy && in_array($request->sortBy, [
                 'id',
                 'nama_produk',
@@ -69,13 +85,7 @@ class ProdukController extends Controller
                 $sortOrder = 'desc';
             }
 
-
-            // { name: "Terbaru", sortBy: "id", sortOrder: "desc" },
-            // { name: "Terlama", sortBy: "id", sortOrder: "asc" },
-            // { name: "Harga tertinggi", sortBy: "harga", sortOrder: "desc" },
-            // { name: "Harga terendah", sortBy: "harga", sortOrder: "asc" },
-            // { name: "Stok terbanyak", sortBy: "jumlah_stock", sortOrder: "desc" },
-            // { name: "Kuota terbanyak", sortBy: "kuota_harian", sortOrder: "desc" },
+            // SORT METHOD #2
             $arraySort = [
                 'terbaru',
                 'terlama',
