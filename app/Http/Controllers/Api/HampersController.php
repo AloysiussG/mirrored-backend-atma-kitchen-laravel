@@ -44,6 +44,29 @@ class HampersController extends Controller
                 $sortOrder = 'desc';
             }
 
+            // SORT METHOD #2
+            $arraySort = [
+                'terbaru',
+                'terlama',
+                'harga tertinggi',
+                'harga terendah',
+                'stok terbanyak',
+                'kuota terbanyak',
+            ];
+
+            $arraySortValue = [
+                ['name' => "Terbaru", 'sortBy' => "id", 'sortOrder' => "desc"],
+                ['name' => "Terlama", 'sortBy' => "id", 'sortOrder' => "asc"],
+                ['name' => "Harga tertinggi", 'sortBy' => "harga_hampers", 'sortOrder' => "desc"],
+                ['name' => "Harga terendah", 'sortBy' => "harga_hampers", 'sortOrder' => "asc"],
+            ];
+
+            if ($request->sort && in_array(strtolower($request->sort), $arraySort)) {
+                $key = array_search(strtolower($request->sort), $arraySort);
+                $sortBy = $arraySortValue[$key]['sortBy'];
+                $sortOrder = $arraySortValue[$key]['sortOrder'];
+            }
+
             $hampers = $hampersQuery->orderBy($sortBy, $sortOrder)->get();
 
             return response()->json(
