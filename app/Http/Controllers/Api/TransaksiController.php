@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hampers;
+use App\Models\Produk;
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use Carbon\Carbon;
@@ -117,8 +119,8 @@ class TransaksiController extends Controller
                 );
             }
 
-            if($transaksi->jenis_pengiriman == 'pickup'){
-                if($request->jarak != 0){
+            if ($transaksi->jenis_pengiriman == 'pickup') {
+                if ($request->jarak != 0) {
                     return response()->json(
                         [
                             'data' => null,
@@ -231,6 +233,234 @@ class TransaksiController extends Controller
                     'message' => $th->getMessage()
                 ],
                 500
+            );
+        }
+    }
+
+    public function updateStatusDiproses($id)
+    {
+        try {
+            $transaksi = Transaksi::find($id);
+            if (!$transaksi) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak ditemukan'
+                    ]
+                );
+            }
+
+            if ($transaksi->status_transaksi_id != 7) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak sedang diproses, tidak bisa mengupdate status'
+                    ]
+                );
+            }
+
+            if ($transaksi->jenis_pengiriman == 'pickup') {
+                $transaksi->status_transaksi_id = 8;
+            } else {
+                $transaksi->status_transaksi_id = 9;
+            }
+            $transaksi->save();
+            return response()->json(
+                [
+                    'data' => $transaksi,
+                    'message' => 'Berhasil mengupdate status transaksi'
+                ]
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    public function updateStatusPickup($id)
+    {
+        try {
+            $transaksi = Transaksi::find($id);
+            if (!$transaksi) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak ditemukan'
+                    ]
+                );
+            }
+
+            if ($transaksi->status_transaksi_id != 8) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Pesanan tidak sedang dipickup, tidak bisa mengupdate status'
+                    ]
+                );
+            }
+
+            if ($transaksi->status_transaksi_id == 8) {
+                $transaksi->status_transaksi_id = 10;
+            }
+            $transaksi->save();
+            return response()->json(
+                [
+                    'data' => $transaksi,
+                    'message' => 'Berhasil mengupdate status transaksi'
+                ]
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    public function indexDiproses(Request $request)
+    {
+        try {
+            $transaksiQuery = Transaksi::query()
+                ->where('status_transaksi_id', 6)
+                ->orWhere('status_transaksi_id', 7)
+                ->orWhere('status_transaksi_id', 8)
+                ->orWhere('status_transaksi_id', 9)
+                ->orWhere('status_transaksi_id', 10)
+                ->with(['cart.customer', 'statusTransaksi', 'packagings.bahanBaku', 'alamat']);
+            if ($request->search) {
+                $transaksiQuery->whereHas('cart.customer', function ($query) use ($request) {
+                    $query->where('nama', 'like', '%' . $request->search . '%');
+                })->orwhereHas('statusTransaksi', function ($query) use ($request) {
+                    $query->where('nama_status', 'like', '%' . $request->search . '%');
+                })->orWhere('no_nota', 'like', '%' . $request->search . '%');
+            }
+            if ($request->date) {
+                $transaksiQuery->whereDate('tanggal_pesan', $request->date);
+            }
+
+            if ($request->status) {
+                $transaksiQuery->where('status_transaksi_id', $request->status);
+            }
+
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'total_harga', 'status', 'tanggal_pesan'])) {
+                $sortBy = $request->sortBy;
+            } else {
+                $sortBy = 'id';
+            }
+
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
+            }
+
+            $transaksis = $transaksiQuery->orderBy($sortBy, $sortOrder)->get();
+
+            return response(
+                [
+                    'message' => 'Retrieve All Success',
+                    'data' => $transaksis
+                ],
+                200
+            );
+        } catch (Throwable $e) {
+            return response(
+                [
+                    'message' => $e->getMessage(),
+                    'data' => null
+                ],
+                404
+            );
+        }
+    }
+
+    public function indexTelatBayar(Request $request)
+    {
+        try {
+            $transaksiQuery = Transaksi::query()
+                ->where('tanggal_ambil', '<=', Carbon::now()->addDay())
+                ->whereNull('tanggal_lunas')
+                ->with(['cart.customer', 'statusTransaksi', 'packagings.bahanBaku', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers.detailHampers.produk']);
+
+            if ($request->search) {
+                $transaksiQuery->whereHas('cart.customer', function ($query) use ($request) {
+                    $query->where('nama', 'like', '%' . $request->search . '%');
+                })->orwhereHas('statusTransaksi', function ($query) use ($request) {
+                    $query->where('nama_status', 'like', '%' . $request->search . '%');
+                })->orWhere('no_nota', 'like', '%' . $request->search . '%');
+            }
+
+            if ($request->date) {
+                $transaksiQuery->whereDate('tanggal_pesan', $request->date);
+            }
+
+            if ($request->status) {
+                $transaksiQuery->where('status_transaksi_id', $request->status);
+            }
+
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'total_harga', 'status', 'tanggal_pesan'])) {
+                $sortBy = $request->sortBy;
+            } else {
+                $sortBy = 'id';
+            }
+
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
+            }
+
+            $transaksis = $transaksiQuery->orderBy($sortBy, $sortOrder)->get();
+
+            //update status transaksi menjadi batal jika belum
+            //kembalikan stok produk yang ready stock jika belum
+            foreach ($transaksis as $transaksi) {
+                if ($transaksi->status_transaksi_id != 12) {
+                    foreach ($transaksi->cart->detailCart as $detailCart) {
+                        if ($detailCart->status_produk == "Ready Stock") {
+                            if ($detailCart->produk_id != null) {
+                                $produk = $detailCart->produk;
+                                $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                                $produk->status = "Ready Stock";
+                                $produk->save();
+                            } else {
+                                $hampers = $detailCart->hampers;
+                                foreach ($hampers->detailHampers as $detailHampers) {
+                                    $produk = $detailHampers->produk;
+                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                    $produk->status = "Ready Stock";
+                                    $produk->save();
+                                }
+                            }
+                        }
+                    }
+                    $transaksi->status_transaksi_id = 12;
+                    $transaksi->save();
+                }
+            }
+
+            return response(
+                [
+                    'message' => 'Retrieve All Success',
+                    'data' => $transaksis
+                ],
+                200
+            );
+        } catch (Throwable $e) {
+            return response(
+                [
+                    'message' => $e->getMessage(),
+                    'data' => null
+                ],
+                404
             );
         }
     }
