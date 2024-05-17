@@ -95,11 +95,11 @@ class PackagingSeeder extends Seeder
         // UNTUK SETIAP 1x TRANSAKSI BERHASIL
         // TAS SPUNBOND 
         $transaksi = Transaksi::query()
-            ->where('status_transaksi_id', 6)
-            ->Orwhere('status_transaksi_id', 7)
+            ->where('status_transaksi_id', 7)
             ->Orwhere('status_transaksi_id', 8)
             ->Orwhere('status_transaksi_id', 9)
             ->Orwhere('status_transaksi_id', 10)
+            ->Orwhere('status_transaksi_id', 11)
             ->get();
 
         foreach ($transaksi as $item) {

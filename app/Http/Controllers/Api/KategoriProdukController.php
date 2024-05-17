@@ -16,6 +16,9 @@ class KategoriProdukController extends Controller
     {
         try {
             $kategoriProduk = KategoriProduk::query()
+                ->with('produks', function ($query) {
+                    $query->orderBy('id', 'asc')->limit(1);
+                })
                 ->withCount('produks');
 
             if ($request->hasProduk && $request->hasProduk == 'true') {
