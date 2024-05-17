@@ -168,14 +168,51 @@ class ProdukController extends Controller
     public function indexByKategoriProduk()
     {
         try {
-            $produks = KategoriProduk::query()
-                ->with('produks')
+            $kategoriWithProduks = KategoriProduk::query()
+                ->with('produks', function ($query) {
+                    $query->with('kategoriProduk', 'penitip', 'packagings.bahanBaku');
+                })
                 ->latest()
                 ->get();
 
+            $kategoriMapped = $kategoriWithProduks->map(function ($item) {
+                $produks = $item['produks'];
+
+                $produksMapped = $produks->map(function ($item) {
+                    $transaksiObj = Transaksi::query()
+                        ->whereHas('cart.detailCart.produk', function ($query) use ($item) {
+                            $query->where('id',  $item->id);
+                        })
+                        ->with('cart', function ($query) use ($item) {
+                            // $query->withCount('detailCart');
+                            $query->withSum(['detailCart' => function ($q) use ($item) {
+                                $q->where('produk_id', $item->id);
+                            }], 'jumlah');
+                        })
+                        ->where('tanggal_pesan', date('Y-m-d'))
+                        ->whereNotIn('status_transaksi_id', [5, 12])
+                        ->get();
+
+                    $transaksiCount = $transaksiObj->sum('cart.detail_cart_sum_jumlah') ?? 0;
+
+                    $item['count_transaksi_today'] = $transaksiCount;
+
+                    $sisaKuota = $item['kuota_harian'] - $transaksiCount;
+                    if ($sisaKuota < 0) {
+                        $sisaKuota = 0;
+                    }
+
+                    $item['sisa_kuota_harian'] = $sisaKuota;
+                    return $item;
+                });
+
+                $item['produks'] = $produksMapped;
+                return $item;
+            });
+
             return response()->json(
                 [
-                    'data' => $produks,
+                    'data' => $kategoriMapped,
                     'message' => 'Berhasil mengambil data produk berdasarkan kategori produk.'
                 ],
                 200
