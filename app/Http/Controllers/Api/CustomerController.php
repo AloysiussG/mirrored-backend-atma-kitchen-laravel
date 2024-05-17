@@ -247,7 +247,7 @@ class CustomerController extends Controller
                 ->whereHas('cart.customer', function ($query) {
                     $query->where('customer_id', Auth::id());
                 })
-                ->with(['statusTransaksi', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers', 'cart.customer']);
+                ->with(['statusTransaksi', 'packagings.bahanBaku', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers.detailHampers.produk', 'cart.customer']);
 
             if ($request->search) {
                 $transaksi->where(function ($query) use ($request) {
@@ -285,11 +285,38 @@ class CustomerController extends Controller
                 $sortOrder = 'desc';
             }
 
-            $transaksi = $transaksi->orderBy($sortBy, $sortOrder)->get();
+            $transaksis = $transaksi->orderBy($sortBy, $sortOrder)->get();
+
+            //update status transaksi menjadi batal jika belum
+            //kembalikan stok produk yang ready stock jika belum
+            foreach ($transaksis as $transaksi) {
+                if ($transaksi->status_transaksi_id != 12) {
+                    foreach ($transaksi->cart->detailCart as $detailCart) {
+                        if ($detailCart->status_produk == "Ready Stock") {
+                            if ($detailCart->produk_id != null) {
+                                $produk = $detailCart->produk;
+                                $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                                $produk->status = "Ready Stock";
+                                $produk->save();
+                            } else {
+                                $hampers = $detailCart->hampers;
+                                foreach ($hampers->detailHampers as $detailHampers) {
+                                    $produk = $detailHampers->produk;
+                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                    $produk->status = "Ready Stock";
+                                    $produk->save();
+                                }
+                            }
+                        }
+                    }
+                    $transaksi->status_transaksi_id = 12;
+                    $transaksi->save();
+                }
+            }
 
             return response()->json(
                 [
-                    'data' => $transaksi,
+                    'data' => $transaksis,
                     'message' => 'Berhasil mengambil data transaksi.'
                 ],
                 200
@@ -327,6 +354,61 @@ class CustomerController extends Controller
                 [
                     'data' => null,
                     'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    public function updateStatusSelesai($id)
+    {
+        try {
+            $transaksi = Transaksi::query()
+                ->where('id', $id)
+                ->with(['statusTransaksi', 'alamat', 'cart.detailCart.produk', 'cart.detailCart.hampers', 'cart.customer', 'packagings.bahanBaku'])
+                ->first();
+
+            if (!$transaksi) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak ditemukan'
+                    ]
+                );
+            }
+
+            if ($transaksi->cart->customer->id != Auth::id()) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Anda tidak memiliki akses untuk mengupdate status transaksi ini'
+                    ]
+                );
+            }
+
+            if ($transaksi->status_transaksi_id != 9 && $transaksi->status_transaksi_id != 10) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Status pesanan tidak sesuai, tidak bisa mengupdate status'
+                    ]
+                );
+            }
+
+            $transaksi->status_transaksi_id = 11;
+
+            $transaksi->save();
+            return response()->json(
+                [
+                    'data' => $transaksi,
+                    'message' => 'Berhasil menyelesaikan transaksi'
+                ]
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage()
                 ],
                 500
             );

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('hampers_id')->nullable()->constrained('hampers');
             $table->float('jumlah');
             $table->float('harga_produk_sekarang');
+            $table->string('status_produk');
             $table->timestamps();
         });
     }
