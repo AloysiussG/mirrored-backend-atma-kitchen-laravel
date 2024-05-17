@@ -7,6 +7,7 @@ use App\Models\KategoriProduk;
 use App\Models\Packaging;
 use App\Models\Penitip;
 use App\Models\Produk;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -23,17 +24,7 @@ class ProdukController extends Controller
         try {
             $produksQuery = Produk::query()->with('kategoriProduk', 'penitip', 'packagings.bahanBaku');
 
-            if ($request->search) {
-                $produksQuery->where('nama_produk', 'like', '%' . $request->search . '%')
-                    ->orWhere('status', 'like', '%' . $request->search . '%')
-                    ->orWhereHas('kategoriProduk', function ($query) use ($request) {
-                        $query->where('nama_kategori_produk', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhereHas('penitip', function ($query) use ($request) {
-                        $query->where('nama_penitip', 'like', '%' . $request->search . '%');
-                    });
-            }
-
+            // FILTER METHOD #1
             if ($request->status) {
                 $produksQuery->where('status', 'like', '%' . $request->status . '%');
             }
@@ -50,6 +41,32 @@ class ProdukController extends Controller
                 });
             }
 
+            // FILTER METHOD #2
+            if ($request->kategoriProduk) {
+                $filterKategoriArr = explode(',', $request->kategoriProduk);
+                $produksQuery->whereHas('kategoriProduk', function ($query) use ($filterKategoriArr) {
+                    $query->whereIn('nama_kategori_produk', $filterKategoriArr);
+                });
+            }
+
+            if ($request->statusProduk) {
+                $filterStatusArr = explode(',', $request->statusProduk);
+                $produksQuery->whereIn('status', $filterStatusArr);
+            }
+
+            // SEARCH
+            if ($request->search) {
+                $produksQuery->where('nama_produk', 'like', '%' . $request->search . '%')
+                    ->orWhere('status', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('kategoriProduk', function ($query) use ($request) {
+                        $query->where('nama_kategori_produk', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('penitip', function ($query) use ($request) {
+                        $query->where('nama_penitip', 'like', '%' . $request->search . '%');
+                    });
+            }
+
+            // SORT METHOD #1
             if ($request->sortBy && in_array($request->sortBy, [
                 'id',
                 'nama_produk',
@@ -69,11 +86,67 @@ class ProdukController extends Controller
                 $sortOrder = 'desc';
             }
 
+            // SORT METHOD #2
+            $arraySort = [
+                'terbaru',
+                'terlama',
+                'harga tertinggi',
+                'harga terendah',
+                'stok terbanyak',
+                'kuota terbanyak',
+            ];
+
+            $arraySortValue = [
+                ['name' => "Terbaru", 'sortBy' => "id", 'sortOrder' => "desc"],
+                ['name' => "Terlama", 'sortBy' => "id", 'sortOrder' => "asc"],
+                ['name' => "Harga tertinggi", 'sortBy' => "harga", 'sortOrder' => "desc"],
+                ['name' => "Harga terendah", 'sortBy' => "harga", 'sortOrder' => "asc"],
+                ['name' => "Stok terbanyak", 'sortBy' => "jumlah_stock", 'sortOrder' => "desc"],
+                ['name' => "Kuota terbanyak", 'sortBy' => "kuota_harian", 'sortOrder' => "desc"],
+            ];
+
+            if ($request->sort && in_array(strtolower($request->sort), $arraySort)) {
+                $key = array_search(strtolower($request->sort), $arraySort);
+                $sortBy = $arraySortValue[$key]['sortBy'];
+                $sortOrder = $arraySortValue[$key]['sortOrder'];
+            }
+
             $produks = $produksQuery->orderBy($sortBy, $sortOrder)->get();
+
+            $produksMapped = $produks->map(function ($item) {
+                $transaksiObj = Transaksi::query()
+                    ->whereHas('cart.detailCart.produk', function ($query) use ($item) {
+                        $query->where('id',  $item->id);
+                    })
+                    ->with('cart', function ($query) use ($item) {
+                        // $query->withCount('detailCart');
+                        $query->withSum(['detailCart' => function ($q) use ($item) {
+                            $q->where('produk_id', $item->id);
+                        }], 'jumlah');
+                    })
+                    ->where('tanggal_pesan', date('Y-m-d'))
+                    ->whereNotIn('status_transaksi_id', [5, 12])
+                    ->get();
+
+                $transaksiCount = $transaksiObj->sum('cart.detail_cart_sum_jumlah') ?? 0;
+
+                $item['count_transaksi_today'] = $transaksiCount;
+
+                $sisaKuota = $item['kuota_harian'] - $transaksiCount;
+                if ($sisaKuota < 0) {
+                    $sisaKuota = 0;
+                }
+
+                $item['sisa_kuota_harian'] = $sisaKuota;
+
+                return $item;
+            });
+
+            $produksMapped = $produksMapped;
 
             return response()->json(
                 [
-                    'data' => $produks,
+                    'data' => $produksMapped,
                     'message' => 'Berhasil mengambil data produk.'
                 ],
                 200
@@ -95,14 +168,51 @@ class ProdukController extends Controller
     public function indexByKategoriProduk()
     {
         try {
-            $produks = KategoriProduk::query()
-                ->with('produks')
+            $kategoriWithProduks = KategoriProduk::query()
+                ->with('produks', function ($query) {
+                    $query->with('kategoriProduk', 'penitip', 'packagings.bahanBaku');
+                })
                 ->latest()
                 ->get();
 
+            $kategoriMapped = $kategoriWithProduks->map(function ($item) {
+                $produks = $item['produks'];
+
+                $produksMapped = $produks->map(function ($item) {
+                    $transaksiObj = Transaksi::query()
+                        ->whereHas('cart.detailCart.produk', function ($query) use ($item) {
+                            $query->where('id',  $item->id);
+                        })
+                        ->with('cart', function ($query) use ($item) {
+                            // $query->withCount('detailCart');
+                            $query->withSum(['detailCart' => function ($q) use ($item) {
+                                $q->where('produk_id', $item->id);
+                            }], 'jumlah');
+                        })
+                        ->where('tanggal_pesan', date('Y-m-d'))
+                        ->whereNotIn('status_transaksi_id', [5, 12])
+                        ->get();
+
+                    $transaksiCount = $transaksiObj->sum('cart.detail_cart_sum_jumlah') ?? 0;
+
+                    $item['count_transaksi_today'] = $transaksiCount;
+
+                    $sisaKuota = $item['kuota_harian'] - $transaksiCount;
+                    if ($sisaKuota < 0) {
+                        $sisaKuota = 0;
+                    }
+
+                    $item['sisa_kuota_harian'] = $sisaKuota;
+                    return $item;
+                });
+
+                $item['produks'] = $produksMapped;
+                return $item;
+            });
+
             return response()->json(
                 [
-                    'data' => $produks,
+                    'data' => $kategoriMapped,
                     'message' => 'Berhasil mengambil data produk berdasarkan kategori produk.'
                 ],
                 200
