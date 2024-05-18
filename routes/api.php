@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\BahanBakuController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\DetailCartController;
 use App\Http\Controllers\Api\KategoriProdukController;
 use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\TransaksiController;
@@ -101,6 +102,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
 
     // CART
     Route::get('/my-cart', [CartController::class, 'index']);
+    Route::post('/my-cart/add-to-cart', [DetailCartController::class, 'addToCart']);
 });
 
 // --- --- OWNER ONLY

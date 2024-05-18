@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\DetailCart;
+use App\Models\Hampers;
+use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
@@ -14,7 +16,7 @@ class DetailCartController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function addToCart(Request $request)
     {
         try {
             // --- CARI ACTIVE CART
@@ -56,14 +58,14 @@ class DetailCartController extends Controller
                 'produk_id' => 'exists:produks,id',
                 'hampers_id' => 'exists:hampers,id',
                 'jumlah' => 'required',
-                'harga_produk_sekarang' => 'required',
+                // 'harga_produk_sekarang' => 'required',
             ]);
 
             if ($validate->fails()) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => $validate->messages(),
+                        'message' => $validate->messages()->first(),
                     ],
                     400
                 );
@@ -86,6 +88,9 @@ class DetailCartController extends Controller
             // jika ada produk yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
 
             if ($detailCartRequest['produk_id']) {
+                $produk = Produk::find($detailCartRequest['produk_id']);
+                $detailCartRequest['harga_produk_sekarang'] = $produk->harga;
+
                 $detailCart = DetailCart::query()
                     ->where('cart_id', $activeCart->id)
                     ->where('produk_id', $detailCartRequest['produk_id'])
@@ -93,11 +98,15 @@ class DetailCartController extends Controller
 
                 if ($detailCart) {
                     $detailCart->jumlah = $detailCart->jumlah + $detailCartRequest['jumlah'];
+                    $detailCart->harga_produk_sekarang = $detailCartRequest['harga_produk_sekarang'];
                     $detailCart->save();
                 } else {
                     $detailCart = DetailCart::create($detailCartRequest);
                 }
-            } else {
+            } else if ($detailCartRequest['hampers_id']) {
+                $hampers = Hampers::find($detailCartRequest['hampers_id']);
+                $detailCartRequest['harga_produk_sekarang'] = $hampers->harga_hampers;
+
                 $detailCart = DetailCart::query()
                     ->where('cart_id', $activeCart->id)
                     ->where('hampers_id', $detailCartRequest['hampers_id'])
@@ -105,12 +114,12 @@ class DetailCartController extends Controller
 
                 if ($detailCart) {
                     $detailCart->jumlah = $detailCart->jumlah + $detailCartRequest['jumlah'];
+                    $detailCart->harga_produk_sekarang = $detailCartRequest['harga_produk_sekarang'];
                     $detailCart->save();
                 } else {
                     $detailCart = DetailCart::create($detailCartRequest);
                 }
             }
-
 
             return response()->json(
                 [
