@@ -71,7 +71,7 @@ class DetailCartController extends Controller
                 );
             }
 
-            if (!$detailCartRequest['produk_id'] && !$detailCartRequest['hampers_id']) {
+            if (!isset($detailCartRequest['produk_id']) && !isset($detailCartRequest['hampers_id'])) {
                 return response()->json(
                     [
                         'data' => null,
@@ -83,11 +83,11 @@ class DetailCartController extends Controller
 
             $detailCartRequest['cart_id'] = $activeCart->id;
 
-            // create detail hampers
-            // cek unik, dalam 1 hampers tidak boleh ada 2 produk yang sama namun beda jumlah produk
+            // create detail cart
+            // cek unik, dalam 1 cart tidak boleh ada 2 produk yang sama namun beda jumlah produk
             // jika ada produk yang sama maka jumlahnya diambil dari hasil penjumlahan keduanya
 
-            if ($detailCartRequest['produk_id']) {
+            if (isset($detailCartRequest['produk_id'])) {
                 $produk = Produk::find($detailCartRequest['produk_id']);
                 $detailCartRequest['harga_produk_sekarang'] = $produk->harga;
 
@@ -103,7 +103,7 @@ class DetailCartController extends Controller
                 } else {
                     $detailCart = DetailCart::create($detailCartRequest);
                 }
-            } else if ($detailCartRequest['hampers_id']) {
+            } else if (isset($detailCartRequest['hampers_id'])) {
                 $hampers = Hampers::find($detailCartRequest['hampers_id']);
                 $detailCartRequest['harga_produk_sekarang'] = $hampers->harga_hampers;
 
@@ -124,7 +124,7 @@ class DetailCartController extends Controller
             return response()->json(
                 [
                     'data' => $detailCart,
-                    'message' => 'Berhasil add to cart.'
+                    'message' => 'Berhasil menambah item ke keranjang.'
                 ],
                 200
             );
