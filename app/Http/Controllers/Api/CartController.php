@@ -28,6 +28,7 @@ class CartController extends Controller
             $cartQuery = Cart::query()
                 ->with(['detailCart.produk', 'detailCart.hampers'])
                 ->withCount('detailCart')
+                ->withSum('detailCart as detail_cart_sum', 'jumlah')
                 ->where('customer_id', $user->id)
                 ->where('status_cart', 1); // cart yang sedang aktif
 
@@ -77,6 +78,21 @@ class CartController extends Controller
             // }
 
             $cart = $cartQuery->orderBy($sortBy, $sortOrder)->first(); // karena 1 aja cartnya
+
+            // hitung subtotal sebelum checkout
+            // dihitung dari base harga produk/hampers, bukan dari harga_produk_sekarang
+            $total = 0;
+            if ($cart->detailCart) {
+                foreach ($cart->detailCart as $item) {
+                    if ($item->hampers) {
+                        $total = $total + ($item->jumlah * $item->hampers->harga_hampers);
+                    } else if ($item->produk) {
+                        $total = $total + ($item->jumlah * $item->produk->harga);
+                    }
+                }
+            }
+
+            $cart['subtotal'] = $total;
 
             // KALO ACTIVE CART TIDAK DITEMUKAN
             // TODO::: bikin cart baru ???
