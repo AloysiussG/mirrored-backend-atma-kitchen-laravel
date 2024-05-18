@@ -139,6 +139,89 @@ class DetailCartController extends Controller
         }
     }
 
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function removeFromCart(Request $request, string $id)
+    {
+        try {
+            // --- CARI ACTIVE CART
+            $user = $request->user();
+
+            // bukan customer kalau punya role, throw 401
+            if (isset($user['role_id'])) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'User bukan customer, tidak dapat melihat cart.'
+                    ],
+                    401
+                );
+            }
+
+            $activeCart = Cart::query()
+                // ->with(['detailCart'])
+                // ->withCount('detailCart')
+                ->where('customer_id', $user->id)
+                ->where('status_cart', 1)
+                ->first(); // karena 1 aja cartnya  
+
+            if (!$activeCart) {
+                // TODO::: bikin cart baru ???
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Cart tidak ditemukan.',
+                    ],
+                    404
+                );
+            }
+
+            // cek apakah yang akan didelete adalah punyanya dia
+            $deleted = DetailCart::query()
+                ->where('cart_id', $activeCart->id)
+                ->where('id', $id)
+                ->first();
+
+            if (!$deleted) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Item tidak ditemukan dari keranjang.',
+                    ],
+                    404
+                );
+            }
+
+            if (!$deleted->delete()) {
+                return response()->json(
+                    [
+                        'data' => $deleted,
+                        'message' => 'Gagal menghapus item dari keranjang.',
+                    ],
+                    500
+                );
+            }
+
+            return response()->json(
+                [
+                    'data' => $deleted,
+                    'message' => 'Berhasil menghapus item dari keranjang.',
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
     /**
      * Display the specified resource.
      */
@@ -232,49 +315,4 @@ class DetailCartController extends Controller
     //     }
     // }
 
-    // /**
-    //  * Remove the specified resource from storage.
-    //  */
-    // public function destroy(string $id)
-    // {
-    //     try {
-    //         $detailHampersDataDeleted = DetailHampers::find($id);
-
-    //         if (!$detailHampersDataDeleted) {
-    //             return response()->json(
-    //                 [
-    //                     'data' => null,
-    //                     'message' => 'Detail hampers tidak ditemukan.',
-    //                 ],
-    //                 404
-    //             );
-    //         }
-
-    //         if (!$detailHampersDataDeleted->delete()) {
-    //             return response()->json(
-    //                 [
-    //                     'data' => $detailHampersDataDeleted,
-    //                     'message' => 'Gagal menghapus data detail hampers.',
-    //                 ],
-    //                 500
-    //             );
-    //         }
-
-    //         return response()->json(
-    //             [
-    //                 'data' => $detailHampersDataDeleted,
-    //                 'message' => 'Berhasil menghapus data detail hampers.',
-    //             ],
-    //             200
-    //         );
-    //     } catch (Throwable $th) {
-    //         return response()->json(
-    //             [
-    //                 'data' => null,
-    //                 'message' => $th->getMessage(),
-    //             ],
-    //             500
-    //         );
-    //     }
-    // }
 }
