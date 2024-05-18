@@ -537,6 +537,18 @@ class TransaksiController extends Controller
                 $transaksi->cart->customer->saldo += $transaksi->total_harga;
                 $transaksi->cart->customer->saldo += $transaksi->tip;
 
+                //update stok produk
+                $detailCart = $transaksi->cart->detailCart;
+                foreach ($detailCart as $detail) {
+                    if ($detail->produk_id) {
+                        if($detail->status_produk == "Ready Stock"){
+                            $produk = Produk::find($detail->produk_id);
+                            $produk->jumlah_stock += $detail->jumlah;
+                            $produk->save();
+                        }
+                    }
+                }
+
                 $transaksi->cart->customer->save();
                 $transaksi->save();
                 return response()->json(
