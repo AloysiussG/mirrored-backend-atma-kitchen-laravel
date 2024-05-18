@@ -115,7 +115,7 @@ class DetailCartController extends Controller
             return response()->json(
                 [
                     'data' => $detailCart,
-                    'message' => 'Berhasil membuat data detail hampers baru dari hampers ' . $hampersData->nama_hampers . '.'
+                    'message' => 'Berhasil add to cart.'
                 ],
                 200
             );
