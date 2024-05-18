@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PasswordChangeController;
 use App\Http\Controllers\Api\PenitipController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\BahanBakuController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\KategoriProdukController;
 use App\Http\Controllers\Api\PackagingController;
@@ -97,6 +98,9 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
 
     // --- PASSWORD CHANGE CUSTOMER
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
+
+    // CART
+    Route::get('/my-cart', [CartController::class, 'index']);
 });
 
 // --- --- OWNER ONLY
