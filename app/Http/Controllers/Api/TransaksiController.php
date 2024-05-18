@@ -490,6 +490,16 @@ class TransaksiController extends Controller
                 );
             }
 
+            if(!$request->verdict){
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => "Verdict harus diisi"
+                    ],
+                    400
+                );
+            }
+
 
             if ($request->verdict == 'terima') {
 
@@ -499,7 +509,7 @@ class TransaksiController extends Controller
                 $customer->save();
 
                 //ganti transaksi status jadi diterima
-                $transaksi->status_transaksi_id = 5;
+                $transaksi->status_transaksi_id = 6;
                 $transaksi->save();
 
                 //update stock produk
@@ -529,20 +539,28 @@ class TransaksiController extends Controller
                 );
             } else if ($request->verdict == 'tolak') {
                 //ganti status jadi ditolak
-                $transaksi->status_transaksi_id = 6;
+                $transaksi->status_transaksi_id = 5;
 
                 //update saldo customer
                 $transaksi->cart->customer->saldo += $transaksi->total_harga;
                 $transaksi->cart->customer->saldo += $transaksi->tip;
 
                 //update stok produk
-                $detailCart = $transaksi->cart->detailCart;
-                foreach ($detailCart as $detail) {
-                    if ($detail->produk_id) {
-                        if($detail->status_produk == "Ready Stock"){
-                            $produk = Produk::find($detail->produk_id);
-                            $produk->jumlah_stock += $detail->jumlah;
+                foreach ($transaksi->cart->detailCart as $detailCart) {
+                    if ($detailCart->status_produk == "Ready Stock") {
+                        if ($detailCart->produk_id != null) {
+                            $produk = $detailCart->produk;
+                            $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                            $produk->status = "Ready Stock";
                             $produk->save();
+                        } else {
+                            $hampers = $detailCart->hampers;
+                            foreach ($hampers->detailHampers as $detailHampers) {
+                                $produk = $detailHampers->produk;
+                                $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                $produk->status = "Ready Stock";
+                                $produk->save();
+                            }
                         }
                     }
                 }
