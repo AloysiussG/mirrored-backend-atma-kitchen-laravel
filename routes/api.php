@@ -104,6 +104,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     Route::get('/my-cart', [CartController::class, 'index']);
     Route::post('/my-cart/add-to-cart', [DetailCartController::class, 'addToCart']);
     Route::delete('/my-cart/remove-from-cart/{id}', [DetailCartController::class, 'removeFromCart']);
+    Route::put('/my-cart/update-detail-cart-count/{id}', [DetailCartController::class, 'updateDetailCartCount']);
 });
 
 // --- --- OWNER ONLY
