@@ -8,6 +8,7 @@ use App\Models\Produk;
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use Carbon\Carbon;
+use DateTime;
 use Throwable;
 use Illuminate\Support\Facades\Validator;
 
@@ -237,7 +238,7 @@ class TransaksiController extends Controller
         }
     }
 
-    public function updateStatusDiproses($id)
+    public function updateStatusTransaksi($id)
     {
         try {
             $transaksi = Transaksi::find($id);
@@ -246,72 +247,35 @@ class TransaksiController extends Controller
                     [
                         'data' => null,
                         'message' => 'Transaksi tidak ditemukan'
-                    ]
+                    ],
+                    404
                 );
             }
 
-            if ($transaksi->status_transaksi_id != 7) {
+            if ($transaksi->status_transaksi_id != 7 && $transaksi->status_transaksi_id != 8) {
                 return response()->json(
                     [
                         'data' => null,
-                        'message' => 'Transaksi tidak sedang diproses, tidak bisa mengupdate status'
-                    ]
+                        'message' => 'Transaksi tidak sedang diproses/dipickup, tidak bisa mengupdate status'
+                    ],
+                    400
                 );
             }
-
-            if ($transaksi->jenis_pengiriman == 'pickup') {
-                $transaksi->status_transaksi_id = 8;
-            } else {
-                $transaksi->status_transaksi_id = 9;
-            }
-            $transaksi->save();
-            return response()->json(
-                [
-                    'data' => $transaksi,
-                    'message' => 'Berhasil mengupdate status transaksi'
-                ]
-            );
-        } catch (Throwable $th) {
-            return response()->json(
-                [
-                    'data' => null,
-                    'message' => $th->getMessage()
-                ],
-                500
-            );
-        }
-    }
-
-    public function updateStatusPickup($id)
-    {
-        try {
-            $transaksi = Transaksi::find($id);
-            if (!$transaksi) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'Transaksi tidak ditemukan'
-                    ]
-                );
-            }
-
-            if ($transaksi->status_transaksi_id != 8) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'Pesanan tidak sedang dipickup, tidak bisa mengupdate status'
-                    ]
-                );
-            }
-
             if ($transaksi->status_transaksi_id == 8) {
                 $transaksi->status_transaksi_id = 10;
+            } else if ($transaksi->status_transaksi_id == 7) {
+                if ($transaksi->jenis_pengiriman == 'pickup') {
+                    $transaksi->status_transaksi_id = 8;
+                } else {
+                    $transaksi->status_transaksi_id = 9;
+                }
             }
+
             $transaksi->save();
             return response()->json(
                 [
                     'data' => $transaksi,
-                    'message' => 'Berhasil mengupdate status transaksi'
+                    'message' => 'Berhasil mengupdate status transaksi menjadi ' . $transaksi->statusTransaksi->nama_status,
                 ]
             );
         } catch (Throwable $th) {
@@ -423,27 +387,66 @@ class TransaksiController extends Controller
             //update status transaksi menjadi batal jika belum
             //kembalikan stok produk yang ready stock jika belum
             foreach ($transaksis as $transaksi) {
+                //cek apakah setiap produk dalam transaksi ready stock
+                $status_transaksi = "Ready Stock";
+                foreach ($transaksi->cart->detailCart as $detailCart) {
+                    if ($detailCart->status_produk == "Pre Order") {
+                        $status_transaksi = "Pre Order";
+                        break;
+                    }
+                }
                 if ($transaksi->status_transaksi_id != 12) {
-                    foreach ($transaksi->cart->detailCart as $detailCart) {
-                        if ($detailCart->status_produk == "Ready Stock") {
-                            if ($detailCart->produk_id != null) {
-                                $produk = $detailCart->produk;
-                                $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
-                                $produk->status = "Ready Stock";
-                                $produk->save();
-                            } else {
-                                $hampers = $detailCart->hampers;
-                                foreach ($hampers->detailHampers as $detailHampers) {
-                                    $produk = $detailHampers->produk;
-                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                    //jika semua produk ready stock, tanggal ambil boleh = tanggal hari ini
+                    //jadi transaksi yang semua produknya ready stock dan taggal ambil = tanggal hari ini bakal di remove
+                    if ($status_transaksi == "Ready Stock") {
+                        $tanggal_ambil = new DateTime($transaksi->tanggal_ambil);
+                        $tanggal_sekarang = new DateTime(Carbon::now()->toDateString());
+                        if ($tanggal_ambil < $tanggal_sekarang) {
+                            foreach ($transaksi->cart->detailCart as $detailCart) {
+                                if ($detailCart->produk_id != null) {
+                                    $produk = $detailCart->produk;
+                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
                                     $produk->status = "Ready Stock";
                                     $produk->save();
+                                } else {
+                                    $hampers = $detailCart->hampers;
+                                    foreach ($hampers->detailHampers as $detailHampers) {
+                                        $produk = $detailHampers->produk;
+                                        $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                        $produk->status = "Ready Stock";
+                                        $produk->save();
+                                    }
+                                }
+                            }
+                            $transaksi->status_transaksi_id = 12;
+                            $transaksi->save();
+                        } else {
+                            $transaksis = $transaksis->reject(function ($item) use ($transaksi) {
+                                return $item->id === $transaksi->id;
+                            });
+                        }
+                    } else if ($status_transaksi == "Pre Order") {
+                        foreach ($transaksi->cart->detailCart as $detailCart) {
+                            if ($detailCart->status_produk == "Ready Stock") {
+                                if ($detailCart->produk_id != null) {
+                                    $produk = $detailCart->produk;
+                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                                    $produk->status = "Ready Stock";
+                                    $produk->save();
+                                } else {
+                                    $hampers = $detailCart->hampers;
+                                    foreach ($hampers->detailHampers as $detailHampers) {
+                                        $produk = $detailHampers->produk;
+                                        $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                        $produk->status = "Ready Stock";
+                                        $produk->save();
+                                    }
                                 }
                             }
                         }
+                        $transaksi->status_transaksi_id = 12;
+                        $transaksi->save();
                     }
-                    $transaksi->status_transaksi_id = 12;
-                    $transaksi->save();
                 }
             }
 

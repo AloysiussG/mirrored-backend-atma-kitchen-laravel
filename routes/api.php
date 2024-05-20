@@ -161,9 +161,7 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     Route::get('/indexTelatBayar', [TransaksiController::class, 'indexTelatBayar']);
 
     //status pesanan 
-    Route::put('/updateStatusDiproses/{id}', [TransaksiController::class, 'updateStatusDiproses']);
-    Route::put('/updateStatusPickup/{id}', [TransaksiController::class, 'updateStatusPickup']);
-
+    Route::put('/updateStatusTransaksi/{id}', [TransaksiController::class, 'updateStatusTransaksi']);
 });
 
 // --- --- MANAGER OPERASIONAL ONLY
