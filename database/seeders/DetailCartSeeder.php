@@ -20,6 +20,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '850000',
+                'status_produk' => 'Pre Order',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -29,6 +30,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '250000',
+                'status_produk' => 'Ready Stock',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -38,6 +40,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '300000',
+                'status_produk' => 'Ready Stock',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -47,6 +50,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '100000',
+                'status_produk' => 'Ready Stock',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -56,6 +60,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '250000',
+                'status_produk' => 'Pre Order',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -65,6 +70,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '120000',
+                'status_produk' => 'Pre Order',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -74,6 +80,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '200000',
+                'status_produk' => 'Ready Stock',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -83,6 +90,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '180000',
+                'status_produk' => 'Pre Order',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -92,6 +100,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => NULL,
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '75000',
+                'status_produk' => 'Ready Stock',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],
@@ -101,6 +110,7 @@ class DetailCartSeeder extends Seeder
                 'hampers_id' => '1',
                 'jumlah' => '1',
                 'harga_produk_sekarang' => '650000',
+                'status_produk' => 'Pre Order',
                 'created_at' => NULL,
                 'updated_at' => NULL
             ],

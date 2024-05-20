@@ -100,6 +100,10 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     // --- PASSWORD CHANGE CUSTOMER
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
 
+    // Konfirmasi Pesanan Selesai
+    Route::put('/updateStatusSelesai/{id}', [CustomerController::class, 'updateStatusSelesai']);
+
+
     // CART
     Route::get('/my-cart', [CartController::class, 'index']);
     Route::post('/my-cart/cek-ketersediaan', [CartController::class, 'cekKetersediaanByTanggalAmbil']);
@@ -162,6 +166,13 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     Route::get('/transaksiProducts/{id}', [TransaksiController::class, 'showWithProducts']);
     Route::put('/updateOngkir/{id}', [TransaksiController::class, 'updateOngkir']);
     Route::put('/updatePembayaran/{id}', [TransaksiController::class, 'updatePembayaran']);
+    Route::get('/indexDiproses', [TransaksiController::class, 'indexDiproses']);
+    Route::get('/indexTelatBayar', [TransaksiController::class, 'indexTelatBayar']);
+
+    //status pesanan 
+    Route::put('/updateStatusDiproses/{id}', [TransaksiController::class, 'updateStatusDiproses']);
+    Route::put('/updateStatusPickup/{id}', [TransaksiController::class, 'updateStatusPickup']);
+
 });
 
 // --- --- MANAGER OPERASIONAL ONLY
