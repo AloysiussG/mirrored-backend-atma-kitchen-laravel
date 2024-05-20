@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
+use App\Models\PromoPoint;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +12,29 @@ use Throwable;
 
 class CartController extends Controller
 {
+    public function hitungPoinDiperoleh($subtotalAwal)
+    {
+        $poinDiperoleh = 0;
+        $tempSubtotalAwal = $subtotalAwal;
+
+        $ketentuanPoinArr = PromoPoint::query()
+            ->orderBy('jumlah_kelipatan_bayar', 'desc')
+            ->get();
+
+        foreach ($ketentuanPoinArr as $key => $value) {
+            if ($value->jumlah_kelipatan_bayar <= $tempSubtotalAwal) {
+                // hasil bagi/quotient (integer)
+                $hasilBagi = intdiv($tempSubtotalAwal, $value->jumlah_kelipatan_bayar);
+                $poinDiperoleh += $hasilBagi * $value->jumlah_poin_diterima;
+
+                // sisa/remainder menggunakan mod
+                $mod = $tempSubtotalAwal % $value->jumlah_kelipatan_bayar;
+                $tempSubtotalAwal = $mod;
+            }
+        }
+
+        return $poinDiperoleh;
+    }
 
 
     public function cekKetersediaanByTanggalAmbil(Request $request)
@@ -247,6 +271,8 @@ class CartController extends Controller
             }
 
             $cart['subtotal'] = $total;
+
+            $cart['poin_didapat'] = $this->hitungPoinDiperoleh($total);
 
             // KALO ACTIVE CART TIDAK DITEMUKAN
             // TODO::: bikin cart baru ???
