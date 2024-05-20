@@ -12,7 +12,9 @@ use App\Http\Controllers\Api\PasswordChangeController;
 use App\Http\Controllers\Api\PenitipController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\BahanBakuController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\DetailCartController;
 use App\Http\Controllers\Api\KategoriProdukController;
 use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\TransaksiController;
@@ -107,6 +109,13 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
 
     // --- Customer pasang bukti transaaksi
     Route::post('/pasangbukti/{id}', [TransaksiController::class, 'updateBukti']);
+    // CART
+    Route::get('/my-cart', [CartController::class, 'index']);
+    Route::post('/my-cart/cek-ketersediaan', [CartController::class, 'cekKetersediaanByTanggalAmbil']);
+    Route::post('/my-cart/add-to-cart', [DetailCartController::class, 'addToCart']);
+    Route::delete('/my-cart/remove-from-cart/{id}', [DetailCartController::class, 'removeFromCart']);
+    Route::put('/my-cart/update-detail-cart-count/{id}', [DetailCartController::class, 'updateDetailCartCount']);
+    Route::put('/my-cart/update-detail-cart-status/{id}', [DetailCartController::class, 'updateDetailCartStatus']);
 });
 
 // --- --- OWNER ONLY
@@ -169,7 +178,6 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     //status pesanan
     Route::put('/updateStatusDiproses/{id}', [TransaksiController::class, 'updateStatusDiproses']);
     Route::put('/updateStatusPickup/{id}', [TransaksiController::class, 'updateStatusPickup']);
-
 });
 
 // --- --- MANAGER OPERASIONAL ONLY
