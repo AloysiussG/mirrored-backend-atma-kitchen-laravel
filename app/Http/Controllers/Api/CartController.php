@@ -6,12 +6,39 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\PromoPoint;
 use App\Models\Transaksi;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class CartController extends Controller
 {
+    public function cekDoublePoin($tglLahirCustomer)
+    {
+        // now diconvert & diparse 2x supaya tidak ada timezone
+        $nowMinus3 = Carbon::now()->subDays(3)->format('Y-m-d');
+        $nowMinus3 = Carbon::parse($nowMinus3);
+
+        $nowPlus3 = Carbon::now()->addDays(3)->format('Y-m-d');
+        $nowPlus3 = Carbon::parse($nowPlus3);
+
+        // parse tanggal lahir ke date
+        $dateLahir = Carbon::parse($tglLahirCustomer);
+
+        // convert date lahir ke date ultah di tahun ini
+        $dayLahir = $dateLahir->day;
+        $monthLahir = $dateLahir->month;
+        $yearNow = Carbon::now()->year;
+        $dateUltahTahunIni = Carbon::create($yearNow, $monthLahir, $dayLahir);
+
+        $check = $dateUltahTahunIni->between($nowMinus3, $nowPlus3);
+
+        if ($check) {
+            return true;
+        }
+        return false;
+    }
+
     public function hitungPoinDiperoleh($subtotalAwal)
     {
         $poinDiperoleh = 0;
@@ -21,7 +48,7 @@ class CartController extends Controller
             ->orderBy('jumlah_kelipatan_bayar', 'desc')
             ->get();
 
-        foreach ($ketentuanPoinArr as $key => $value) {
+        foreach ($ketentuanPoinArr as $value) {
             if ($value->jumlah_kelipatan_bayar <= $tempSubtotalAwal) {
                 // hasil bagi/quotient (integer)
                 $hasilBagi = intdiv($tempSubtotalAwal, $value->jumlah_kelipatan_bayar);
@@ -272,7 +299,15 @@ class CartController extends Controller
 
             $cart['subtotal'] = $total;
 
-            $cart['poin_didapat'] = $this->hitungPoinDiperoleh($total);
+            // hitung poin & double poin
+            $poinDidapat = $this->hitungPoinDiperoleh($total);
+            $check = $this->cekDoublePoin($user->tanggal_lahir);
+            if ($check) {
+                $poinDidapat = $poinDidapat * 2;
+                $cart['is_poin_double'] = true;
+            }
+
+            $cart['poin_didapat'] = $poinDidapat;
 
             // KALO ACTIVE CART TIDAK DITEMUKAN
             // TODO::: bikin cart baru ???
