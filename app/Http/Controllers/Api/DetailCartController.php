@@ -41,14 +41,12 @@ class DetailCartController extends Controller
                 ->first(); // karena 1 aja cartnya  
 
             if (!$activeCart) {
+                // KALO ACTIVE CART TIDAK DITEMUKAN
                 // TODO::: bikin cart baru ???
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => 'Cart tidak ditemukan.',
-                    ],
-                    404
-                );
+                $activeCart = Cart::create([
+                    'customer_id' => $user->id,
+                    'status_cart' => 1,
+                ]);
             }
 
             $detailCartRequest = $request->all();

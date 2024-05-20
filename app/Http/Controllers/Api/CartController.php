@@ -284,6 +284,15 @@ class CartController extends Controller
 
             $cart = $cartQuery->orderBy($sortBy, $sortOrder)->first(); // karena 1 aja cartnya
 
+            // KALO ACTIVE CART TIDAK DITEMUKAN
+            // TODO::: bikin cart baru ???
+            if (!$cart) {
+                $cart = Cart::create([
+                    'customer_id' => $user->id,
+                    'status_cart' => 1,
+                ]);
+            }
+
             // hitung subtotal sebelum checkout
             // dihitung dari base harga produk/hampers, bukan dari harga_produk_sekarang
             $total = 0;
