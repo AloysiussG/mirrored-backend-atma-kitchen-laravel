@@ -217,4 +217,7 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
 
     //terima or tolak pesanan
     Route::put('/terimaPesanan/{id}', [TransaksiController::class, 'updateTerimaTolak']);
+
+    //get bahan baku by the transaksi
+    Route::get('/bahanWarning', [TransaksiController::class, 'bahanBakuTransaksi']);
 });

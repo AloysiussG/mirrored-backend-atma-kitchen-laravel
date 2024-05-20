@@ -596,27 +596,20 @@ class TransaksiController extends Controller
     // }
 
 
-    public function testBahanBakuTransaksi($id)
+    public function BahanBakuTransaksi()
     {
         try {
-            $transaksi = Transaksi::find($id);
-            if (!$transaksi) {
-                return response()->json(
-                    [
-                        'data' => null,
-                        'message' => "tidak ada transaksi dengan id tersebut"
-                    ],
-                    500
-                );
-            }
+            // dummy biar banyak datanya
+            $transaksis = Transaksi::all();
+            //ril punya
+            // $transaksis = Transaksi::all()->where('status_transaksi_id', 6)->where('tanggal_ambil', '>=', Carbon::now());
             $transaksiperTanggal = [];
-            foreach (Transaksi::get() as $transaksi) {
+            foreach ($transaksis as $transaksi) {
                 $found = false;
-                echo "adding new id transaksi: " . $transaksi->id . "\n";
+                // echo "adding new id transaksi: " . $transaksi->id . "\n";
                 //cek di array, udaah ada ato blom tanggal ambil yang sama
                 foreach ($transaksiperTanggal as &$group) {
                     if ($group["tanggal_ambil"] === $transaksi->tanggal_ambil) {
-                        // If the same tanggal_ambil exists, add the transaction ID to the existing group
                         $group["id_transaksi"][] = $transaksi->id;
                         $group["no_nota"][] = $transaksi->no_nota;
                         $found = true;
@@ -624,9 +617,9 @@ class TransaksiController extends Controller
                     }
                 }
 
-                // If the group with the current tanggal_ambil doesn't exist, create a new one
+
                 if (!$found) {
-                    echo "Adding new tanggal ambil: " . $transaksi->tanggal_ambil . "\n";
+                    // echo "Adding new tanggal ambil: " . $transaksi->tanggal_ambil . "\n";
                     $transaksiperTanggal[] = [
                         'tanggal_ambil' => $transaksi->tanggal_ambil,
                         'id_transaksi' => [$transaksi->id],
@@ -637,28 +630,39 @@ class TransaksiController extends Controller
 
             //cari cart nya semua
             foreach ($transaksiperTanggal as &$transaksiTanggal) {
+                $bahanbutuh = [];
                 foreach ($transaksiTanggal["id_transaksi"] as $idTransaksi) {
                     $transaksi = Transaksi::find($idTransaksi);
-                    $bahanbutuh = [];
                     $produkIds = [];
                     $detailCarts = $transaksi->cart->detailCart;
 
                     foreach ($detailCarts as $detailCart) {
                         if ($detailCart->produk && $detailCart->produk->resep) {
-                            $produkIds[] = $detailCart->produk->id;
+                            // echo "Produk: " . $detailCart->produk->nama_produk . "\n";
+                            $produkIds[] = [
+                                'id' => $detailCart->produk->id,
+                                'jumlah' => $detailCart-> jumlah
+                            ];
                         } else if ($detailCart->hampers) {
+                            // echo "Hampers: " . $detailCart->hampers->nama_hampers . "\n";
                             $hamperId = $detailCart->hampers->id;
                             $hamper = Hampers::find($hamperId);
                             $detailhampers = $hamper->detailHampers;
                             foreach ($detailhampers as $detailHampers) {
+                                // echo "Produk: " . $detailHampers->produk->nama_produk . "\n";
                                 if ($detailHampers->produk && $detailHampers->produk->resep) {
-                                    $produkIds[] = $detailHampers->produk->id;
+                                    $produkIds[] = [
+                                        'id' => $detailHampers->produk->id,
+                                        'jumlah' => $detailHampers->jumlah_produk * $detailCart->jumlah
+                                    ];
                                 }
                             }
                         }
                     }
                     foreach ($produkIds as $produkId) {
-                        $produk = Produk::find($produkId);
+                        // echo "Produk ID: " . $produkId['id'] . "\n";
+                        // echo "Jumlah: " . $produkId['jumlah'] . "\n";
+                        $produk = Produk::find($produkId['id']);
                         $resep = $produk->resep;
                         $detailReseps = $resep->detailResep;
                         foreach ($detailReseps as $detailResepa) {
@@ -670,7 +674,7 @@ class TransaksiController extends Controller
                             foreach ($bahanbutuh as &$bahan) {
                                 // echo "Comparing with existing ingredient: " . $bahan['nama_bahan_baku'] . "\n";
                                 if ($bahan['nama_bahan_baku'] === $namaBahanBaku) {
-                                    $bahan['jumlah_bahan_resep'] += $jumlahBahanResep;
+                                    $bahan['jumlah_bahan_resep'] += ($jumlahBahanResep * $produkId['jumlah']);
                                     $found = true;
                                     // echo "\n" . $bahan['nama_bahan_baku'] . " found\n";
                                     break;
@@ -682,7 +686,8 @@ class TransaksiController extends Controller
                                 $bahanbutuh[] = [
                                     'id_bahan_baku' => $detailResepa->bahanBaku->id,
                                     'nama_bahan_baku' => $detailResepa->bahanBaku->nama_bahan_baku,
-                                    'jumlah_bahan_resep' => $detailResepa->jumlah_bahan_resep,
+                                    'satuan' => $detailResepa->bahanBaku->satuan_bahan,
+                                    'jumlah_bahan_resep' => ($jumlahBahanResep * $produkId['jumlah'])
                                 ];
                                 // echo "Added new ingredient: $namaBahanBaku\n";
                             }
@@ -691,9 +696,9 @@ class TransaksiController extends Controller
                 }
                 foreach ($bahanbutuh as &$bahan) {
                     $bahanBaku = BahanBaku::find($bahan['id_bahan_baku']);
-                    echo "Checking stock of " . $bahanBaku->nama_bahan_baku . " with amount: " . $bahan['jumlah_bahan_resep'] . "\n";
+                    // echo "Checking stock of " . $bahanBaku->nama_bahan_baku . " with amount: " . $bahan['jumlah_bahan_resep'] . "\n";
                     if ($bahanBaku->jumlah_bahan_baku < $bahan['jumlah_bahan_resep']) {
-                        echo "Bahan baku tidak cukup\n";
+                        // echo "Bahan baku tidak cukup\n";
                         $bahan['warn'] = [
                             'message' => 'Bahan baku tidak cukup',
                             'jumlah_bahan_stock' => $bahanBaku->jumlah_bahan_baku
