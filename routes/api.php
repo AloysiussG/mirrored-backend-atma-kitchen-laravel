@@ -110,6 +110,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     Route::post('/my-cart/add-to-cart', [DetailCartController::class, 'addToCart']);
     Route::delete('/my-cart/remove-from-cart/{id}', [DetailCartController::class, 'removeFromCart']);
     Route::put('/my-cart/update-detail-cart-count/{id}', [DetailCartController::class, 'updateDetailCartCount']);
+    Route::put('/my-cart/update-detail-cart-status/{id}', [DetailCartController::class, 'updateDetailCartStatus']);
 });
 
 // --- --- OWNER ONLY
@@ -172,7 +173,6 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     //status pesanan 
     Route::put('/updateStatusDiproses/{id}', [TransaksiController::class, 'updateStatusDiproses']);
     Route::put('/updateStatusPickup/{id}', [TransaksiController::class, 'updateStatusPickup']);
-
 });
 
 // --- --- MANAGER OPERASIONAL ONLY

@@ -88,6 +88,7 @@ class DetailCartController extends Controller
             if (isset($detailCartRequest['produk_id'])) {
                 $produk = Produk::find($detailCartRequest['produk_id']);
                 $detailCartRequest['harga_produk_sekarang'] = $produk->harga;
+                $detailCartRequest['status_produk'] = $produk->status;
 
                 $detailCart = DetailCart::query()
                     ->where('cart_id', $activeCart->id)
@@ -104,6 +105,7 @@ class DetailCartController extends Controller
             } else if (isset($detailCartRequest['hampers_id'])) {
                 $hampers = Hampers::find($detailCartRequest['hampers_id']);
                 $detailCartRequest['harga_produk_sekarang'] = $hampers->harga_hampers;
+                $detailCartRequest['status_produk'] = 'Pre Order';
 
                 $detailCart = DetailCart::query()
                     ->where('cart_id', $activeCart->id)
@@ -305,6 +307,105 @@ class DetailCartController extends Controller
                 [
                     'data' => $updated,
                     'message' => 'Berhasil mengubah jumlah item dari keranjang.',
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    public function updateDetailCartStatus(Request $request, string $id)
+    {
+        try {
+            // --- CARI ACTIVE CART
+            $user = $request->user();
+
+            // bukan customer kalau punya role, throw 401
+            if (isset($user['role_id'])) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'User bukan customer, tidak dapat melihat cart.'
+                    ],
+                    401
+                );
+            }
+
+            $activeCart = Cart::query()
+                // ->with(['detailCart'])
+                // ->withCount('detailCart')
+                ->where('customer_id', $user->id)
+                ->where('status_cart', 1)
+                ->first(); // karena 1 aja cartnya  
+
+            if (!$activeCart) {
+                // TODO::: bikin cart baru ???
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Cart tidak ditemukan.',
+                    ],
+                    404
+                );
+            }
+
+            $detailCartRequest = $request->all();
+
+            // TODO::: VALIDATOR LEBIH RUMIT & AMAN
+            $validate = Validator::make($detailCartRequest, [
+                'status_produk' => 'required',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => $validate->messages()->first(),
+                    ],
+                    400
+                );
+            }
+
+            // cek apakah yang akan diupdate adalah punyanya dia
+            $updated = DetailCart::query()
+                ->where('cart_id', $activeCart->id)
+                ->where('id', $id)
+                ->first();
+
+            if (!$updated) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Item tidak ditemukan dari keranjang.',
+                    ],
+                    404
+                );
+            }
+
+            $updated->status_produk = $detailCartRequest['status_produk'];
+
+
+            if (!$updated->save()) {
+                return response()->json(
+                    [
+                        'data' => $updated,
+                        'message' => 'Gagal mengubah status item dari keranjang.',
+                    ],
+                    500
+                );
+            }
+
+            return response()->json(
+                [
+                    'data' => $updated,
+                    'message' => 'Berhasil mengubah status item dari keranjang.',
                 ],
                 200
             );
