@@ -27,6 +27,9 @@ use App\Http\Controllers\API\StatusController;
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
 
+//test nanti hapus pls janlup
+Route::get('/test/{id}', [TransaksiController::class, 'testbahanBakuTransaksi']);
+
 // password change
 Route::get('/password-change/verify/{verifyID}', [PasswordChangeController::class, 'verify']);
 Route::post('/forgotPassword', [PasswordChangeController::class, 'forgotPass']);
@@ -104,6 +107,8 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     Route::put('/updateStatusSelesai/{id}', [CustomerController::class, 'updateStatusSelesai']);
 
 
+    // --- Customer pasang bukti transaaksi
+    Route::post('/pasangbukti/{id}', [TransaksiController::class, 'updateBukti']);
     // CART
     Route::get('/my-cart', [CartController::class, 'index']);
     Route::post('/my-cart/cek-ketersediaan', [CartController::class, 'cekKetersediaanByTanggalAmbil']);
@@ -170,7 +175,7 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     Route::get('/indexDiproses', [TransaksiController::class, 'indexDiproses']);
     Route::get('/indexTelatBayar', [TransaksiController::class, 'indexTelatBayar']);
 
-    //status pesanan 
+    //status pesanan
     Route::put('/updateStatusDiproses/{id}', [TransaksiController::class, 'updateStatusDiproses']);
     Route::put('/updateStatusPickup/{id}', [TransaksiController::class, 'updateStatusPickup']);
 });
@@ -213,4 +218,14 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
     Route::put('/pengeluaran/{id}', [PengeluaranController::class, 'update']);
     Route::delete('/pengeluaran/{id}', [PengeluaranController::class, 'destroy']);
+
+    //untuk ngambil transaksi yang dibutuhkan sama MO
+    Route::get('/findTransaksis', [TransaksiController::class, 'findByCustomer']);
+    Route::get('/transaksiProduct/{id}', [TransaksiController::class, 'showWithProducts']);
+
+    //terima or tolak pesanan
+    Route::put('/terimaPesanan/{id}', [TransaksiController::class, 'updateTerimaTolak']);
+
+    //get bahan baku by the transaksi
+    Route::get('/bahanWarning', [TransaksiController::class, 'bahanBakuTransaksi']);
 });
