@@ -111,6 +111,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
 
     // CART
     Route::get('/my-cart', [CartController::class, 'index']);
+    Route::get('/my-cart/show-nota/{id}', [CartController::class, 'showNota']);
     Route::post('/my-cart/cek-ketersediaan', [CartController::class, 'cekKetersediaanByTanggalAmbil']);
     Route::post('/my-cart/add-to-cart', [DetailCartController::class, 'addToCart']);
     Route::delete('/my-cart/remove-from-cart/{id}', [DetailCartController::class, 'removeFromCart']);

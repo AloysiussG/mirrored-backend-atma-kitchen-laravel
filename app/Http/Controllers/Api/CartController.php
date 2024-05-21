@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Alamat;
 use App\Models\Cart;
+use App\Models\Customer;
 use App\Models\DetailCart;
 use App\Models\Produk;
 use App\Models\PromoPoint;
@@ -957,28 +958,114 @@ class CartController extends Controller
 
             $requestOrder['status_transaksi_id'] = $statusRes ? $statusRes->id : 1; // id harusnya 1
 
-            // TODO --- 3 TANGAL TIMESTAMP
+            // return response()->json(
+            //     [
+            //         'data' => $requestOrder,
+            //         'message' => $requestOrder['status_transaksi_id']
+            //     ],
+            //     200
+            // );
 
+            // TODO --- 3 TANGAL TIMESTAMP
+            // tanggal ambil udah ada...
+            $requestOrder['tanggal_pesan'] = Carbon::now();
+
+            // nomor nota autogenerate
             $requestOrder['no_nota'] = $this->generateNomorNota();
+
+            // tip 0, dll...
+            $requestOrder['tip'] = 0;
+            if ($requestOrder['jenis_pengiriman'] == 'pickup') {
+                $requestOrder['ongkos_kirim'] = 0;
+            }
+
+            // TODO::: sementara gabisa null
+            $requestOrder['ongkos_kirim'] = 0;
 
             // buat row transaksi baru
             $orderTransaksiCreated = Transaksi::create($requestOrder);
 
+            // ubah status cart menjadi 0 (inactive)
+            $cartUpdated = Cart::query()->find($cart->id);
+            $cartUpdated->status_cart = 0;
+            $cartUpdated->save();
+
             // kurangi stok READY STOCK
             $allProduksCartReadyStockResults->map(function ($item) {
                 $produk = Produk::query()->find($item['id']);
-                $produk->jumlah_stock = $produk->jumlah_stock - $item['jumlah'];
+                $valueSetelahDikurangi = $produk->jumlah_stock - $item['jumlah'];
+                if ($valueSetelahDikurangi <= 0) {
+                    $produk->status = 'Pre Order';
+                }
+                $produk->jumlah_stock = $valueSetelahDikurangi;
                 $produk->save();
             });
 
-            // ubah status cart menjadi 0 (inactive)
-            $cart->status_cart = 0;
-            $cart->save();
+            // update poin customer
+            $cust = Customer::query()->find($user->id);
+            $cust->poin = $requestOrder['poin_sekarang'];
+            $cust->save();
 
             return response()->json(
                 [
                     'data' => $orderTransaksiCreated,
                     'message' => 'Berhasil melakukan order.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    public function showNota(Request $request, string $id)
+    {
+        try {
+            $user = $request->user();
+            $transaksi = Transaksi::with(
+                'cart.detailCart.produk',
+                'cart.detailCart.hampers',
+                'cart.customer',
+                'statusTransaksi',
+                'alamat',
+                'packagings.bahanBaku'
+            )
+                ->find($id);
+
+            $total = 0;
+            $cart = $transaksi->cart;
+            if ($cart->detailCart) {
+                foreach ($cart->detailCart as $item) {
+                    if ($item->hampers) {
+                        $total = $total + ($item->jumlah * $item->hampers->harga_hampers);
+                    } else if ($item->produk) {
+                        $total = $total + ($item->jumlah * $item->produk->harga);
+                    }
+                }
+            }
+
+            $transaksi['subtotal'] = $total;
+
+            if ($transaksi->cart->customer_id != $user->id) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Kamu tidak memiliki akses.'
+                    ],
+                    200
+                );
+            }
+
+            return response()->json(
+                [
+                    'data' => $transaksi,
+                    'message' => 'Berhasil ambil nota.'
                 ],
                 200
             );
