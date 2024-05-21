@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AlamatController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DetailHampersController;
 use App\Http\Controllers\Api\DetailResepController;
@@ -115,6 +116,10 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     Route::delete('/my-cart/remove-from-cart/{id}', [DetailCartController::class, 'removeFromCart']);
     Route::put('/my-cart/update-detail-cart-count/{id}', [DetailCartController::class, 'updateDetailCartCount']);
     Route::put('/my-cart/update-detail-cart-status/{id}', [DetailCartController::class, 'updateDetailCartStatus']);
+    Route::post('/my-cart/confirm-order', [CartController::class, 'confirmOrder']);
+
+    // alamat
+    Route::get('/my-alamat', [AlamatController::class, 'indexMyAlamat']);
 });
 
 // --- --- OWNER ONLY
