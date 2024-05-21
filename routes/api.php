@@ -92,6 +92,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     Route::post('/my-customer/update', [CustomerController::class, 'update']);
     Route::get('/my-customer', [CustomerController::class, 'show']);
     Route::get('/my-customer/indexPesanan', [CustomerController::class, 'indexPesanan']);
+    Route::get('/my-customer/indexPesananTerkirim', [CustomerController::class, 'indexPesananTerkirim']);
     Route::get('/my-customer/{id}', [CustomerController::class, 'showPesanan']);
 
 
@@ -99,7 +100,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     Route::post('/password-change', [PasswordChangeController::class, 'store']);
 
     // Konfirmasi Pesanan Selesai
-    Route::put('/updateStatusSelesai/{id}', [CustomerController::class, 'updateStatusSelesai']);
+    Route::put('/my-customer/updateStatusSelesai/{id}', [CustomerController::class, 'updateStatusSelesai']);
 
 });
 

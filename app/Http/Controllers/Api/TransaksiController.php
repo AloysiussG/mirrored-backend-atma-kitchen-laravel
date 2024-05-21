@@ -103,6 +103,16 @@ class TransaksiController extends Controller
                 );
             }
 
+            if ($transaksi->jenis_pengiriman == 'delivery' && $request->jarak <= 0) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Jarak pengiriman harus lebih dari 0',
+                    ],
+                    400
+                );
+            }
+
             $validate = Validator::make($request->all(), [
                 'jarak' => 'required|gt:-1',
             ], [
@@ -120,16 +130,14 @@ class TransaksiController extends Controller
                 );
             }
 
-            if ($transaksi->jenis_pengiriman == 'pickup') {
-                if ($request->jarak != 0) {
-                    return response()->json(
-                        [
-                            'data' => null,
-                            'message' => 'Jarak pengiriman harus 0 untuk pengiriman pickup',
-                        ],
-                        400
-                    );
-                }
+            if ($transaksi->jenis_pengiriman == 'pickup' && $request->jarak != 0) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Jarak pengiriman harus 0 untuk pengiriman pickup',
+                    ],
+                    400
+                );
             }
 
             if ($request->jarak == 0) {
@@ -421,6 +429,7 @@ class TransaksiController extends Controller
                             $transaksi->status_transaksi_id = 12;
                             $transaksi->save();
                         } else {
+                            //keluarkan transaksi yang tanggal ambilnya belum lewat
                             $transaksis = $transaksis->reject(function ($item) use ($transaksi) {
                                 return $item->id === $transaksi->id;
                             });
