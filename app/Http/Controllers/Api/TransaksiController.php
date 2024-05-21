@@ -3,14 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BahanBaku;
 use App\Models\Hampers;
 use App\Models\Produk;
+use App\Models\Resep;
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use Carbon\Carbon;
 use DateTime;
 use Throwable;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 class TransaksiController extends Controller
 {
@@ -473,6 +477,333 @@ class TransaksiController extends Controller
                     'data' => null
                 ],
                 404
+            );
+        }
+    }
+
+    public function updateTerimaTolak($id, Request $request)
+    {
+        try {
+            $transaksi = Transaksi::find($id);
+            if (!$transaksi) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => "tidak ada transaksi dengan id tersebut"
+                    ],
+                    500
+                );
+            }
+            if ($transaksi->status_transaksi_id != 4) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => "Pembayaran Transaksi Belum dilakukan/divalidasi"
+                    ]
+                );
+            }
+
+            if (!$request->verdict) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => "Verdict harus diisi"
+                    ],
+                    400
+                );
+            }
+
+
+            if ($request->verdict == 'terima') {
+
+                //tambah poin customer
+                $customer = $transaksi->cart->customer;
+                $customer->poin += $transaksi->poin_didapat;
+                $customer->save();
+
+                //ganti transaksi status jadi diterima
+                $transaksi->status_transaksi_id = 6;
+                $transaksi->save();
+
+                //update stock produk
+
+
+                //ambil bahan baku dari tiap transaksi
+                // $bahanbutuh = array();
+                // $produkIds = $transaksi->cart->detailCart->produk->pluck('id');
+                // foreach ($produkIds as $produkId) {
+                //     $produk = Produk::find($produkId);
+                //     $resep = $produk->resep;
+                //     $detailReseps = $resep->detailResep;
+                //     foreach ($detailReseps as $detailResep) {
+                //         $bahanbutuh[] = [
+                //             'nama_bahan_baku' => $detailResep->bahanBaku->nama_bahan_baku,
+                //             'jumlah_bahan_resep' => $detailResep->jumlah_bahan_resep,
+                //         ];
+                //     }
+                // }
+
+
+                return response()->json(
+                    [
+                        'data' => $transaksi,
+                        'message' => "Transaksi berhasil diterima"
+                    ]
+                );
+            } else if ($request->verdict == 'tolak') {
+                //ganti status jadi ditolak
+                $transaksi->status_transaksi_id = 5;
+
+                //update saldo customer
+                $transaksi->cart->customer->saldo += $transaksi->total_harga;
+                $transaksi->cart->customer->saldo += $transaksi->tip;
+
+                //update stok produk
+                foreach ($transaksi->cart->detailCart as $detailCart) {
+                    if ($detailCart->status_produk == "Ready Stock") {
+                        if ($detailCart->produk_id != null) {
+                            $produk = $detailCart->produk;
+                            $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                            $produk->status = "Ready Stock";
+                            $produk->save();
+                        } else {
+                            $hampers = $detailCart->hampers;
+                            foreach ($hampers->detailHampers as $detailHampers) {
+                                $produk = $detailHampers->produk;
+                                $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                $produk->status = "Ready Stock";
+                                $produk->save();
+                            }
+                        }
+                    }
+                }
+
+                $transaksi->cart->customer->save();
+                $transaksi->save();
+                return response()->json(
+                    [
+                        'data' => $transaksi,
+                        'message' => "Transaksi berhasil ditolak"
+                    ]
+                );
+            }
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    // public function sortBahanBakuList($bahanbutuhkan){
+    //     //sort dulu bahannya baru masuk ke transaksi
+    //     function sortByName($a, $b) {
+    //         return strcmp($a['nama_bahan_baku'], $b['nama_bahan_baku']);
+    //     }
+    //     usort($bahanbutuhkan, "sortByName");
+    //     return $bahanbutuhkan;
+    // }
+
+
+    public function BahanBakuTransaksi()
+    {
+        try {
+            // dummy biar banyak datanya
+            $transaksis = Transaksi::all();
+            //ril punya
+            // $transaksis = Transaksi::all()->where('status_transaksi_id', 6)->where('tanggal_ambil', '>=', Carbon::now());
+            $transaksiperTanggal = [];
+            foreach ($transaksis as $transaksi) {
+                $found = false;
+                // echo "adding new id transaksi: " . $transaksi->id . "\n";
+                //cek di array, udaah ada ato blom tanggal ambil yang sama
+                foreach ($transaksiperTanggal as &$group) {
+                    if ($group["tanggal_ambil"] === $transaksi->tanggal_ambil) {
+                        $group["id_transaksi"][] = $transaksi->id;
+                        $group["no_nota"][] = $transaksi->no_nota;
+                        $found = true;
+                        break;
+                    }
+                }
+
+
+                if (!$found) {
+                    // echo "Adding new tanggal ambil: " . $transaksi->tanggal_ambil . "\n";
+                    $transaksiperTanggal[] = [
+                        'tanggal_ambil' => $transaksi->tanggal_ambil,
+                        'id_transaksi' => [$transaksi->id],
+                        'no_nota' => [$transaksi->no_nota]
+                    ];
+                }
+            }
+
+            //cari cart nya semua
+            foreach ($transaksiperTanggal as &$transaksiTanggal) {
+                $bahanbutuh = [];
+                foreach ($transaksiTanggal["id_transaksi"] as $idTransaksi) {
+                    $transaksi = Transaksi::find($idTransaksi);
+                    $produkIds = [];
+                    $detailCarts = $transaksi->cart->detailCart;
+
+                    foreach ($detailCarts as $detailCart) {
+                        if ($detailCart->produk && $detailCart->produk->resep) {
+                            // echo "Produk: " . $detailCart->produk->nama_produk . "\n";
+                            $produkIds[] = [
+                                'id' => $detailCart->produk->id,
+                                'jumlah' => $detailCart-> jumlah
+                            ];
+                        } else if ($detailCart->hampers) {
+                            // echo "Hampers: " . $detailCart->hampers->nama_hampers . "\n";
+                            $hamperId = $detailCart->hampers->id;
+                            $hamper = Hampers::find($hamperId);
+                            $detailhampers = $hamper->detailHampers;
+                            foreach ($detailhampers as $detailHampers) {
+                                // echo "Produk: " . $detailHampers->produk->nama_produk . "\n";
+                                if ($detailHampers->produk && $detailHampers->produk->resep) {
+                                    $produkIds[] = [
+                                        'id' => $detailHampers->produk->id,
+                                        'jumlah' => $detailHampers->jumlah_produk * $detailCart->jumlah
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                    foreach ($produkIds as $produkId) {
+                        // echo "Produk ID: " . $produkId['id'] . "\n";
+                        // echo "Jumlah: " . $produkId['jumlah'] . "\n";
+                        $produk = Produk::find($produkId['id']);
+                        $resep = $produk->resep;
+                        $detailReseps = $resep->detailResep;
+                        foreach ($detailReseps as $detailResepa) {
+                            $namaBahanBaku = $detailResepa->bahanBaku->nama_bahan_baku;
+                            $jumlahBahanResep = $detailResepa->jumlah_bahan_resep;
+                            // echo "Checking ingredient: $namaBahanBaku with amount: $jumlahBahanResep\n";
+                            $found = false;
+                            // cek dulu ada ato ndak di array
+                            foreach ($bahanbutuh as &$bahan) {
+                                // echo "Comparing with existing ingredient: " . $bahan['nama_bahan_baku'] . "\n";
+                                if ($bahan['nama_bahan_baku'] === $namaBahanBaku) {
+                                    $bahan['jumlah_bahan_resep'] += ($jumlahBahanResep * $produkId['jumlah']);
+                                    $found = true;
+                                    // echo "\n" . $bahan['nama_bahan_baku'] . " found\n";
+                                    break;
+                                }
+                                // echo "ga ketemu";
+                            }
+                            // klo gk ketemu, tambahin ke array
+                            if ($found == false) {
+                                $bahanbutuh[] = [
+                                    'id_bahan_baku' => $detailResepa->bahanBaku->id,
+                                    'nama_bahan_baku' => $detailResepa->bahanBaku->nama_bahan_baku,
+                                    'satuan' => $detailResepa->bahanBaku->satuan_bahan,
+                                    'jumlah_bahan_resep' => ($jumlahBahanResep * $produkId['jumlah'])
+                                ];
+                                // echo "Added new ingredient: $namaBahanBaku\n";
+                            }
+                        }
+                    }
+                }
+                foreach ($bahanbutuh as &$bahan) {
+                    $bahanBaku = BahanBaku::find($bahan['id_bahan_baku']);
+                    // echo "Checking stock of " . $bahanBaku->nama_bahan_baku . " with amount: " . $bahan['jumlah_bahan_resep'] . "\n";
+                    if ($bahanBaku->jumlah_bahan_baku < $bahan['jumlah_bahan_resep']) {
+                        // echo "Bahan baku tidak cukup\n";
+                        $bahan['warn'] = [
+                            'message' => 'Bahan baku tidak cukup',
+                            'jumlah_bahan_stock' => $bahanBaku->jumlah_bahan_baku
+                        ];
+                    }
+                }
+                // $this->sortBahanBakuList($bahanbutuh);
+                $transaksiTanggal['bahan_baku'] = $bahanbutuh;
+            }
+
+
+            return response()->json(
+                [
+                    'data' => $transaksiperTanggal,
+                    'message' => "Berhasil mengambil bahan baku dari transaksi"
+                ]
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    public function updateBukti($id, Request $request)
+    {
+        try {
+            $transaksi = Transaksi::find($id);
+            if (!$transaksi) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => "tidak ada transaksi dengan id tersebut"
+                    ],
+                    500
+                );
+            }
+
+            $validate = Validator::make($request->all(), [
+                'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ], [
+                'bukti_pembayaran.required' => 'Bukti Pembayaran harus diisi',
+                'bukti_pembayaran.image' => 'Bukti Pembayaran harus berupa gambar',
+                'bukti_pembayaran.mimes' => 'Bukti Pembayaran harus berupa gambar dengan format jpeg, png, jpg, gif, atau svg',
+                'bukti_pembayaran.max' => 'Bukti Pembayaran tidak boleh lebih dari 2MB',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => $validate->messages()->first(),
+                    ],
+                    400
+                );
+            }
+
+            //hapus foto lama kalo misalnya udah ada
+            if ($transaksi->status_transaksi_id == 3) {
+                if (!is_null($transaksi->kode_bukti_bayar) && Storage::disk('public')->exists($transaksi->kode_bukti_bayar)) {
+                    Storage::disk('public')->delete($transaksi->kode_bukti_bayar);
+                }
+            }
+
+            $uploadFolder = "/bukti_pembayaran";
+
+            $isiRequest = $request->all();
+            if ($request->file('bukti_pembayaran')) {
+                $gambar = $isiRequest['bukti_pembayaran'];
+                $path = $gambar->store($uploadFolder, 'public');
+
+                $transaksi->kode_bukti_bayar = $path;
+                $transaksi->status_transaksi_id = 3;
+                $transaksi->save();
+            }
+
+            return response()->json(
+                [
+                    'data' => $transaksi,
+                    'message' => "Berhasil mengupload bukti pembayaran"
+                ]
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage()
+                ],
+                500
             );
         }
     }

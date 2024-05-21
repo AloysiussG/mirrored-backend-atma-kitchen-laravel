@@ -17,7 +17,7 @@ class BahanBakuController extends Controller
         if ($request->search) {
             $bahanBakus->where('nama_bahan_baku', 'like', '%' . $request->search . '%')->orWhere('satuan_bahan', 'like', '%' . $request->search . '%');
         }
-        
+
         if ($request->jenisBahanBaku) {
             $bahanBakus->where('jenis_bahan_baku', 'like', '%' . $request->jenisBahanBaku . '%');
         }
@@ -81,7 +81,6 @@ class BahanBakuController extends Controller
             $validate = Validator::make($request->all(), [
                 'nama_bahan_baku' => 'required',
                 'satuan_bahan' => 'required',
-                'jumlah_bahan_baku' => 'required|numeric|gt:-1',
             ]);
 
             if($validate->fails()){
@@ -93,7 +92,7 @@ class BahanBakuController extends Controller
 
             $bahanBaku->nama_bahan_baku = $request->nama_bahan_baku;
             $bahanBaku->satuan_bahan = $request->satuan_bahan;
-            $bahanBaku->jumlah_bahan_baku = $request->jumlah_bahan_baku;
+            $bahanBaku->jumlah_bahan_baku = 0;
 
             $bahanBaku->save();
 
@@ -115,7 +114,6 @@ class BahanBakuController extends Controller
             $validate = Validator::make($request->all(), [
                 'nama_bahan_baku' => 'required',
                 'satuan_bahan' => 'required',
-                'jumlah_bahan_baku' => 'required|numeric|gt:-1',
             ]);
 
             if($validate->fails()){
@@ -128,7 +126,6 @@ class BahanBakuController extends Controller
         if($bahanBaku){
             $bahanBaku->nama_bahan_baku = $request->nama_bahan_baku;
             $bahanBaku->satuan_bahan = $request->satuan_bahan;
-            $bahanBaku->jumlah_bahan_baku = $request->jumlah_bahan_baku;
             $bahanBaku->save();
 
             return response([

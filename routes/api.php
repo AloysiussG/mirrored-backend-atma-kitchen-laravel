@@ -12,7 +12,9 @@ use App\Http\Controllers\Api\PasswordChangeController;
 use App\Http\Controllers\Api\PenitipController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\BahanBakuController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\DetailCartController;
 use App\Http\Controllers\Api\KategoriProdukController;
 use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\TransaksiController;
@@ -24,6 +26,9 @@ use App\Http\Controllers\API\StatusController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
+
+//test nanti hapus pls janlup
+Route::get('/test/{id}', [TransaksiController::class, 'testbahanBakuTransaksi']);
 
 // password change
 Route::get('/password-change/verify/{verifyID}', [PasswordChangeController::class, 'verify']);
@@ -102,6 +107,16 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     // Konfirmasi Pesanan Selesai
     Route::put('/my-customer/updateStatusSelesai/{id}', [CustomerController::class, 'updateStatusSelesai']);
 
+
+    // --- Customer pasang bukti transaaksi
+    Route::post('/pasangbukti/{id}', [TransaksiController::class, 'updateBukti']);
+    // CART
+    Route::get('/my-cart', [CartController::class, 'index']);
+    Route::post('/my-cart/cek-ketersediaan', [CartController::class, 'cekKetersediaanByTanggalAmbil']);
+    Route::post('/my-cart/add-to-cart', [DetailCartController::class, 'addToCart']);
+    Route::delete('/my-cart/remove-from-cart/{id}', [DetailCartController::class, 'removeFromCart']);
+    Route::put('/my-cart/update-detail-cart-count/{id}', [DetailCartController::class, 'updateDetailCartCount']);
+    Route::put('/my-cart/update-detail-cart-status/{id}', [DetailCartController::class, 'updateDetailCartStatus']);
 });
 
 // --- --- OWNER ONLY
@@ -203,4 +218,14 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
     Route::put('/pengeluaran/{id}', [PengeluaranController::class, 'update']);
     Route::delete('/pengeluaran/{id}', [PengeluaranController::class, 'destroy']);
+
+    //untuk ngambil transaksi yang dibutuhkan sama MO
+    Route::get('/findTransaksis', [TransaksiController::class, 'findByCustomer']);
+    Route::get('/transaksiProduct/{id}', [TransaksiController::class, 'showWithProducts']);
+
+    //terima or tolak pesanan
+    Route::put('/terimaPesanan/{id}', [TransaksiController::class, 'updateTerimaTolak']);
+
+    //get bahan baku by the transaksi
+    Route::get('/bahanWarning', [TransaksiController::class, 'bahanBakuTransaksi']);
 });
