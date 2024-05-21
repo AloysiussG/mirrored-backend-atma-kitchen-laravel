@@ -54,6 +54,10 @@ Route::post('/register', [CustomerController::class, 'store']);
 Route::get('/role', [RoleController::class, 'index']);
 
 
+// sementara buat cek
+// Route::get('/generateNomorNota', [CartController::class, 'generateNomorNota']);
+
+
 // --- PROTECTED ROUTES
 
 // ability vs abilities, misal: [customer, admin]

@@ -13,6 +13,54 @@ use Throwable;
 
 class CartController extends Controller
 {
+    public function generateNomorNota()
+    {
+
+        // 24.02.101
+        // Format No nota: tahun.bulan.nomor urut. Nomor urut jalan terus, tidak pernah direset.
+        // Pemesanan yang batal juga tetap mendapatkan nomor ini.
+
+        $yearNow = Carbon::now()->format('y');
+        $monthNow = Carbon::now()->format('m');
+
+        $yearAndMonth = $yearNow . '.' . $monthNow;
+
+        // test
+        // $yearAndMonth = '24.03';
+
+        $startNo = 1;
+
+        $transaksi = Transaksi::query()
+            ->where('no_nota', 'like', $yearAndMonth . '%')
+            ->get('no_nota');
+
+        if (count($transaksi)) {
+            $mapped = $transaksi->map(function ($item) {
+                $lastNoNota = explode(
+                    '.',
+                    $item->no_nota
+                )[2];
+                return $lastNoNota;
+            });
+            $sorted = $mapped->sortDesc()->values()->all();
+            $startNo = $sorted[0] + 1;
+        } else {
+            $startNo = 1;
+        }
+
+        $newNomorNota = $yearAndMonth . '.' . $startNo;
+
+        return $newNomorNota;
+
+        // return response()->json(
+        //     [
+        //         'data' => $newNomorNota,
+        //         'message' => 'Berhasil mengecek data cart.'
+        //     ],
+        //     200
+        // );
+    }
+
     public function cekDoublePoin($tglLahirCustomer)
     {
         // now diconvert & diparse 2x supaya tidak ada timezone
