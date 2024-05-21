@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignId('status_transaksi_id')->constrained('status_transaksis');
             $table->foreignId('cart_id')->constrained('carts');
             $table->foreignId('alamat_id')->nullable()->constrained('alamats');
-            $table->date('tanggal_pesan');
-            $table->date('tanggal_lunas')->nullable();
-            $table->date('tanggal_ambil');
+            $table->dateTime('tanggal_pesan');
+            $table->dateTime('tanggal_lunas')->nullable();
+            $table->dateTime('tanggal_ambil');
             $table->integer('poin_dipakai');
             $table->integer('poin_didapat');
             $table->integer('poin_sekarang');
@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('no_nota');
             $table->string('kode_bukti_bayar')->nullable();
             $table->string('jenis_pengiriman');
+            $table->string('catatan_pengiriman')->nullable();
             $table->timestamps();
         });
     }
