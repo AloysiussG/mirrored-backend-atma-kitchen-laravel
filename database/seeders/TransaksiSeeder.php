@@ -19,9 +19,9 @@ class TransaksiSeeder extends Seeder
                 'status_transaksi_id' => 5, //ditolak
                 'cart_id' => 1,
                 'alamat_id' => null,
-                'tanggal_pesan' => '2024-03-20',
-                'tanggal_lunas' => '2024-03-21',
-                'tanggal_ambil' => '2024-03-24',
+                'tanggal_pesan' => '2024-03-20T21:10',
+                'tanggal_lunas' => '2024-03-21T13:50',
+                'tanggal_ambil' => '2024-03-24T09:15',
                 'poin_dipakai' => 0,
                 'poin_didapat' => 0,
                 'poin_sekarang' => 10,

@@ -87,7 +87,8 @@ class DetailCartController extends Controller
 
             if (isset($detailCartRequest['produk_id'])) {
                 $produk = Produk::find($detailCartRequest['produk_id']);
-                $detailCartRequest['harga_produk_sekarang'] = $produk->harga;
+                // $detailCartRequest['harga_produk_sekarang'] = $produk->harga;
+                $detailCartRequest['harga_produk_sekarang'] = 0;
                 $detailCartRequest['status_produk'] = $produk->status;
 
                 $detailCart = DetailCart::query()
@@ -97,14 +98,15 @@ class DetailCartController extends Controller
 
                 if ($detailCart) {
                     $detailCart->jumlah = $detailCart->jumlah + $detailCartRequest['jumlah'];
-                    $detailCart->harga_produk_sekarang = $detailCartRequest['harga_produk_sekarang'];
+                    // $detailCart->harga_produk_sekarang = $detailCartRequest['harga_produk_sekarang'];
                     $detailCart->save();
                 } else {
                     $detailCart = DetailCart::create($detailCartRequest);
                 }
             } else if (isset($detailCartRequest['hampers_id'])) {
                 $hampers = Hampers::find($detailCartRequest['hampers_id']);
-                $detailCartRequest['harga_produk_sekarang'] = $hampers->harga_hampers;
+                // $detailCartRequest['harga_produk_sekarang'] = $hampers->harga_hampers;
+                $detailCartRequest['harga_produk_sekarang'] = 0;
                 $detailCartRequest['status_produk'] = 'Pre Order';
 
                 $detailCart = DetailCart::query()
@@ -114,7 +116,7 @@ class DetailCartController extends Controller
 
                 if ($detailCart) {
                     $detailCart->jumlah = $detailCart->jumlah + $detailCartRequest['jumlah'];
-                    $detailCart->harga_produk_sekarang = $detailCartRequest['harga_produk_sekarang'];
+                    // $detailCart->harga_produk_sekarang = $detailCartRequest['harga_produk_sekarang'];
                     $detailCart->save();
                 } else {
                     $detailCart = DetailCart::create($detailCartRequest);

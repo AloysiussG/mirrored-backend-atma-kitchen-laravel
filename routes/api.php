@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AlamatController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DetailHampersController;
 use App\Http\Controllers\Api\DetailResepController;
@@ -57,6 +58,10 @@ Route::post('/register', [CustomerController::class, 'store']);
 Route::get('/role', [RoleController::class, 'index']);
 
 
+// sementara buat cek
+// Route::get('/generateNomorNota', [CartController::class, 'generateNomorNota']);
+
+
 // --- PROTECTED ROUTES
 
 // ability vs abilities, misal: [customer, admin]
@@ -112,11 +117,16 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     Route::post('/pasangbukti/{id}', [TransaksiController::class, 'updateBukti']);
     // CART
     Route::get('/my-cart', [CartController::class, 'index']);
+    Route::get('/my-cart/show-nota/{id}', [CartController::class, 'showNota']);
     Route::post('/my-cart/cek-ketersediaan', [CartController::class, 'cekKetersediaanByTanggalAmbil']);
     Route::post('/my-cart/add-to-cart', [DetailCartController::class, 'addToCart']);
     Route::delete('/my-cart/remove-from-cart/{id}', [DetailCartController::class, 'removeFromCart']);
     Route::put('/my-cart/update-detail-cart-count/{id}', [DetailCartController::class, 'updateDetailCartCount']);
     Route::put('/my-cart/update-detail-cart-status/{id}', [DetailCartController::class, 'updateDetailCartStatus']);
+    Route::post('/my-cart/confirm-order', [CartController::class, 'confirmOrder']);
+
+    // alamat
+    Route::get('/my-alamat', [AlamatController::class, 'indexMyAlamat']);
 });
 
 // --- --- OWNER ONLY
