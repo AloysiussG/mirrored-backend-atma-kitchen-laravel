@@ -1052,6 +1052,22 @@ class CartController extends Controller
 
             $transaksi['subtotal'] = $total;
 
+            // reverse logic find radius by ongkir
+            $radius = 0;
+            if ($transaksi->ongkos_kirim == 0) {
+                $radius = '0';
+            } else if ($transaksi->ongkos_kirim == 10000) {
+                $radius = '5';
+            } else if ($transaksi->ongkos_kirim == 15000) {
+                $radius = '10';
+            } else if ($transaksi->ongkos_kirim == 20000) {
+                $radius = '15';
+            } else {
+                $radius = '> 15';
+            }
+
+            $transaksi['radius'] = $radius;
+
             if ($transaksi->cart->customer_id != $user->id) {
                 return response()->json(
                     [
