@@ -316,6 +316,20 @@ class CartController extends Controller
                 }
             }
 
+            // check time
+
+            $tglAmbilParsed2 = Carbon::parse($request->tanggal_ambil);
+
+            $tglAmbilStr2TglOnly = Carbon::parse($request->tanggal_ambil)->format('Y-m-d');
+            $tglAmbilParsed2Start = Carbon::parse($tglAmbilStr2TglOnly . '09:00:00');
+            $tglAmbilParsed2End = Carbon::parse($tglAmbilStr2TglOnly . '19:00:00');
+
+            $checkBetweenTime = $tglAmbilParsed2->between($tglAmbilParsed2Start, $tglAmbilParsed2End);
+            if (!$checkBetweenTime) {
+                $warnings = $warnings + 1;
+                $cart['warning_min_time'] = ['09:00', '19:00'];
+            }
+
             $cart['warnings_count'] = $warnings;
 
 
@@ -881,6 +895,20 @@ class CartController extends Controller
                     $warnings = $warnings + 1;
                     $cart['warning_min_date'] = $nowPlus2->format('Y-m-d');
                 }
+            }
+
+            // check time
+
+            $tglAmbilParsed2 = Carbon::parse($request->tanggal_ambil);
+
+            $tglAmbilStr2TglOnly = Carbon::parse($request->tanggal_ambil)->format('Y-m-d');
+            $tglAmbilParsed2Start = Carbon::parse($tglAmbilStr2TglOnly . '09:00:00');
+            $tglAmbilParsed2End = Carbon::parse($tglAmbilStr2TglOnly . '19:00:00');
+
+            $checkBetweenTime = $tglAmbilParsed2->between($tglAmbilParsed2Start, $tglAmbilParsed2End);
+            if (!$checkBetweenTime) {
+                $warnings = $warnings + 1;
+                $cart['warning_min_time'] = ['09:00', '19:00'];
             }
 
             $cart['warnings_count'] = $warnings;
