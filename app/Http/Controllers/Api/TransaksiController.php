@@ -612,9 +612,9 @@ class TransaksiController extends Controller
     {
         try {
             // dummy biar banyak datanya
-            $transaksis = Transaksi::all();
+            // $transaksis = Transaksi::all();
             //ril punya
-            // $transaksis = Transaksi::all()->where('status_transaksi_id', 6)->where('tanggal_ambil', '>=', Carbon::now());
+            $transaksis = Transaksi::all()->where('status_transaksi_id', 6)->where('tanggal_ambil', '>=', Carbon::now());
             $transaksiperTanggal = [];
             foreach ($transaksis as $transaksi) {
                 $found = false;
@@ -653,7 +653,7 @@ class TransaksiController extends Controller
                             // echo "Produk: " . $detailCart->produk->nama_produk . "\n";
                             $produkIds[] = [
                                 'id' => $detailCart->produk->id,
-                                'jumlah' => $detailCart-> jumlah
+                                'jumlah' => $detailCart->jumlah
                             ];
                         } else if ($detailCart->hampers) {
                             // echo "Hampers: " . $detailCart->hampers->nama_hampers . "\n";
