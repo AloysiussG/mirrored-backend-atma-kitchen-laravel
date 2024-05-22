@@ -241,9 +241,11 @@ class CartController extends Controller
             $allProduksTransaksi = [];
             $newArr = [];
 
+            $tanggalAmbilOnly = Carbon::parse($request->tanggal_ambil)->format('Y-m-d');
+
             $transaksiArr = Transaksi::query()
                 ->with(['cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])
-                ->where('tanggal_ambil', $request->tanggal_ambil)
+                ->whereDate('tanggal_ambil', $tanggalAmbilOnly)
                 ->whereNotIn('status_transaksi_id', [5, 12])
                 ->get();
 
@@ -822,9 +824,11 @@ class CartController extends Controller
             $allProduksTransaksi = [];
             $newArr = [];
 
+            $tanggalAmbilOnly = Carbon::parse($request->tanggal_ambil)->format('Y-m-d');
+
             $transaksiArr = Transaksi::query()
                 ->with(['cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])
-                ->where('tanggal_ambil', $request->tanggal_ambil)
+                ->whereDate('tanggal_ambil', $tanggalAmbilOnly)
                 ->whereNotIn('status_transaksi_id', [5, 12])
                 ->get();
 
@@ -1007,7 +1011,7 @@ class CartController extends Controller
 
             // update poin customer
             $cust = Customer::query()->find($user->id);
-            $cust->poin = $requestOrder['poin_sekarang'];
+            $cust->poin = $cust->poin - $requestOrder['poin_dipakai'];
             $cust->save();
 
             return response()->json(

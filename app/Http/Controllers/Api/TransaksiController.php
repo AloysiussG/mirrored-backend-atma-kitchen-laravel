@@ -660,9 +660,9 @@ class TransaksiController extends Controller
     {
         try {
             // dummy biar banyak datanya
-            $transaksis = Transaksi::all();
+            // $transaksis = Transaksi::all();
             //ril punya
-            // $transaksis = Transaksi::all()->where('status_transaksi_id', 6)->where('tanggal_ambil', '>=', Carbon::now());
+            $transaksis = Transaksi::all()->where('status_transaksi_id', 6)->where('tanggal_ambil', '>=', Carbon::now());
             $transaksiperTanggal = [];
             foreach ($transaksis as $transaksi) {
                 $found = false;
