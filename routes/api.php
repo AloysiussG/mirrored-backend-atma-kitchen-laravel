@@ -185,6 +185,7 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     Route::put('/updatePembayaran/{id}', [TransaksiController::class, 'updatePembayaran']);
     Route::get('/indexDiproses', [TransaksiController::class, 'indexDiproses']);
     Route::get('/indexTelatBayar', [TransaksiController::class, 'indexTelatBayar']);
+    Route::get('/indexMenungguKonfirmasi', [TransaksiController::class, 'indexMenungguKonfirmasi']);
 
     //status pesanan 
     Route::put('/updateStatusTransaksi/{id}', [TransaksiController::class, 'updateStatusTransaksi']);

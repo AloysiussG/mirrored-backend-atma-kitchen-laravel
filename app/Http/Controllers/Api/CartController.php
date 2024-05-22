@@ -956,7 +956,11 @@ class CartController extends Controller
                 ->where('nama_status', 'like', 'Pesanan menunggu dikonfirmasi')
                 ->first();
 
-            $requestOrder['status_transaksi_id'] = $statusRes ? $statusRes->id : 1; // id harusnya 1
+            if ($requestOrder['jenis_pengiriman'] == 'pickup') {
+                $requestOrder['status_transaksi_id'] = 2;
+            } else {
+                $requestOrder['status_transaksi_id'] = $statusRes ? $statusRes->id : 1; // id harusnya 1
+            }
 
             // return response()->json(
             //     [

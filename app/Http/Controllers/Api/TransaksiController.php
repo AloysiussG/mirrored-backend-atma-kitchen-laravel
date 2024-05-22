@@ -79,6 +79,54 @@ class TransaksiController extends Controller
         }
     }
 
+    public function indexMenungguKonfirmasi(Request $request)
+    {
+        try {
+            $transaksiQuery = Transaksi::query()
+                ->where('status_transaksi_id', 1)
+                ->where('jenis_pengiriman', 'delivery')
+                ->with(['cart.customer', 'statusTransaksi', 'packagings.bahanBaku', 'alamat']);
+            if ($request->search) {
+                $transaksiQuery->whereHas('cart.customer', function ($query) use ($request) {
+                    $query->where('nama', 'like', '%' . $request->search . '%');
+                })->orwhereHas('statusTransaksi', function ($query) use ($request) {
+                    $query->where('nama_status', 'like', '%' . $request->search . '%');
+                })->orWhere('no_nota', 'like', '%' . $request->search . '%');
+            }
+            if ($request->date) {
+                $transaksiQuery->whereDate('tanggal_pesan', $request->date);
+            }
+
+            if ($request->status) {
+                $transaksiQuery->where('status_transaksi_id', $request->status);
+            }
+
+            if ($request->sortBy && in_array($request->sortBy, ['id', 'total_harga', 'status', 'tanggal_pesan'])) {
+                $sortBy = $request->sortBy;
+            } else {
+                $sortBy = 'id';
+            }
+
+            if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
+                $sortOrder = $request->sortOrder;
+            } else {
+                $sortOrder = 'desc';
+            }
+
+            $transaksis = $transaksiQuery->orderBy($sortBy, $sortOrder)->get();
+
+            return response([
+                'message' => 'Retrieve All Success',
+                'data' => $transaksis
+            ], 200);
+        } catch (Throwable $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 404);
+        }
+    }
+
     // nanti sewaktu transaksi === diproses
     // jangan lupa tambah packaging 1x Tas Spunbond
     // kurangi stok bahan baku Tas Spunbond
@@ -653,7 +701,7 @@ class TransaksiController extends Controller
                             // echo "Produk: " . $detailCart->produk->nama_produk . "\n";
                             $produkIds[] = [
                                 'id' => $detailCart->produk->id,
-                                'jumlah' => $detailCart-> jumlah
+                                'jumlah' => $detailCart->jumlah
                             ];
                         } else if ($detailCart->hampers) {
                             // echo "Hampers: " . $detailCart->hampers->nama_hampers . "\n";
