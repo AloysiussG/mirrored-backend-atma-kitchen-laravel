@@ -605,6 +605,7 @@ class TransaksiController extends Controller
                 //update saldo customer
                 $transaksi->cart->customer->saldo += $transaksi->total_harga;
                 $transaksi->cart->customer->saldo += $transaksi->tip;
+                $transaksi->cart->customer->poin += $transaksi->poin_dipakai;
 
                 //update stok produk
                 foreach ($transaksi->cart->detailCart as $detailCart) {
