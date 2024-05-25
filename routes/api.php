@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailCartController;
 use App\Http\Controllers\Api\KategoriProdukController;
 use App\Http\Controllers\Api\PackagingController;
+use App\Http\Controllers\Api\PemrosesanPesananController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PresensiController;
@@ -239,4 +240,7 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
 
     //get bahan baku by the transaksi
     Route::get('/bahanWarning', [TransaksiController::class, 'bahanBakuTransaksi']);
+
+    // list pesanan harian, yang perlu diproses hari ini (h-1 tanggal ambil)
+    Route::get('/list-pesanan-harian', [PemrosesanPesananController::class, 'index']);
 });
