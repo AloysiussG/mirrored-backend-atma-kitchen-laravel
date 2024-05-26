@@ -42,6 +42,8 @@ class PemrosesanPesananController extends Controller
                 ->orderBy('id', 'asc')
                 ->get();
 
+            // LIST PESANAN
+
             // hitung bahan baku
             // 1. bahan baku yang dihitung hanya untuk produk/hampers yg status belinya PRE ORDER
             // 2. porsi yg diorder direkap untuk setiap produk, misal 3 *0.5 + 2 * 1 = 3.5 Loyang Produk A
@@ -136,6 +138,34 @@ class PemrosesanPesananController extends Controller
                 }
                 return $item;
             })->values();
+
+            // bahan baku tapi belum digabungin
+            $allProduksWithResep = $allProduksTransaksiResults->map(function ($it) {
+                $jmlDibeli = $it->jumlah_dibeli;
+                if ($it->resep) {
+                    $it['resep'] = $it->resep->detailResep->map(function ($dr) use ($jmlDibeli) {
+                        $dr['jumlah_dibeli_x_jumlah_bahan_resep'] = $dr->jumlah_bahan_resep * $jmlDibeli;
+                        $dr['bahan_baku'] = $dr->bahanBaku;
+                        return $dr;
+                    });
+                }
+                return $it;
+            });
+
+            // LIST BAHAN BAKU
+
+            // {SEMENTARA TEST RETURN}
+            return response()->json(
+                [
+                    'data' => $allProduksWithResep,
+                    'message' => 'Berhasil ambil data list pesanan harian yang perlu diproses.'
+                ],
+                200
+            );
+
+
+
+            // GET DATA
 
             $data = [];
             $data['list_pesanan'] = $transaksiArr;
