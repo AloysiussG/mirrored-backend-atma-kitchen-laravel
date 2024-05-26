@@ -14,33 +14,141 @@ class PemrosesanPesananController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function getArrPesananHarian()
+    {
+        // list pesanan harian yang perlu diproses hari ini
+        // hari ini diproses === h-1 tanggal ambil
+        // alias hari ini + 1 = tanggal ambil
+        $today = Carbon::now()->format('Y-m-d');
+        $todayPlusOne = Carbon::now()->addDay()->format('Y-m-d');
+
+        // // {SEMENTARA ONLY BUAT TES}
+        // $today = Carbon::parse('2024-05-26')->format('Y-m-d');
+        // $todayPlusOne = Carbon::parse('2024-05-26')->addDay()->format('Y-m-d');
+
+        // ambil status 'Pesanan diterima' (just in case)
+        $statusRes = StatusTransaksi::query()
+            ->where('nama_status', 'like', '%diterima%')
+            ->first();
+
+        // ambil transaksi yang sesuai tanggal & status transaksi = Pesanan diterima
+        $transaksiArr = Transaksi::query()
+            ->with(['cart.customer', 'cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])
+            ->whereDate('tanggal_ambil', $todayPlusOne)
+            ->where('status_transaksi_id', $statusRes->id)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        return [
+            'today' => $today,
+            'today_plus_one' => $todayPlusOne,
+            'transaksi_arr' => $transaksiArr,
+        ];
+    }
+
+    // list transaksi harian ---> untuk confirm proses/tidak
+    public function indexTransaksiPerluDiproses()
+    {
+        try {
+            $res = $this->getArrPesananHarian();
+            $transaksiArr =  $res['transaksi_arr'];
+
+            return response()->json(
+                [
+                    'data' => $transaksiArr,
+                    'message' => 'Berhasil ambil data list transaksi yang perlu diproses.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    public function prosesTransaksi(string $id)
+    {
+        try {
+            $res = $this->getArrPesananHarian();
+            $transaksiCollection =  collect($res['transaksi_arr']);
+            $found = $transaksiCollection->firstWhere('id', $id);
+
+            // cek apakah id transaksi dari URL ada di dalam list transaksi hari ini, just in case
+            if (!$found) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak ditemukan di dalam list transaksi yang perlu diproses hari ini.',
+                    ],
+                    400
+                );
+            }
+
+            // TODO:: check warning bahan baku
+            // ...
+            $checked = true;
+
+            if (!$checked) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak dapat diproses karena ada bahan baku yang kurang.',
+                    ],
+                    400
+                );
+            }
+
+            // TODO:: jika check passed, kurangi stok bahan baku setelah diproses
+            // ...
+
+            // ambil status 'Pesanan diproses' (just in case)
+            $statusRes = StatusTransaksi::query()
+                ->where('nama_status', 'like', '%diproses%')
+                ->first();
+
+            // ubah status transaksi menjadi diproses
+            $transaksiUpdated = Transaksi::find($found->id);
+            $transaksiUpdated->status_transaksi_id = $statusRes->id;
+            $transaksiUpdated->save();
+
+            return response()->json(
+                [
+                    'data' => $transaksiUpdated,
+                    'message' => 'Berhasil proses transaksi.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    // list pesanan harian ---> hanya untuk tampilan di web saja, list transaksi & produk & bahan baku yg dibutuhkan
     public function index()
     {
         try {
+            $res = $this->getArrPesananHarian();
+
             // list pesanan harian yang perlu diproses hari ini
             // hari ini diproses === h-1 tanggal ambil
             // ambil yang hari ini = tanggal ambil - 1
             // alias hari ini + 1 = tanggal ambil
-            $today = Carbon::now()->format('Y-m-d');
-            $todayPlusOne = Carbon::now()->addDay()->format('Y-m-d');
-
-            // {SEMENTARA ONLY BUAT TES}
-            // $today = Carbon::parse('2024-05-24')->format('Y-m-d');
-            // $todayPlusOne = Carbon::parse('2024-05-24')->addDay()->format('Y-m-d');
-
-
-            // ambil status 'Pesanan diterima' (just in case)
-            $statusRes = StatusTransaksi::query()
-                ->where('nama_status', 'like', '%diterima%')
-                ->first();
+            $today = $res['today'];
+            $todayPlusOne = $res['today_plus_one'];
 
             // ambil transaksi yang sesuai tanggal & status transaksi = Pesanan diterima
-            $transaksiArr = Transaksi::query()
-                ->with(['cart.customer', 'cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])
-                ->whereDate('tanggal_ambil', $todayPlusOne)
-                ->where('status_transaksi_id', $statusRes->id)
-                ->orderBy('id', 'asc')
-                ->get();
+            $transaksiArr =  $res['transaksi_arr'];
 
             // LIST PESANAN
 
@@ -154,14 +262,14 @@ class PemrosesanPesananController extends Controller
 
             // LIST BAHAN BAKU
 
-            // {SEMENTARA TEST RETURN}
-            return response()->json(
-                [
-                    'data' => $allProduksWithResep,
-                    'message' => 'Berhasil ambil data list pesanan harian yang perlu diproses.'
-                ],
-                200
-            );
+            // // {SEMENTARA TEST RETURN}
+            // return response()->json(
+            //     [
+            //         'data' => $allProduksWithResep,
+            //         'message' => 'Berhasil ambil data list pesanan harian yang perlu diproses.'
+            //     ],
+            //     200
+            // );
 
 
 
