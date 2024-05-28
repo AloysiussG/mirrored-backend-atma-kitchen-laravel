@@ -134,6 +134,69 @@ class PemrosesanPesananController extends Controller
         }
     }
 
+    public function prosesSemuaTransaksi()
+    {
+        try {
+            $res = $this->getArrPesananHarian();
+            $transaksiCollection =  collect($res['transaksi_arr']);
+
+            if (!$transaksiCollection) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak ditemukan di dalam list transaksi yang perlu diproses hari ini.',
+                    ],
+                    400
+                );
+            }
+
+            // TODO:: check warning bahan baku (dari transaksi ARRAY)
+            // ...
+            $checked = true;
+
+            if (!$checked) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak dapat diproses karena ada bahan baku yang kurang.',
+                    ],
+                    400
+                );
+            }
+
+            // TODO:: jika check passed, kurangi stok bahan baku setelah diproses (dari transaksi ARRAY)
+            // ...
+
+            // ambil status 'Pesanan diproses' (just in case)
+            $statusRes = StatusTransaksi::query()
+                ->where('nama_status', 'like', '%diproses%')
+                ->first();
+
+            // ubah status transaksi menjadi diproses (dari transaksi ARRAY)
+            $transaksiCollectionUpdated = $transaksiCollection->map(function ($item) use ($statusRes) {
+                $transaksiUpdated = Transaksi::find($item->id);
+                $transaksiUpdated->status_transaksi_id = $statusRes->id;
+                $transaksiUpdated->save();
+            });
+
+            return response()->json(
+                [
+                    'data' => $transaksiCollectionUpdated,
+                    'message' => 'Berhasil proses transaksi.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
     // list pesanan harian ---> hanya untuk tampilan di web saja, list transaksi & produk & bahan baku yg dibutuhkan
     public function index()
     {
