@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
 use App\Http\Controllers\Api\PenggunaanBahanBakuController;
 use App\Http\Controllers\Api\PresensiController;
+use App\Http\Controllers\Api\ProdukUniqueController;
 use App\Http\Controllers\Api\ResepController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StatusController;
@@ -42,6 +43,9 @@ Route::post('/forgotPassword', [PasswordChangeController::class, 'forgotPass']);
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk-by-kategori', [ProdukController::class, 'indexByKategoriProduk']);
 Route::get('/produk/{id}', [ProdukController::class, 'show']);
+
+// produk unique
+Route::get('/produk-unique', [ProdukUniqueController::class, 'index']);
 
 Route::get('/kategori', [KategoriProdukController::class, 'index']);
 
