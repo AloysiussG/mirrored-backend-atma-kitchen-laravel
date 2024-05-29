@@ -45,4 +45,9 @@ class Produk extends Model
     {
         return $this->hasOne(Resep::class);
     }
+
+    public function produkUnique()
+    {
+        return $this->belongsTo(ProdukUnique::class);
+    }
 }
