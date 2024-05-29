@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\PemrosesanPesananController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
+use App\Http\Controllers\Api\PenggunaanBahanBakuController;
 use App\Http\Controllers\Api\PresensiController;
 use App\Http\Controllers\Api\ResepController;
 use App\Http\Controllers\API\RoleController;
@@ -247,4 +248,7 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     // 2. list transaksi harian ---> untuk confirm proses/tidak
     Route::get('/list-transaksi-harian', [PemrosesanPesananController::class, 'indexTransaksiPerluDiproses']);
     Route::put('/list-transaksi-harian/proses/{id}', [PemrosesanPesananController::class, 'prosesTransaksi']);
+
+    // penggunaan bahan baku
+    Route::get('/penggunaan-bahan-baku', [PenggunaanBahanBakuController::class, 'index']);
 });

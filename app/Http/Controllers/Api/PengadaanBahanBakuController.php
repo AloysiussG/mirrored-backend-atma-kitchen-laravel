@@ -54,7 +54,7 @@ class PengadaanBahanBakuController extends Controller
             return response()->json(
                 [
                     'data' => $pengadaanBahanBaku,
-                    'message' => 'Berhasil mengambil data produk.'
+                    'message' => 'Berhasil mengambil data pengadaan bahan baku.'
                 ],
                 200
             );

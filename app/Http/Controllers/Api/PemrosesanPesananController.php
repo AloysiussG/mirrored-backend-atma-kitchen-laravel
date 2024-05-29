@@ -103,6 +103,9 @@ class PemrosesanPesananController extends Controller
                 );
             }
 
+            // TODO:: jika check passed, add penggunaan bahan baku
+            // ...
+
             // TODO:: jika check passed, kurangi stok bahan baku setelah diproses
             // ...
 
@@ -163,6 +166,9 @@ class PemrosesanPesananController extends Controller
                     400
                 );
             }
+
+            // TODO:: jika check passed, add penggunaan bahan baku
+            // ...
 
             // TODO:: jika check passed, kurangi stok bahan baku setelah diproses (dari transaksi ARRAY)
             // ...
