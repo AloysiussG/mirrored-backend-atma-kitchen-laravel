@@ -7,6 +7,7 @@ use App\Models\KategoriProduk;
 use App\Models\Packaging;
 use App\Models\Penitip;
 use App\Models\Produk;
+use App\Models\ProdukUnique;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -22,7 +23,7 @@ class ProdukController extends Controller
     public function index(Request $request)
     {
         try {
-            $produksQuery = Produk::query()->with('kategoriProduk', 'penitip', 'packagings.bahanBaku');
+            $produksQuery = Produk::query()->with('kategoriProduk', 'penitip', 'packagings.bahanBaku', 'produkUnique');
 
             // FILTER METHOD #1
             if ($request->status) {
@@ -170,7 +171,7 @@ class ProdukController extends Controller
         try {
             $kategoriWithProduks = KategoriProduk::query()
                 ->with('produks', function ($query) {
-                    $query->with('kategoriProduk', 'penitip', 'packagings.bahanBaku');
+                    $query->with('kategoriProduk', 'penitip', 'packagings.bahanBaku', 'produkUnique');
                 })
                 ->latest()
                 ->get();
@@ -254,6 +255,11 @@ class ProdukController extends Controller
             $validate = Validator::make($produkDataRequest, [
                 'kategori_produk_id' => 'required|exists:kategori_produks,id',
                 'nama_produk' => 'required',
+                'is_produk_varian' => 'required',
+                'nama_produk_unique' => [
+                    Rule::requiredIf(fn () => $produkDataRequest['is_produk_varian'] === 'Ya'),
+                    'nullable',
+                ],
                 'harga' => 'required|numeric|min:1000',
                 'kuota_harian' => 'required|numeric|min:1',
                 'penitip_id' => [
@@ -333,6 +339,28 @@ class ProdukController extends Controller
                 $produkDataRequest['foto_produk'] = $imageUploadedPath;
             }
 
+            // tambah produk data unique
+            if (isset($produkDataRequest['nama_produk_unique'])) {
+                $found = ProdukUnique::query()
+                    ->where('nama_produk', 'like', $produkDataRequest['nama_produk_unique'])
+                    ->first();
+                if ($found) {
+                    $produkDataRequest['produk_unique_id'] = $found->id;
+                } else {
+                    $create = ProdukUnique::create([
+                        'nama_produk' => $produkDataRequest['nama_produk_unique']
+                    ]);
+                    $produkDataRequest['produk_unique_id'] = $create->id;
+                }
+            }
+
+            if (!$produkDataRequest['produk_unique_id'] && !$produkDataRequest['nama_produk_unique']) {
+                $createNew = ProdukUnique::create([
+                    'nama_produk' => $produkDataRequest['nama_produk']
+                ]);
+                $produkDataRequest['produk_unique_id'] = $createNew->id;
+            }
+
             $produkData = Produk::create($produkDataRequest);
 
             // --- CREATE PACKAGING ---
@@ -387,7 +415,7 @@ class ProdukController extends Controller
     public function show(string $id)
     {
         try {
-            $produkData = Produk::with('kategoriProduk', 'penitip', 'packagings.bahanBaku')->find($id);
+            $produkData = Produk::with('kategoriProduk', 'penitip', 'packagings.bahanBaku', 'produkUnique')->find($id);
 
             if (!$produkData) {
                 return response()->json(
@@ -464,6 +492,11 @@ class ProdukController extends Controller
             $validate = Validator::make($produkDataRequest, [
                 'kategori_produk_id' => 'required|exists:kategori_produks,id',
                 'nama_produk' => 'required',
+                'is_produk_varian' => 'required',
+                'nama_produk_unique' => [
+                    Rule::requiredIf(fn () => $produkDataRequest['is_produk_varian'] === 'Ya'),
+                    'nullable',
+                ],
                 'harga' => 'required|numeric|min:1000',
                 'kuota_harian' => 'required|numeric|min:1',
                 'penitip_id' => [
@@ -559,6 +592,28 @@ class ProdukController extends Controller
                 }
             }
 
+            // tambah produk data unique
+            if (isset($produkDataRequest['nama_produk_unique'])) {
+                $found = ProdukUnique::query()
+                    ->where('nama_produk', 'like', $produkDataRequest['nama_produk_unique'])
+                    ->first();
+                if ($found) {
+                    $produkDataRequest['produk_unique_id'] = $found->id;
+                } else {
+                    $create = ProdukUnique::create([
+                        'nama_produk' => $produkDataRequest['nama_produk_unique']
+                    ]);
+                    $produkDataRequest['produk_unique_id'] = $create->id;
+                }
+            }
+
+            if (!$produkDataRequest['produk_unique_id'] && !$produkDataRequest['nama_produk_unique']) {
+                $createNew = ProdukUnique::create([
+                    'nama_produk' => $produkDataRequest['nama_produk']
+                ]);
+                $produkDataRequest['produk_unique_id'] = $createNew->id;
+            }
+
             $produkDataUpdated->update($produkDataRequest);
 
             // update packaging
@@ -644,6 +699,14 @@ class ProdukController extends Controller
                     ],
                     500
                 );
+            }
+
+            $produkUnique = ProdukUnique::query()
+                ->with('produks')
+                ->find($produkDataDeleted->produk_unique_id);
+
+            if (count($produkUnique->produks) <= 0) {
+                $produkUnique->delete();
             }
 
             return response()->json(
