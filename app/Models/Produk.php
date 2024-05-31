@@ -41,10 +41,10 @@ class Produk extends Model
         return $this->hasMany(Packaging::class);
     }
 
-    public function resep()
-    {
-        return $this->hasOne(Resep::class);
-    }
+    // public function resep()
+    // {
+    //     return $this->hasOne(Resep::class);
+    // }
 
     public function produkUnique()
     {

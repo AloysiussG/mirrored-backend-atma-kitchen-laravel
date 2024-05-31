@@ -13,19 +13,35 @@ class ResepSeeder extends Seeder
      */
     public function run(): void
     {
+        // DB::table('reseps')->truncate();
         DB::table('reseps')->insert([
+            // NEW RESEP WITH FK TO PRODUKUNIQUE
             [
                 'produk_id' => 1,
                 'nama_resep' => 'Lah-pees Leh-zheet Andalan',
             ],
             [
-                'produk_id' => 3,
+                'produk_id' => 2,
                 'nama_resep' => 'Lapis Surabaya ala Chef Wilson',
             ],
             [
-                'produk_id' => 5,
+                'produk_id' => 3,
                 'nama_resep' => 'Fudgy Brownies by Ramsey',
             ],
+
+            // // OLD RESEP WITH FK TO PRODUK
+            // [
+            //     'produk_id' => 1,
+            //     'nama_resep' => 'Lah-pees Leh-zheet Andalan',
+            // ],
+            // [
+            //     'produk_id' => 3,
+            //     'nama_resep' => 'Lapis Surabaya ala Chef Wilson',
+            // ],
+            // [
+            //     'produk_id' => 5,
+            //     'nama_resep' => 'Fudgy Brownies by Ramsey',
+            // ],
         ]);
     }
 }

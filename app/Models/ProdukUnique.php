@@ -17,4 +17,9 @@ class ProdukUnique extends Model
     {
         return $this->hasMany(Produk::class);
     }
+
+    public function resep()
+    {
+        return $this->hasOne(Resep::class);
+    }
 }

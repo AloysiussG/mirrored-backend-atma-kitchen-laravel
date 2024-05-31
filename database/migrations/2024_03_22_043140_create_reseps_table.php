@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('reseps', function (Blueprint $table) {
             $table->id();
+            // udah diganti ke constrained 'produk_uniques' di migration bawah
             $table->foreignId('produk_id')->constrained('produks');
             $table->string('nama_resep');
             $table->timestamps();
