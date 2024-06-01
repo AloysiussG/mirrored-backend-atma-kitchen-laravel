@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailCartController;
 use App\Http\Controllers\Api\KategoriProdukController;
+use App\Http\Controllers\api\LaporanGreController;
 use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
@@ -80,6 +81,10 @@ Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(
     // nanti route API untuk laporan yang bisa dilihat Owner + MO ditaruh disini
     Route::get('/karyawan', [KaryawanController::class, 'index']);
     Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
+    
+    // laporan
+    Route::get('/laporanPendapatan/{tahun}', [LaporanGreController::class, 'laporanPendapatan']);
+    Route::post('/laporanBahanBaku', [LaporanGreController::class, 'laporanBahanBaku']);
 });
 
 // --- --- ADMIN + MANAGER OPERASIONAL
