@@ -168,8 +168,10 @@ class PemrosesanPesananController extends Controller
             return $item;
         })->sortBy('nama_bahan_baku')->values();
 
+        // WARNINGS
         $warnings = 0;
 
+        // WARNING BAHAN BAKU
         $allDetailResepGroupedResultsWithWarning = $allDetailResepGroupedResults->map(function ($item) use (&$warnings) {
             $bahanBaku = BahanBaku::find($item['bahan_baku_id']);
             $item['stok_saat_ini'] = $bahanBaku->jumlah_bahan_baku;
@@ -180,13 +182,83 @@ class PemrosesanPesananController extends Controller
             return $item;
         });
 
+        // LIST PACKAGING PER TRANSAKSI
+        $newTransaksiArr = $transaksiArr->map(function ($value) {
+            $detailCarts = $value->cart->detailCart;
+            $listPackaging = [];
+            $newData = [];
+            foreach ($detailCarts as $detailItem) {
+                if (isset($detailItem->produk)) {
+                    foreach ($detailItem->produk->packagings as $pkg) {
+                        $newData['bahan_baku_id'] = $pkg->bahan_baku_id;
+                        $newData['nama_bahan_baku'] = $pkg->bahanBaku->nama_bahan_baku;
+                        $newData['jumlah_packaging'] = $pkg->jumlah * $detailItem->jumlah;
+                        $listPackaging[] = $newData;
+                    }
+                } else if (isset($detailItem->hampers)) {
+                    foreach ($detailItem->hampers->packagings as $pkg) {
+                        $newData['bahan_baku_id'] = $pkg->bahan_baku_id;
+                        $newData['nama_bahan_baku'] = $pkg->bahanBaku->nama_bahan_baku;
+                        $newData['jumlah_packaging'] = $pkg->jumlah * $detailItem->jumlah;
+                        $listPackaging[] = $newData;
+                    }
+                    foreach ($detailItem->hampers->detailHampers as $detailHampers) {
+                        foreach ($detailHampers->produk->packagings as $pkg) {
+                            $newData['bahan_baku_id'] = $pkg->bahan_baku_id;
+                            $newData['nama_bahan_baku'] = $pkg->bahanBaku->nama_bahan_baku;
+                            $newData['jumlah_packaging'] = $pkg->jumlah * $detailItem->jumlah;
+                            $listPackaging[] = $newData;
+                        }
+                    }
+                }
+            }
+            // + 1 x tas spunbond
+            $packagingTransaksi = BahanBaku::query()
+                ->where('nama_bahan_baku', 'like', 'tas spunbond')
+                ->first();
+            $listPackaging[] = [
+                'bahan_baku_id' => $packagingTransaksi->id,
+                'nama_bahan_baku' => $packagingTransaksi->nama_bahan_baku,
+                'jumlah_packaging' => 1,
+            ];
+            $listPackagingCollection = collect($listPackaging);
+            $listPackagingCollectionResults = $listPackagingCollection->groupBy('bahan_baku_id')->map(function ($group) {
+                $item = $group->first();
+                $item['jumlah_packaging'] = $group->sum('jumlah_packaging');
+                return $item;
+            })->sortBy('nama_bahan_baku')->values();
+
+            $value['list_packaging'] = $listPackagingCollectionResults;
+            return $value;
+        });
+
+        // rekap bahan packaging
+        $rekapBahanPackaging = $newTransaksiArr->flatMap(fn ($item) => $item['list_packaging']);
+        $rekapBahanPackagingResults = $rekapBahanPackaging->groupBy('bahan_baku_id')->map(function ($group) {
+            $item = $group->first();
+            $item['jumlah_packaging'] = $group->sum('jumlah_packaging');
+            return $item;
+        })->sortBy('nama_bahan_baku')->values();
+
+        // warning packaging
+        $rekapBahanPackagingResultsWithWarning = $rekapBahanPackagingResults->map(function ($item) use (&$warnings) {
+            $bahanBaku = BahanBaku::find($item['bahan_baku_id']);
+            $item['stok_saat_ini'] = $bahanBaku->jumlah_bahan_baku;
+            if ($bahanBaku->jumlah_bahan_baku < $item['jumlah_packaging']) {
+                $item['warning'] = 'true';
+                $warnings += 1;
+            }
+            return $item;
+        });
+
         // GET DATA
         $data = [];
-        $data['list_pesanan'] = $transaksiArr;
+        $data['list_pesanan'] = $newTransaksiArr;
         $data['rekap_pesanan'] = $allProduksTransaksiResults;
         $data['pesanan_yang_perlu_dibuat'] = $allPesananYangPerluDibuatResults;
         $data['list_bahan_per_produk'] = $allProduksWithResep;
         $data['rekap_bahan'] = $allDetailResepGroupedResultsWithWarning;
+        $data['rekap_bahan_packaging'] = $rekapBahanPackagingResultsWithWarning;
         $data['warnings_count'] = $warnings;
 
         return $data;
