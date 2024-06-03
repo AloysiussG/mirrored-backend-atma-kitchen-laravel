@@ -293,6 +293,44 @@ class PemrosesanPesananController extends Controller
         }
     }
 
+    public function cekProsesTransaksi(string $id)
+    {
+        try {
+            $res = $this->getArrPesananHarian();
+            $transaksiCollection =  collect($res['transaksi_arr']);
+            $found = $transaksiCollection->where('id', $id)->values();
+
+            // cek apakah id transaksi dari URL ada di dalam list transaksi hari ini, just in case
+            if (!count($found)) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak ditemukan di dalam list transaksi yang perlu diproses hari ini.',
+                    ],
+                    400
+                );
+            }
+
+            $data = $this->checkPesananHarian($found);
+
+            return response()->json(
+                [
+                    'data' => $data,
+                    'message' => 'Berhasil cek proses transaksi.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
     public function prosesTransaksi(string $id)
     {
         try {
@@ -345,6 +383,42 @@ class PemrosesanPesananController extends Controller
                 [
                     'data' => $transaksiUpdated,
                     'message' => 'Berhasil proses transaksi.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    public function cekProsesSemuaTransaksi()
+    {
+        try {
+            $res = $this->getArrPesananHarian();
+            $transaksiCollection =  collect($res['transaksi_arr']);
+
+            if (!count($transaksiCollection)) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak ditemukan di dalam list transaksi yang perlu diproses hari ini.',
+                    ],
+                    400
+                );
+            }
+
+            $data = $this->checkPesananHarian($transaksiCollection);
+
+            return response()->json(
+                [
+                    'data' => $data,
+                    'message' => 'Berhasil cek proses transaksi.'
                 ],
                 200
             );

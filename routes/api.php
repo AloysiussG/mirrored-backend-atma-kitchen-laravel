@@ -246,12 +246,17 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     //get bahan baku by the transaksi
     Route::get('/bahanWarning', [TransaksiController::class, 'bahanBakuTransaksi']);
 
+    // PEMROSESAN PESANAN
     // list pesanan harian, yang perlu diproses hari ini (h-1 tanggal ambil)
     // 1. list pesanan harian ---> hanya untuk tampilan di web saja, list transaksi & produk & bahan baku yg dibutuhkan
     Route::get('/list-pesanan-harian', [PemrosesanPesananController::class, 'index']);
     // 2. list transaksi harian ---> untuk confirm proses/tidak
-    Route::get('/list-transaksi-harian', [PemrosesanPesananController::class, 'indexTransaksiPerluDiproses']);
-    Route::put('/list-transaksi-harian/proses/{id}', [PemrosesanPesananController::class, 'prosesTransaksi']);
+    // Route::get('/list-transaksi-harian', [PemrosesanPesananController::class, 'indexTransaksiPerluDiproses']);
+    Route::get('/list-pesanan-harian/cek/{id}', [PemrosesanPesananController::class, 'cekProsesTransaksi']);
+    Route::put('/list-pesanan-harian/proses/{id}', [PemrosesanPesananController::class, 'prosesTransaksi']);
+
+    Route::get('/list-pesanan-harian/cek-semua', [PemrosesanPesananController::class, 'cekProsesSemuaTransaksi']);
+    Route::put('/list-pesanan-harian/proses-semua', [PemrosesanPesananController::class, 'prosesSemuaTransaksi']);
 
     // penggunaan bahan baku
     Route::get('/penggunaan-bahan-baku', [PenggunaanBahanBakuController::class, 'index']);
