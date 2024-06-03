@@ -20,6 +20,6 @@ class ProdukUnique extends Model
 
     public function resep()
     {
-        return $this->hasOne(Resep::class);
+        return $this->hasOne(Resep::class, 'produk_id');
     }
 }

@@ -22,6 +22,11 @@ class Resep extends Model
         // return $this->belongsTo(Produk::class);
     }
 
+    public function produkUnique()
+    {
+        return $this->belongsTo(ProdukUnique::class, 'produk_id', 'id');
+    }
+
     public function detailResep()
     {
         return $this->hasMany(DetailResep::class);

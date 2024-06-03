@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BahanBaku;
 use App\Models\StatusTransaksi;
 use App\Models\Transaksi;
 use Carbon\Carbon;
@@ -265,37 +266,30 @@ class PemrosesanPesananController extends Controller
                 $item = $group->first();
                 $item['jumlah_dibeli'] = $group->sum('jumlah_dibeli');
                 return $item;
-            })->values();
-
+            })->sortBy('nama_produk')->values();
 
             // 2 - rekap porsi per produk (nama produk unik)
 
-            // 2.1 - buat collection isinya nama produk unik / tanpa ada porsi loyang di nama produk
-            $namaProdukCakeUniqueCollection = collect(
-                [
-                    'Lapis Legit',
-                    'Lapis Surabaya',
-                    'Brownies',
-                    'Spikoe',
-                ]
-            );
-
             // 2.2 - search/compare nama produk, searched === true semisal ditemukan 'Lapis Legit' pada 'Lapis Legit 1/2 Loyang', dst..
             //       ketika searched === true, ubah nama produk menjadi 'Lapis Legit', dst..
-            $allPesananYangPerluDibuat = $allProduksTransaksiResults->map(function ($item) use ($namaProdukCakeUniqueCollection) {
-                $namaProduk = $item->nama_produk;
-                $foundIndex = $namaProdukCakeUniqueCollection->search(function ($elFromCollection) use ($namaProduk) {
-                    return strpos($namaProduk, $elFromCollection) !== false;
-                });
-
-                // jika nama produk ketemu di nama produk unique collection, ubah nama produk jadi nama unique supaya nanti bisa direkap porsinya
-                if ($foundIndex !== false) {
-                    $itemCopy = clone $item;
-                    $itemCopy->nama_produk = $namaProdukCakeUniqueCollection[$foundIndex];
-                    return $itemCopy;
+            $allPesananYangPerluDibuat = $allProduksTransaksiResults->map(function ($item) {
+                $namaProduk = $item->produkUnique->nama_produk;
+                if (!$namaProduk) {
+                    $namaProduk = $item->nama_produk;
                 }
-                return $item;
+                $itemCopy = clone $item;
+                $itemCopy->nama_produk = $namaProduk;
+                return $itemCopy;
             });
+
+            // // {SEMENTARA TEST RETURN}
+            // return response()->json(
+            //     [
+            //         'data' => $allPesananYangPerluDibuat,
+            //         'message' => 'Berhasil ambil data list pesanan harian yang perlu diproses.'
+            //     ],
+            //     200
+            // );
 
             // 2.3 - group by nama produk unik tadi, lalu cari rekap porsi yang perlu dibuat
             $allPesananYangPerluDibuatGrouped = $allPesananYangPerluDibuat->groupBy('nama_produk');
@@ -303,44 +297,73 @@ class PemrosesanPesananController extends Controller
                 $item = $group->first();
                 if ($item->porsi !== null) {
                     // untuk mencari jumlah total porsi yang perlu dibuat, sum (jumlah dibeli * porsi masing masing)
-                    $item['jumlah_porsi_yang_perlu_dibuat'] = $group->sum(function ($groupSumItem) {
-                        // 3 - bila jumlah total porsi yang perlu dibuat masih ada yang 1/2 (atau <= 1 lah pokoknya), porsi yang perlu dibuat tetap dianggap 1
-                        //     karena mesin minimal membuat 1 porsi loyang
+                    $jmlPorsiSum = $group->sum(function ($groupSumItem) {
                         $sum = $groupSumItem->jumlah_dibeli * $groupSumItem->porsi;
-                        if ($sum <= 1) {
-                            $sum = 1;
-                        }
                         return $sum;
                     });
+                    // 3 - bila jumlah total porsi yang perlu dibuat masih ada yang 1/2 (atau <= 1 lah pokoknya), porsi yang perlu dibuat tetap dianggap 1
+                    //     karena mesin minimal membuat 1 porsi loyang
+                    if ($jmlPorsiSum <= 1) {
+                        $jmlPorsiSum = 1;
+                    }
+                    $item['jumlah_porsi_yang_perlu_dibuat'] = $jmlPorsiSum;
                 }
                 return $item;
             })->values();
 
-            // bahan baku tapi belum digabungin
-            $allProduksWithResep = $allProduksTransaksiResults->map(function ($it) {
-                $jmlDibeli = $it->jumlah_dibeli;
-                if ($it->resep) {
-                    $it['resep'] = $it->resep->detailResep->map(function ($dr) use ($jmlDibeli) {
-                        $dr['jumlah_dibeli_x_jumlah_bahan_resep'] = $dr->jumlah_bahan_resep * $jmlDibeli;
-                        $dr['bahan_baku'] = $dr->bahanBaku;
-                        return $dr;
-                    });
-                }
-                return $it;
-            });
-
             // LIST BAHAN BAKU
+            $allProduksWithResep = $allPesananYangPerluDibuatResults->map(function ($it) {
+                $jmlPorsiTotal = $it->jumlah_porsi_yang_perlu_dibuat;
+                // jika bukan produk yang berporsi, pake jumlah_dibeli
+                if (!$jmlPorsiTotal) {
+                    $jmlPorsiTotal = $it->jumlah_dibeli;
+                }
+                if ($it->produkUnique->resep) {
+                    $produkWithResep['nama_produk'] = $it->produkUnique->nama_produk;
+                    $produkWithResep['detail_resep'] = $it->produkUnique->resep->detailResep->map(function ($dr) use ($jmlPorsiTotal) {
+                        $new['bahan_baku_id'] = $dr->bahanBaku->id;
+                        $new['nama_bahan_baku'] = $dr->bahanBaku->nama_bahan_baku;
+                        $new['satuan_bahan'] = $dr->bahanBaku->satuan_bahan;
+                        $new['jml_porsi_total'] = $jmlPorsiTotal;
+                        $new['jumlah_bahan_resep'] = $dr->jumlah_bahan_resep;
+                        $new['jml_porsi_total_x_jumlah_bahan_resep'] = $dr->jumlah_bahan_resep * $jmlPorsiTotal;
+                        return $new;
+                    });
+                    return $produkWithResep;
+                }
+            })->filter(fn ($item) => $item != null);
+
+            $allDetailResep = $allProduksWithResep->flatMap(fn ($item) => $item['detail_resep']);
+
+            $allDetailResepGrouped = $allDetailResep->groupBy('bahan_baku_id');
+            $allDetailResepGroupedResults = $allDetailResepGrouped->map(function ($group) {
+                $item['bahan_baku_id'] = $group->first()['bahan_baku_id'];
+                $item['nama_bahan_baku'] = $group->first()['nama_bahan_baku'];
+                $item['satuan_bahan'] = $group->first()['satuan_bahan'];
+                $item['sum_jumlah_bahan'] = $group->sum('jml_porsi_total_x_jumlah_bahan_resep');
+                return $item;
+            })->sortBy('nama_bahan_baku')->values();
+
+            $warnings = 0;
+
+            $allDetailResepGroupedResultsWithWarning = $allDetailResepGroupedResults->map(function ($item) use (&$warnings) {
+                $bahanBaku = BahanBaku::find($item['bahan_baku_id']);
+                $item['stok_saat_ini'] = $bahanBaku->jumlah_bahan_baku;
+                if ($bahanBaku->jumlah_bahan_baku < $item['sum_jumlah_bahan']) {
+                    $item['warning'] = 'true';
+                    $warnings += 1;
+                }
+                return $item;
+            });
 
             // // {SEMENTARA TEST RETURN}
             // return response()->json(
             //     [
-            //         'data' => $allProduksWithResep,
+            //         'data' => $allDetailResepGroupedResults,
             //         'message' => 'Berhasil ambil data list pesanan harian yang perlu diproses.'
             //     ],
             //     200
             // );
-
-
 
             // GET DATA
 
@@ -348,6 +371,9 @@ class PemrosesanPesananController extends Controller
             $data['list_pesanan'] = $transaksiArr;
             $data['rekap_pesanan'] = $allProduksTransaksiResults;
             $data['pesanan_yang_perlu_dibuat'] = $allPesananYangPerluDibuatResults;
+            $data['list_bahan_per_produk'] = $allProduksWithResep;
+            $data['rekap_bahan'] = $allDetailResepGroupedResultsWithWarning;
+            $data['warnings_count'] = $warnings;
             $data['tanggal_sekarang'] = $today;
             $data['tanggal_ambil_dicek'] = $todayPlusOne;
 
