@@ -51,6 +51,79 @@ class TransaksiController extends Controller
 
             $transaksis = $transaksiQuery->orderBy($sortBy, $sortOrder)->get();
 
+            //update status transaksi menjadi batal jika belum
+            //kembalikan stok produk yang ready stock jika belum
+            foreach ($transaksis as $transaksi) {
+                //cek apakah setiap produk dalam transaksi ready stock
+                $status_transaksi = "Ready Stock";
+                foreach ($transaksi->cart->detailCart as $detailCart) {
+                    if ($detailCart->status_produk == "Pre Order") {
+                        $status_transaksi = "Pre Order";
+                        break;
+                    }
+                }
+                $tanggal_ambil = new DateTime($transaksi->tanggal_ambil);
+                $tanggal_sekarang = new DateTime(Carbon::now()->addDay()->toDateString());
+                if ($transaksi->status_transaksi_id != 12 && $transaksi->tanggal_lunas == null && $tanggal_ambil <= $tanggal_sekarang) {
+                    //jika semua produk ready stock, tanggal ambil boleh = tanggal hari ini
+                    //jadi transaksi yang semua produknya ready stock dan taggal ambil = tanggal hari ini bakal di remove
+                    if ($status_transaksi == "Ready Stock") {
+                        $tanggal_sekarang = new DateTime(Carbon::now()->toDateString());
+                        if ($tanggal_ambil < $tanggal_sekarang) {
+                            foreach ($transaksi->cart->detailCart as $detailCart) {
+                                if ($detailCart->produk_id != null) {
+                                    $produk = $detailCart->produk;
+                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                                    $produk->status = "Ready Stock";
+                                    $produk->save();
+                                } else {
+                                    $hampers = $detailCart->hampers;
+                                    foreach ($hampers->detailHampers as $detailHampers) {
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
+                                    }
+                                }
+                            }
+                            $customer = $transaksi->cart->customer;
+                            $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                            $customer->save();
+                            $transaksi->status_transaksi_id = 12;
+                            $transaksi->save();
+                        }
+                    } else if ($status_transaksi == "Pre Order") {
+                        foreach ($transaksi->cart->detailCart as $detailCart) {
+                            if ($detailCart->status_produk == "Ready Stock") {
+                                if ($detailCart->produk_id != null) {
+                                    $produk = $detailCart->produk;
+                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                                    $produk->status = "Ready Stock";
+                                    $produk->save();
+                                } else {
+                                    $hampers = $detailCart->hampers;
+                                    foreach ($hampers->detailHampers as $detailHampers) {
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        $$customer = $transaksi->cart->customer;
+                        $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                        $customer->save();
+                        $transaksi->status_transaksi_id = 12;
+                        $transaksi->save();
+                    }
+                }
+            }
+
             return response([
                 'message' => 'Retrieve All Success',
                 'data' => $transaksis
@@ -114,6 +187,79 @@ class TransaksiController extends Controller
             }
 
             $transaksis = $transaksiQuery->orderBy($sortBy, $sortOrder)->get();
+
+            //update status transaksi menjadi batal jika belum
+            //kembalikan stok produk yang ready stock jika belum
+            foreach ($transaksis as $transaksi) {
+                //cek apakah setiap produk dalam transaksi ready stock
+                $status_transaksi = "Ready Stock";
+                foreach ($transaksi->cart->detailCart as $detailCart) {
+                    if ($detailCart->status_produk == "Pre Order") {
+                        $status_transaksi = "Pre Order";
+                        break;
+                    }
+                }
+                $tanggal_ambil = new DateTime($transaksi->tanggal_ambil);
+                $tanggal_sekarang = new DateTime(Carbon::now()->addDay()->toDateString());
+                if ($transaksi->status_transaksi_id != 12 && $transaksi->tanggal_lunas == null && $tanggal_ambil <= $tanggal_sekarang) {
+                    //jika semua produk ready stock, tanggal ambil boleh = tanggal hari ini
+                    //jadi transaksi yang semua produknya ready stock dan taggal ambil = tanggal hari ini bakal di remove
+                    if ($status_transaksi == "Ready Stock") {
+                        $tanggal_sekarang = new DateTime(Carbon::now()->toDateString());
+                        if ($tanggal_ambil < $tanggal_sekarang) {
+                            foreach ($transaksi->cart->detailCart as $detailCart) {
+                                if ($detailCart->produk_id != null) {
+                                    $produk = $detailCart->produk;
+                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                                    $produk->status = "Ready Stock";
+                                    $produk->save();
+                                } else {
+                                    $hampers = $detailCart->hampers;
+                                    foreach ($hampers->detailHampers as $detailHampers) {
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
+                                    }
+                                }
+                            }
+                            $customer = $transaksi->cart->customer;
+                            $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                            $customer->save();
+                            $transaksi->status_transaksi_id = 12;
+                            $transaksi->save();
+                        }
+                    } else if ($status_transaksi == "Pre Order") {
+                        foreach ($transaksi->cart->detailCart as $detailCart) {
+                            if ($detailCart->status_produk == "Ready Stock") {
+                                if ($detailCart->produk_id != null) {
+                                    $produk = $detailCart->produk;
+                                    $produk->jumlah_stock = $produk->jumlah_stock + $detailCart->jumlah;
+                                    $produk->status = "Ready Stock";
+                                    $produk->save();
+                                } else {
+                                    $hampers = $detailCart->hampers;
+                                    foreach ($hampers->detailHampers as $detailHampers) {
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        $customer = $transaksi->cart->customer;
+                        $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                        $customer->save();
+                        $transaksi->status_transaksi_id = 12;
+                        $transaksi->save();
+                    }
+                }
+            }
 
             return response([
                 'message' => 'Retrieve All Success',
@@ -471,13 +617,18 @@ class TransaksiController extends Controller
                                 } else {
                                     $hampers = $detailCart->hampers;
                                     foreach ($hampers->detailHampers as $detailHampers) {
-                                        $produk = $detailHampers->produk;
-                                        $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
-                                        $produk->status = "Ready Stock";
-                                        $produk->save();
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
                                     }
                                 }
                             }
+                            $customer = $transaksi->cart->customer;
+                            $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                            $customer->save();
                             $transaksi->status_transaksi_id = 12;
                             $transaksi->save();
                         } else {
@@ -497,14 +648,19 @@ class TransaksiController extends Controller
                                 } else {
                                     $hampers = $detailCart->hampers;
                                     foreach ($hampers->detailHampers as $detailHampers) {
-                                        $produk = $detailHampers->produk;
-                                        $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
-                                        $produk->status = "Ready Stock";
-                                        $produk->save();
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
                                     }
                                 }
                             }
                         }
+                        $customer = $transaksi->cart->customer;
+                        $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                        $customer->save();
                         $transaksi->status_transaksi_id = 12;
                         $transaksi->save();
                     }
@@ -837,6 +993,7 @@ class TransaksiController extends Controller
 
                 $transaksi->kode_bukti_bayar = $path;
                 $transaksi->status_transaksi_id = 3;
+                $transaksi->tanggal_lunas = Carbon::now();
                 $transaksi->save();
             }
 

@@ -317,13 +317,18 @@ class CustomerController extends Controller
                                 } else {
                                     $hampers = $detailCart->hampers;
                                     foreach ($hampers->detailHampers as $detailHampers) {
-                                        $produk = $detailHampers->produk;
-                                        $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
-                                        $produk->status = "Ready Stock";
-                                        $produk->save();
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
                                     }
                                 }
                             }
+                            $customer = $transaksi->cart->customer;
+                            $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                            $customer->save();
                             $transaksi->status_transaksi_id = 12;
                             $transaksi->save();
                         }
@@ -338,14 +343,19 @@ class CustomerController extends Controller
                                 } else {
                                     $hampers = $detailCart->hampers;
                                     foreach ($hampers->detailHampers as $detailHampers) {
-                                        $produk = $detailHampers->produk;
-                                        $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
-                                        $produk->status = "Ready Stock";
-                                        $produk->save();
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
                                     }
                                 }
                             }
                         }
+                        $customer = $transaksi->cart->customer;
+                        $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                        $customer->save();
                         $transaksi->status_transaksi_id = 12;
                         $transaksi->save();
                     }
@@ -446,13 +456,18 @@ class CustomerController extends Controller
                                 } else {
                                     $hampers = $detailCart->hampers;
                                     foreach ($hampers->detailHampers as $detailHampers) {
-                                        $produk = $detailHampers->produk;
-                                        $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
-                                        $produk->status = "Ready Stock";
-                                        $produk->save();
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
                                     }
                                 }
                             }
+                            $customer = $transaksi->cart->customer;
+                            $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                            $customer->save();
                             $transaksi->status_transaksi_id = 12;
                             $transaksi->save();
                         }
@@ -467,14 +482,19 @@ class CustomerController extends Controller
                                 } else {
                                     $hampers = $detailCart->hampers;
                                     foreach ($hampers->detailHampers as $detailHampers) {
-                                        $produk = $detailHampers->produk;
-                                        $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
-                                        $produk->status = "Ready Stock";
-                                        $produk->save();
+                                        for ($i = 0; $i < $detailCart->jumlah; $i++) {
+                                            $produk = $detailHampers->produk;
+                                            $produk->jumlah_stock = $produk->jumlah_stock + $detailHampers->jumlah_produk;
+                                            $produk->status = "Ready Stock";
+                                            $produk->save();
+                                        }
                                     }
                                 }
                             }
                         }
+                        $customer = $transaksi->cart->customer;
+                        $customer->poin = $customer->poin + $transaksi->poin_dipakai;
+                        $customer->save();
                         $transaksi->status_transaksi_id = 12;
                         $transaksi->save();
                     }
