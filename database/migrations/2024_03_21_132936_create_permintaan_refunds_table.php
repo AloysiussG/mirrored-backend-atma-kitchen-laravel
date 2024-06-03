@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('status');
             $table->float('nominal');
             $table->date('tanggal_refund');
+            $table->dateTime('tanggal_proses')->nullable();
             $table->timestamps();
         });
     }
