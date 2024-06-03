@@ -17,13 +17,16 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailCartController;
 use App\Http\Controllers\Api\KategoriProdukController;
+use App\Http\Controllers\api\LaporanSamController;
 use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
+use App\Http\Controllers\api\PermintaaanRefundController;
 use App\Http\Controllers\Api\PresensiController;
 use App\Http\Controllers\Api\ResepController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StatusController;
+use App\Models\PermintaanRefund;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
@@ -62,6 +65,7 @@ Route::get('/role', [RoleController::class, 'index']);
 // Route::get('/generateNomorNota', [CartController::class, 'generateNomorNota']);
 
 
+
 // --- PROTECTED ROUTES
 
 // ability vs abilities, misal: [customer, admin]
@@ -80,6 +84,9 @@ Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(
     // nanti route API untuk laporan yang bisa dilihat Owner + MO ditaruh disini
     Route::get('/karyawan', [KaryawanController::class, 'index']);
     Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
+    Route::get('/testsam',[LaporanSamController::class,'laporan_presensi']);
+    Route::get('/testsam2', [LaporanSamController::class,'laporan_penitip']);
+    Route::get('/testsam3', [LaporanSamController::class,'laporanPengeluaranPemasukan']);
 });
 
 // --- --- ADMIN + MANAGER OPERASIONAL
@@ -127,6 +134,11 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
 
     // alamat
     Route::get('/my-alamat', [AlamatController::class, 'indexMyAlamat']);
+
+    //penarikan saldo
+    Route::get('/penarikan-saldo', [PermintaaanRefundController::class, 'indexByCustomer']);
+    Route::post('/penarikan-saldo', [PermintaaanRefundController::class, 'kirimRequest']);
+
 });
 
 // --- --- OWNER ONLY
@@ -187,8 +199,13 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     Route::get('/indexTelatBayar', [TransaksiController::class, 'indexTelatBayar']);
     Route::get('/indexMenungguKonfirmasi', [TransaksiController::class, 'indexMenungguKonfirmasi']);
 
-    //status pesanan 
+    //status pesanan
     Route::put('/updateStatusTransaksi/{id}', [TransaksiController::class, 'updateStatusTransaksi']);
+
+    //permintaan refund
+    Route::get('/permintaan-refund-admin', [PermintaaanRefundController::class,'indexByStatus']);
+    Route::put('/permintaan-refund-admin/{id}', [PermintaaanRefundController::class,'terimaRequest']);
+
 });
 
 // --- --- MANAGER OPERASIONAL ONLY

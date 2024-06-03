@@ -39,4 +39,9 @@ class Karyawan extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+
+    public function presensi()
+    {
+        return $this->hasMany(Presensi::class);
+    }
 }

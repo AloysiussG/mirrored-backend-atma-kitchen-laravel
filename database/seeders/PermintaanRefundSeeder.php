@@ -15,24 +15,24 @@ class PermintaanRefundSeeder extends Seeder
     {
         DB::table('permintaan_refunds')->insert([[
             'customer_id' => 1,
-            'status' =>'Sedang diproses',
+            'status' =>'berhasil',
             'nominal' => '1100000',
             'tanggal_refund' => '2024-03-23',
             'tanggal_proses' => '2024-03-24 08:00:00'
         ],
         [
             'customer_id' => 2,
-            'status' =>'Selesai',
+            'status' =>'berhasil',
             'nominal' => '425000',
             'tanggal_refund' => '2024-03-17',
             'tanggal_proses' => '2024-03-18 09:00:00'
         ],
         [
             'customer_id' => 3,
-            'status' =>'Selesai',
+            'status' =>'pending',
             'nominal' => '360000',
             'tanggal_refund' => '2024-02-03',
-            'tanggal_proses' => '2024-02-04 10:00:00'
+            'tanggal_proses' => null
         ],
         ]);
     }

@@ -7,16 +7,17 @@ use App\Models\Customer;
 use App\Models\PermintaanRefund;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 use Illuminate\Support\Facades\Validator;
 
 class PermintaaanRefundController extends Controller
 {
-    public function indexByCustomer($id){
+    public function indexByCustomer(){
         try{
-            $pengembalian_saldo = PermintaanRefund::where('customer_id', $id)->get();
+            $pengembalian_saldo = PermintaanRefund::where('customer_id', Auth::id())->get();
             return response()->json([
-                'message' => 'success mengambil data pengembalian saldo customer id '.$id,
+                'message' => 'success mengambil data pengembalian saldo customer id '.Auth::id(),
                 'data' => $pengembalian_saldo
             ]);
         } catch(Throwable $e){
@@ -30,7 +31,7 @@ class PermintaaanRefundController extends Controller
     public function indexByStatus(){
         //status nya cuma pending sama berhasil setelah dikirim permintaaan nya
         try{
-            $pengembalian_saldo = PermintaanRefund::where('status', 'pending')->get();
+            $pengembalian_saldo = PermintaanRefund::where('status', 'pending')->with('customer')->get();
             return response()->json([
                 'message' => 'success mengambil data pengembalian saldo dengan status pending',
                 'data' => $pengembalian_saldo
@@ -46,7 +47,7 @@ class PermintaaanRefundController extends Controller
     public function kirimRequest(Request $request){
         try{
             $pengembalian_saldo = new PermintaanRefund();
-            $customer = Customer::find($request->customer_id);
+            $customer = Customer::find(Auth::id());
 
             if(!$customer){
                 return response()->json([
@@ -56,9 +57,13 @@ class PermintaaanRefundController extends Controller
             }
 
            $validate = Validator::make($request->all(), [
-                'customer_id' => 'required',
-                'nominal' => 'required | max:'.$customer->saldo,
-            ]);
+                'nominal' => 'required | max:'.$customer->saldo. '| min: 1',
+            ],
+            [
+                'nominal.required' => 'nominal harus diisi',
+                'nominal.max' => 'nominal tidak boleh melebihi saldo'
+            ]
+        );
 
             if($validate->fails()){
                 return response()->json([
@@ -67,7 +72,7 @@ class PermintaaanRefundController extends Controller
                 ],400);
             }
 
-            $pengembalian_saldo->customer_id = $request->customer_id;
+            $pengembalian_saldo->customer_id = Auth::id();
             $pengembalian_saldo->status = 'pending';
             $pengembalian_saldo->nominal = $request->nominal;
             $pengembalian_saldo->tanggal_refund = Carbon::now();
