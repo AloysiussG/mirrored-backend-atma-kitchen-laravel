@@ -31,24 +31,25 @@ class LaporanGreController extends Controller
             }
 
             $namaBulan = [
-                1 => 'Januari',
-                2 => 'Februari',
-                3 => 'Maret',
-                4 => 'April',
+                1 => 'Jan',
+                2 => 'Feb',
+                3 => 'Mar',
+                4 => 'Apr',
                 5 => 'Mei',
-                6 => 'Juni',
-                7 => 'Juli',
-                8 => 'Agustus',
-                9 => 'September',
-                10 => 'Oktober',
-                11 => 'November',
-                12 => 'Desember'
+                6 => 'Jun',
+                7 => 'Jul',
+                8 => 'Agu',
+                9 => 'Sep',
+                10 => 'Okt',
+                11 => 'Nov',
+                12 => 'Des'
             ];
 
             $laporan = [];
             $laporan['tahun'] = $tahun;
             $laporan['tanggal_cetak'] = Carbon::now();
             $total = 0;
+            $dataPenjualan = [];
             for ($i = 1; $i <= 12; $i++) {
                 $jumlahUang = 0;
                 $jumlahTransaksi = 0;
@@ -60,13 +61,14 @@ class LaporanGreController extends Controller
                     }
                 }
                 $total = $total + $jumlahUang;
-                $laporan[] = [
+                $dataPenjualan[] = [
                     'bulan' => $namaBulan[$i],
                     'jumlah_transaksi' => $jumlahTransaksi,
                     'jumlah_uang' => $jumlahUang
                 ];
             }
             $laporan['total'] = $total;
+            $laporan['data_penjualan'] = $dataPenjualan;
 
             return response(
                 [
@@ -108,7 +110,7 @@ class LaporanGreController extends Controller
                 ->where('tanggal_penggunaan', '>=', $request->tanggal_mulai)
                 ->where('tanggal_penggunaan', '<=', $request->tanggal_akhir)->get();
 
-            if (!$penggunaan) {
+            if ($penggunaan->isEmpty()) {
                 return response()->json(
                     [
                         'message' => 'Tidak ada penggunaan bahan baku pada rentang tanggal tersebut',
@@ -119,15 +121,18 @@ class LaporanGreController extends Controller
             }
 
             $laporan = [];
-            $laporan['rentang_tanggal'] = $request->tanggal_mulai . ' - ' . $request->tanggal_akhir;
+            $laporan['tanggal_mulai'] = $request->tanggal_mulai;
+            $laporan['tanggal_akhir'] = $request->tanggal_akhir;
             $laporan['tanggal_cetak'] = Carbon::now();
+            $bahanBaku = [];
             foreach($penggunaan as $item){
-                $laporan[] = [
+                $bahanBaku[] = [
                     'nama_bahan_baku' => $item->bahanBaku->nama_bahan_baku,
                     'satuan_penggunaan' => $item->satuan_penggunaan,
                     'jumlah_penggunaan' => $item->jumlah_penggunaan,
                 ];
             }
+            $laporan['data_penggunaan'] = $bahanBaku;
 
             return response()->json(
                 [
