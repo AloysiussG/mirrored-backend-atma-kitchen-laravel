@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BahanBaku;
 use App\Models\StatusTransaksi;
 use App\Models\Transaksi;
 use Carbon\Carbon;
@@ -145,8 +146,6 @@ class LaporanController extends Controller
         // GROUP BY Produk 
         // WITH ROLLUP;
 
-
-
     }
 
     /**
@@ -154,7 +153,31 @@ class LaporanController extends Controller
      */
     public function indexLaporanStokBahanBaku()
     {
-        //
+        try {
+            $bahanBakuArr = BahanBaku::query()
+                ->orderBy('jumlah_bahan_baku', 'desc')
+                ->get();
+
+            $data['tanggal_cetak'] = Carbon::now();
+            $data['bahan_baku_arr_count'] = count($bahanBakuArr);
+            $data['bahan_baku_arr'] = $bahanBakuArr;
+
+            return response()->json(
+                [
+                    'data' => $data,
+                    'message' => 'Berhasil mengambil laporan stok bahan baku.'
+                ],
+                200
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
 
     /**
