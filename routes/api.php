@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailCartController;
 use App\Http\Controllers\Api\KategoriProdukController;
+use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\api\LaporanGreController;
 use App\Http\Controllers\api\LaporanSamController;
 use App\Http\Controllers\Api\PackagingController;
@@ -95,9 +96,15 @@ Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(
     // laporan
     Route::get('/laporanPendapatan/{tahun}', [LaporanGreController::class, 'laporanPendapatan']);
     Route::post('/laporanBahanBaku', [LaporanGreController::class, 'laporanBahanBaku']);
-    Route::get('/testsam',[LaporanSamController::class,'laporan_presensi']);
-    Route::get('/testsam2', [LaporanSamController::class,'laporan_penitip']);
-    Route::get('/testsam3', [LaporanSamController::class,'laporanPengeluaranPemasukan']);
+    Route::get('/testsam', [LaporanSamController::class, 'laporan_presensi']);
+    Route::get('/testsam2', [LaporanSamController::class, 'laporan_penitip']);
+    Route::get('/testsam3', [LaporanSamController::class, 'laporanPengeluaranPemasukan']);
+
+    // laporan penjualan bulanan per produk 
+    Route::post('/laporan-penjualan-bulanan-per-produk', [LaporanController::class, 'indexLaporanPenjualanBulananPerProduk']);
+
+    // laporan stok bahan baku 
+    Route::get('/laporan-stok-bahan-baku', [LaporanController::class, 'indexLaporanStokBahanBaku']);
 });
 
 // --- --- ADMIN + MANAGER OPERASIONAL
@@ -149,7 +156,6 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     //penarikan saldo
     Route::get('/penarikan-saldo', [PermintaaanRefundController::class, 'indexByCustomer']);
     Route::post('/penarikan-saldo', [PermintaaanRefundController::class, 'kirimRequest']);
-
 });
 
 // --- --- OWNER ONLY
@@ -214,9 +220,8 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     Route::put('/updateStatusTransaksi/{id}', [TransaksiController::class, 'updateStatusTransaksi']);
 
     //permintaan refund
-    Route::get('/permintaan-refund-admin', [PermintaaanRefundController::class,'indexByStatus']);
-    Route::put('/permintaan-refund-admin/{id}', [PermintaaanRefundController::class,'terimaRequest']);
-
+    Route::get('/permintaan-refund-admin', [PermintaaanRefundController::class, 'indexByStatus']);
+    Route::put('/permintaan-refund-admin/{id}', [PermintaaanRefundController::class, 'terimaRequest']);
 });
 
 // --- --- MANAGER OPERASIONAL ONLY
