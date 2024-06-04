@@ -103,65 +103,22 @@ class LaporanController extends Controller
                 500
             );
         }
-
-        // -- 2.	Laporan penjualan bulanan per produk
-
-        // -- kalau ada hampersnya
-        // SELECT 
-        //     IFNULL(p.nama_produk, h.nama_hampers) AS ProdukORHampers,
-        //     SUM(dc.jumlah) AS Kuantitas, 
-        //     dc.harga_produk_sekarang, 
-        //     SUM(dc.harga_produk_sekarang * dc.jumlah) AS "Jumlah Uang",
-        //     st.nama_status
-        // FROM transaksis t
-        // JOIN status_transaksis st ON (st.id = t.status_transaksi_id)
-        // JOIN carts c ON (t.cart_id = c.id)
-        // JOIN detail_carts dc ON (c.id = dc.cart_id)
-        // LEFT JOIN produks p ON (p.id = dc.produk_id)
-        // LEFT JOIN hampers h ON (h.id = dc.hampers_id)
-        // WHERE 
-        //     MONTHNAME(t.tanggal_pesan) = 'February' 
-        //     AND YEAR(t.tanggal_pesan) = '2024'
-        //     AND st.nama_status = 'Pesanan selesai'
-        // GROUP BY ProdukORHampers 
-        // WITH ROLLUP;
-
-
-        // -- kalau semua jadi satu per produk (TAPI GAK MAKE SENSE DI JUMLAH UANG)
-
-        // SELECT 
-        //     IFNULL(p.nama_produk, pdh.nama_produk) AS Produk,
-        //     SUM(IFNULL(dh.jumlah_produk, dc.jumlah)) AS Kuantitas,
-        //     dc.harga_produk_sekarang, 
-        //     SUM(dc.harga_produk_sekarang * dc.jumlah) AS "Jumlah Uang"
-        // FROM transaksis t
-        // JOIN status_transaksis st ON (st.id = t.status_transaksi_id)
-        // JOIN carts c ON (t.cart_id = c.id)
-        // JOIN detail_carts dc ON (c.id = dc.cart_id)
-        // LEFT JOIN produks p ON (p.id = dc.produk_id)
-        // LEFT JOIN hampers h ON (h.id = dc.hampers_id)
-        // LEFT JOIN detail_hampers dh ON (h.id = dh.hampers_id)
-        // LEFT JOIN produks pdh ON (pdh.id = dh.produk_id)
-        // WHERE 
-        //     MONTHNAME(t.tanggal_pesan) = 'February' 
-        //     AND YEAR(t.tanggal_pesan) = '2024'
-        //     AND st.nama_status = 'Pesanan selesai'
-        // GROUP BY Produk 
-        // WITH ROLLUP;
-
     }
 
     /**
      * Display a listing of the resource.
      */
-    public function indexLaporanStokBahanBaku()
+    public function indexLaporanStokBahanBaku(Request $request)
     {
         try {
+            $user = $request->user();
+
             $bahanBakuArr = BahanBaku::query()
                 ->orderBy('jumlah_bahan_baku', 'desc')
                 ->get();
 
             $data['tanggal_cetak'] = Carbon::now();
+            $data['dicetak_oleh'] = $user->nama . ' (' . $user->role->role_name . ')';
             $data['bahan_baku_arr_count'] = count($bahanBakuArr);
             $data['bahan_baku_arr'] = $bahanBakuArr;
 
