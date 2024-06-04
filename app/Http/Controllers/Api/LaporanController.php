@@ -19,6 +19,8 @@ class LaporanController extends Controller
     public function indexLaporanPenjualanBulananPerProduk(Request $request)
     {
         try {
+            $user = $request->user();
+
             $validate = Validator::make($request->all(), [
                 'num_month' => 'required|numeric|min:1|max:12',
                 'num_year' => 'required|numeric|min_digits:4|max_digits:4',
@@ -79,6 +81,7 @@ class LaporanController extends Controller
             $data['bulan'] = Carbon::create()->month($numMonth)->format('F');
             $data['tahun'] = Carbon::create()->year($numYear)->format('Y');
             $data['tanggal_cetak'] = Carbon::now();
+            $data['dicetak_oleh'] = $user->nama . ' (' . $user->role->role_name . ')';
             $data['transaksi_count'] = count($transaksiArr);
             $data['produk_arr_count'] = count($detailCartProdukHampersResults);
             $data['produk_arr'] = $detailCartProdukHampersResults;
