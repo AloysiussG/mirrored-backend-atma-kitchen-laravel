@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\BahanBaku;
+use App\Models\Produk;
 use App\Models\StatusTransaksi;
 use App\Models\Transaksi;
 use Carbon\Carbon;
@@ -127,7 +128,19 @@ class PemrosesanPesananController extends Controller
                 });
                 // 3 - bila jumlah total porsi yang perlu dibuat masih ada yang 1/2 (atau <= 1 lah pokoknya), porsi yang perlu dibuat tetap dianggap 1
                 //     karena mesin minimal membuat 1 porsi loyang
-                if ($jmlPorsiSum <= 1) {
+                if ($jmlPorsiSum < 1) {
+                    $item['is_kurang_dari_1_loyang'] = 'true';
+                    // cari sisa porsi yang tidak dibeli,
+                    // semisal jmlPorsiSum yang dibeli 1/2 loyang, tetep buat 1 loyang
+                    // nah, 1/2 sisanya akan dikembalikan ke stok produk
+                    $sisaPorsiYgTidakDibeli = 1 - $jmlPorsiSum;
+                    $produkInSameProdukUnique = $item->produkUnique->produks->firstWhere('porsi', '<=', $sisaPorsiYgTidakDibeli);
+                    if ($produkInSameProdukUnique) {
+                        $item['sisa_produk_yang_tidak_dibeli'] = $produkInSameProdukUnique;
+                        $item['sisa_produk_yang_tidak_dibeli']['jumlah'] = 1;
+                    }
+                    $item['jumlah_porsi_awal'] = $jmlPorsiSum;
+                    $item['jumlah_porsi_sisa'] = $sisaPorsiYgTidakDibeli;
                     $jmlPorsiSum = 1;
                 }
                 $item['jumlah_porsi_yang_perlu_dibuat'] = $jmlPorsiSum;
@@ -264,6 +277,64 @@ class PemrosesanPesananController extends Controller
         return $data;
     }
 
+    public function addPenggunaanByRekapBahan($data)
+    {
+        // TODO:: jika check passed, add penggunaan bahan baku
+        // ...
+
+        // TODO:: jika check passed, kurangi stok bahan baku setelah diproses
+        // ...
+
+        // TODO:: jika check passed, tambah stok produk sisa (misal ada pembelian 1/2 Loyang, bikin 1 Loyang, sisa 1/2 nya masuk stok produk 1/2 loyang)
+        // ...
+
+        $penggunaanController = new PenggunaanBahanBakuController();
+
+        // add pengadaan bahan biasa
+        if (count($data['rekap_bahan']) > 0) {
+            $rekap = collect($data['rekap_bahan']);
+            $rekap->map(function ($item) use ($penggunaanController) {
+                $bb = BahanBaku::find($item['bahan_baku_id']);
+                $penggunaanController->addPenggunaan([
+                    'tanggal_penggunaan' => Carbon::now(),
+                    'bahan_baku_id' => $item['bahan_baku_id'],
+                    'jumlah_penggunaan' => $item['sum_jumlah_bahan'],
+                    'satuan_penggunaan' => $bb->satuan_bahan,
+                ]);
+            });
+        }
+
+        // add pengadaan bahan packaging
+        if (count($data['rekap_bahan_packaging']) > 0) {
+            $rekap = collect($data['rekap_bahan_packaging']);
+            $rekap->map(function ($item) use ($penggunaanController) {
+                $bb = BahanBaku::find($item['bahan_baku_id']);
+                $penggunaanController->addPenggunaan([
+                    'tanggal_penggunaan' => Carbon::now(),
+                    'bahan_baku_id' => $item['bahan_baku_id'],
+                    'jumlah_penggunaan' => $item['jumlah_packaging'],
+                    'satuan_penggunaan' => $bb->satuan_bahan,
+                ]);
+            });
+        }
+
+        // KEMBALIKAN STOK PRODUK
+        // jika ada produk sisa beli < 1 loyang
+        // misal beli 1/2 loyang tapi tetep diproses 1 loyang, 1/2 sisanya akan masuk ke stok produk
+        $collectPesananPerluDibuat = collect($data['pesanan_yang_perlu_dibuat']);
+        $collectPesananPerluDibuat->map(function ($item) {
+            if ($item['is_kurang_dari_1_loyang']) {
+                $idProdukKembali = $item['sisa_produk_yang_tidak_dibeli']['id'];
+                $jmlKembali = $item['sisa_produk_yang_tidak_dibeli']['jumlah'];
+                // kembalikan ke stok produk
+                $produk = Produk::find($idProdukKembali);
+                $produk->jumlah_stock = $produk->jumlah_stock + $jmlKembali;
+                $produk->status = 'Ready Stock';
+                $produk->save();
+            }
+        });
+    }
+
     /**
      * API CONTROLLER FUNCTIONS
      */
@@ -336,10 +407,12 @@ class PemrosesanPesananController extends Controller
         try {
             $res = $this->getArrPesananHarian();
             $transaksiCollection =  collect($res['transaksi_arr']);
-            $found = $transaksiCollection->firstWhere('id', $id);
+            $found = $transaksiCollection->where('id', $id)->values();
+
+
 
             // cek apakah id transaksi dari URL ada di dalam list transaksi hari ini, just in case
-            if (!$found) {
+            if (!count($found)) {
                 return response()->json(
                     [
                         'data' => null,
@@ -350,10 +423,9 @@ class PemrosesanPesananController extends Controller
             }
 
             // TODO:: check warning bahan baku
-            // ...
-            $checked = true;
+            $data = $this->checkPesananHarian($found);
 
-            if (!$checked) {
+            if ($data['warnings_count'] > 0) {
                 return response()->json(
                     [
                         'data' => null,
@@ -363,11 +435,25 @@ class PemrosesanPesananController extends Controller
                 );
             }
 
+            // // FOUND
+            // return response()->json(
+            //     [
+            //         'data' => $data,
+            //         'message' => 'Transaksi tidak ditemukan di dalam list transaksi yang perlu diproses hari ini.',
+            //     ],
+            //     400
+            // );
+
             // TODO:: jika check passed, add penggunaan bahan baku
             // ...
 
             // TODO:: jika check passed, kurangi stok bahan baku setelah diproses
             // ...
+
+            // TODO:: jika check passed, tambah stok produk sisa (misal ada pembelian 1/2 Loyang, bikin 1 Loyang, sisa 1/2 nya masuk stok produk 1/2 loyang)
+            // ...
+
+            $this->addPenggunaanByRekapBahan($data);
 
             // ambil status 'Pesanan diproses' (just in case)
             $statusRes = StatusTransaksi::query()
@@ -375,7 +461,8 @@ class PemrosesanPesananController extends Controller
                 ->first();
 
             // ubah status transaksi menjadi diproses
-            $transaksiUpdated = Transaksi::find($found->id);
+            $foundFirst = $found->first();
+            $transaksiUpdated = Transaksi::find($foundFirst->id);
             $transaksiUpdated->status_transaksi_id = $statusRes->id;
             $transaksiUpdated->save();
 
@@ -439,6 +526,16 @@ class PemrosesanPesananController extends Controller
             $res = $this->getArrPesananHarian();
             $transaksiCollection =  collect($res['transaksi_arr']);
 
+            if (!count($transaksiCollection)) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Tidak ada transaksi yang perlu diproses di hari ini.',
+                    ],
+                    400
+                );
+            }
+
             if (!$transaksiCollection) {
                 return response()->json(
                     [
@@ -449,11 +546,10 @@ class PemrosesanPesananController extends Controller
                 );
             }
 
-            // TODO:: check warning bahan baku (dari transaksi ARRAY)
-            // ...
-            $checked = true;
+            // TODO:: check warning bahan baku
+            $data = $this->checkPesananHarian($transaksiCollection);
 
-            if (!$checked) {
+            if ($data['warnings_count'] > 0) {
                 return response()->json(
                     [
                         'data' => null,
@@ -466,8 +562,13 @@ class PemrosesanPesananController extends Controller
             // TODO:: jika check passed, add penggunaan bahan baku
             // ...
 
-            // TODO:: jika check passed, kurangi stok bahan baku setelah diproses (dari transaksi ARRAY)
+            // TODO:: jika check passed, kurangi stok bahan baku setelah diproses
             // ...
+
+            // TODO:: jika check passed, tambah stok produk sisa (misal ada pembelian 1/2 Loyang, bikin 1 Loyang, sisa 1/2 nya masuk stok produk 1/2 loyang)
+            // ...
+
+            $this->addPenggunaanByRekapBahan($data);
 
             // ambil status 'Pesanan diproses' (just in case)
             $statusRes = StatusTransaksi::query()

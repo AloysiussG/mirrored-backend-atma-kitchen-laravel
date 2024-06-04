@@ -38,7 +38,7 @@ class PenggunaanBahanBakuController extends Controller
         // TODO:: kurangi stok bahan baku
         // update (kurangi) stok di bahan baku
         // karena penggunaan bahan baku berpengaruh terhadap stok bahan baku (-)
-        $bahanBaku->jumlah_bahan_baku = $bahanBaku->jumlah_bahan_baku - $penggunaanData->jumlah_bahan;
+        $bahanBaku->jumlah_bahan_baku = $bahanBaku->jumlah_bahan_baku - $penggunaanData->jumlah_penggunaan;
         $bahanBaku->save();
     }
 
