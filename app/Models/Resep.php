@@ -16,9 +16,17 @@ class Resep extends Model
 
     public function produk()
     {
-        return $this->belongsTo(Produk::class);
+        // udah diganti ke constrained 'produk_uniques' di migration bawah
+        return $this->belongsTo(ProdukUnique::class);
+
+        // return $this->belongsTo(Produk::class);
     }
-    
+
+    public function produkUnique()
+    {
+        return $this->belongsTo(ProdukUnique::class, 'produk_id', 'id');
+    }
+
     public function detailResep()
     {
         return $this->hasMany(DetailResep::class);

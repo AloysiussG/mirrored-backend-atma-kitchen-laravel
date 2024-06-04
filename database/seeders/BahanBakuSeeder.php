@@ -121,7 +121,6 @@ class BahanBakuSeeder extends Seeder
                 'jumlah_bahan_baku' => 20000,
                 'jenis_bahan_baku' => 'Resep'
             ],
-
             [
                 //16
                 'nama_bahan_baku' => 'coklat batang',
@@ -129,6 +128,9 @@ class BahanBakuSeeder extends Seeder
                 'jumlah_bahan_baku' => 2000,
                 'jenis_bahan_baku' => 'Resep'
             ],
+
+            // *...jangan tambahin bahan baku disini, soalnya ID Bahan Baku Packaging udah tersetup
+            // tambahinnya di bawah packaging...*
 
             // ============== BAHAN BAKU PACKAGING ==============
             [
@@ -173,6 +175,50 @@ class BahanBakuSeeder extends Seeder
                 'jumlah_bahan_baku' => 100,
                 'jenis_bahan_baku' => 'Packaging'
             ],
+
+            // ============== (TAMBAHAN BAHAN BAKU RESEP) ==============
+            [
+                // 'id' => '23',
+                'nama_bahan_baku' => 'tepung maizena',
+                'satuan_bahan' => 'gram',
+                'jumlah_bahan_baku' => '0',
+                'jenis_bahan_baku' => 'Resep',
+            ],
+            [
+                // 'id' => '24',
+                'nama_bahan_baku' => 'baking powder',
+                'satuan_bahan' => 'gram',
+                'jumlah_bahan_baku' => '0',
+                'jenis_bahan_baku' => 'Resep',
+            ],
+            [
+                // 'id' => '25',
+                'nama_bahan_baku' => 'ragi',
+                'satuan_bahan' => 'gram',
+                'jumlah_bahan_baku' => '0',
+                'jenis_bahan_baku' => 'Resep',
+            ],
+            [
+                // 'id' => '26',
+                'nama_bahan_baku' => 'kuning telur',
+                'satuan_bahan' => 'buah',
+                'jumlah_bahan_baku' => '0',
+                'jenis_bahan_baku' => 'Resep',
+            ],
+            [
+                // 'id' => '27',
+                'nama_bahan_baku' => 'susu full cream',
+                'satuan_bahan' => 'milliliter',
+                'jumlah_bahan_baku' => '0',
+                'jenis_bahan_baku' => 'Resep',
+            ],
+            [
+                // 'id' => '28',
+                'nama_bahan_baku' => 'matcha bubuk',
+                'satuan_bahan' => 'gram',
+                'jumlah_bahan_baku' => '0',
+                'jenis_bahan_baku' => 'Resep',
+            ]
         ]);
     }
 }

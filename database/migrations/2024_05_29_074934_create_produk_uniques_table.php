@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reseps', function (Blueprint $table) {
+        Schema::create('produk_uniques', function (Blueprint $table) {
             $table->id();
-            // udah diganti ke constrained 'produk_uniques' di migration bawah
-            $table->foreignId('produk_id')->constrained('produks');
-            $table->string('nama_resep');
+            $table->string('nama_produk');
             $table->timestamps();
         });
     }
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reseps');
+        Schema::dropIfExists('produk_uniques');
     }
 };

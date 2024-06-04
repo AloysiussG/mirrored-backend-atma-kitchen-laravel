@@ -13,6 +13,54 @@ class ProdukSeeder extends Seeder
      */
     public function run(): void
     {
+        // DB::table('produks')->truncate();
+        // DB::table('produk_uniques')->truncate();
+
+        DB::table('produk_uniques')->insert([
+            [
+                'nama_produk' => 'Lapis Legit',
+            ],
+            [
+                'nama_produk' => 'Lapis Surabaya',
+            ],
+            [
+                'nama_produk' => 'Brownies',
+            ],
+            [
+                'nama_produk' => 'Spikoe',
+            ],
+            [
+                'nama_produk' => 'Roti Sosis',
+            ],
+            [
+                'nama_produk' => 'Milk Bun',
+            ],
+            [
+                'nama_produk' => 'Matcha Creamy Latte',
+            ],
+            [
+                'nama_produk' => 'Keripik Kentang',
+            ],
+            [
+                'nama_produk' => 'Kopi Luwak Bubuk',
+            ],
+            [
+                'nama_produk' => 'Mandarin',
+            ],
+            [
+                'nama_produk' => 'Roti Keju',
+            ],
+            [
+                'nama_produk' => 'Choco Creamy Latte',
+            ],
+            [
+                'nama_produk' => 'Matcha Organik Bubuk',
+            ],
+            [
+                'nama_produk' => 'Chocolate Bar',
+            ],
+        ]);
+
         DB::table('produks')->insert([
             [
                 //id =  1
@@ -23,9 +71,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Pre Order',
                 'harga' => 850000,
                 'porsi' => 1,
-                // 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/lapislegit1.jpeg',
+                'produk_unique_id' => 1,
             ],
             [
                 'kategori_produk_id' => 1,
@@ -35,9 +83,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Ready Stock',
                 'harga' => 450000,
                 'porsi' => 0.5,
-                // 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/lapislegit2.jpeg',
+                'produk_unique_id' => 1,
             ],
             [
                 //id =  2
@@ -48,9 +96,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Ready Stock',
                 'harga' => 550000,
                 'porsi' => 1,
-                // 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/lapissurabaya1.jpg',
+                'produk_unique_id' => 2,
             ],
             [
                 //id =  2
@@ -61,9 +109,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Ready Stock',
                 'harga' => 300000,
                 'porsi' => 0.5,
-                // 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/lapissurabaya2.jpg',
+                'produk_unique_id' => 2,
             ],
             [
                 //id =  3
@@ -74,9 +122,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Pre Order',
                 'harga' => 250000,
                 'porsi' => 1,
-                // 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/brownies1.jpg',
+                'produk_unique_id' => 3,
             ],
             [
                 //id =  3
@@ -87,9 +135,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Pre Order',
                 'harga' => 150000,
                 'porsi' => 0.5,
-                // 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/brownies2.jpg',
+                'produk_unique_id' => 3,
             ],
             [
                 //id =  4
@@ -100,9 +148,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Pre Order',
                 'harga' => 350000,
                 'porsi' => 1,
-                // 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/spikoe1.jpg',
+                'produk_unique_id' => 4,
             ],
             [
                 //id =  4
@@ -113,9 +161,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Pre Order',
                 'harga' => 200000,
                 'porsi' => 0.5,
-                // 'satuan_porsi' => 'Loyang',
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/spikoe2.jpg',
+                'produk_unique_id' => 4,
             ],
             [
                 //id =  5
@@ -126,9 +174,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Pre Order',
                 'harga' => 180000,
                 'porsi' => null,
-                // 'satuan_porsi' => null,
                 'kuota_harian' => 20,
                 'foto_produk' => 'sample/rotisosis.jpg',
+                'produk_unique_id' => 5,
             ],
             [
                 //id =  6
@@ -139,9 +187,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Ready Stock',
                 'harga' => 120000,
                 'porsi' => null,
-                // 'satuan_porsi' => null,
                 'kuota_harian' => 20,
                 'foto_produk' => 'sample/milkbun.jpg',
+                'produk_unique_id' => 6,
             ],
             [
                 //id =  7
@@ -152,9 +200,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Pre Order',
                 'harga' => 100000,
                 'porsi' => null,
-                // 'satuan_porsi' => null,
                 'kuota_harian' => 20,
                 'foto_produk' => 'sample/matcha.jpg',
+                'produk_unique_id' => 7,
             ],
             [
                 //id =  8
@@ -165,9 +213,9 @@ class ProdukSeeder extends Seeder
                 'status' => 'Ready Stock',
                 'harga' => 75000,
                 'porsi' => null,
-                // 'satuan_porsi' => null,
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/keripikkentang1.jpeg',
+                'produk_unique_id' => 8,
             ],
             [
                 //id =  9
@@ -178,9 +226,81 @@ class ProdukSeeder extends Seeder
                 'status' => 'Ready Stock',
                 'harga' => 250000,
                 'porsi' => null,
-                // 'satuan_porsi' => null,
                 'kuota_harian' => 10,
                 'foto_produk' => 'sample/kopiluwak.jpg',
+                'produk_unique_id' => 9,
+            ],
+            [
+                'kategori_produk_id' => 1,
+                'penitip_id' => null,
+                'nama_produk' => 'Mandarin 1 Loyang',
+                'jumlah_stock' => null,
+                'status' => 'Pre Order',
+                'harga' => 450000,
+                'porsi' => 1,
+                'kuota_harian' => 10,
+                'foto_produk' => 'sample/lapislegit1.jpeg',
+                'produk_unique_id' => 10,
+            ],
+            [
+                'kategori_produk_id' => 1,
+                'penitip_id' => null,
+                'nama_produk' => 'Mandarin 1/2 Loyang',
+                'jumlah_stock' => 1,
+                'status' => 'Ready Stock',
+                'harga' => 250000,
+                'porsi' => 0.5,
+                'kuota_harian' => 10,
+                'foto_produk' => 'sample/lapislegit2.jpeg',
+                'produk_unique_id' => 10,
+            ],
+            [
+                'kategori_produk_id' => 2,
+                'penitip_id' => null,
+                'nama_produk' => 'Roti Keju',
+                'jumlah_stock' => null,
+                'status' => 'Pre Order',
+                'harga' => 150000,
+                'porsi' => null,
+                'kuota_harian' => 20,
+                'foto_produk' => 'sample/rotisosis.jpg',
+                'produk_unique_id' => 11,
+            ],
+            [
+                'kategori_produk_id' => 3,
+                'penitip_id' => null,
+                'nama_produk' => 'Choco Creamy Latte',
+                'jumlah_stock' => 0,
+                'status' => 'Pre Order',
+                'harga' => 75000,
+                'porsi' => null,
+                'kuota_harian' => 20,
+                'foto_produk' => 'sample/matcha.jpg',
+                'produk_unique_id' => 12,
+            ],
+            [
+                'kategori_produk_id' => 4,
+                'penitip_id' => 1,
+                'nama_produk' => 'Matcha Organik Bubuk 100gr',
+                'jumlah_stock' => 10,
+                'status' => 'Ready Stock',
+                'harga' => 300000,
+                'porsi' => null,
+                'kuota_harian' => 10,
+                'foto_produk' => 'sample/keripikkentang1.jpeg',
+                'produk_unique_id' => 13,
+            ],
+            [
+                'kategori_produk_id' => 4,
+                'penitip_id' => 1,
+                'nama_produk' => 'Chocolate Bar 100gr',
+                'jumlah_stock' => 10,
+                'status' => 'Ready Stock',
+                'harga' => 120000,
+                'porsi' => null,
+                'kuota_harian' => 10,
+                'foto_produk' => 'sample/keripikkentang1.jpeg',
+                'produk_unique_id' => 14,
             ],
         ]);
     }
