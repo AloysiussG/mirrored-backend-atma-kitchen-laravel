@@ -478,6 +478,8 @@ class TransaksiController extends Controller
             }
 
             $transaksi->save();
+            $user = $transaksi->cart->customer;
+            $user->notify(new PushNotification());
             return response()->json(
                 [
                     'data' => $transaksi,
