@@ -54,11 +54,12 @@ class LaporanSamController extends Controller
             //     ->groupBy(DB::raw('MONTH(p.tanggal_bolos)'), 'k.id')
             //     ->get();
 
-            if($request->date){
+            if ($request->date) {
                 $currMonth = Carbon::parse($request->date)->month;
                 $currYear = Carbon::parse($request->date)->year;
-            }else{
+            } else {
                 $currMonth = Carbon::now()->month;
+                // $currMonth = 2;
                 $currYear = Carbon::now()->year;
             }
 
@@ -77,16 +78,16 @@ class LaporanSamController extends Controller
             foreach ($presensi_in_month as &$p) {
                 $days_in_month = Carbon::createFromDate(Carbon::now()->year, $currMonth, 1)->daysInMonth();
                 $p->jumlah_masuk = $days_in_month - $p->jumlah_bolos;
-                if($p->jumlah_bolos <= 4){
+                if ($p->jumlah_bolos <= 4) {
                     $p->bonus = $p->karyawan->bonus_gaji;
                 }
                 $p->karyawan = Karyawan::find($p->karyawan_id);
                 $p->month = $currMonth;
                 $p->year = $currYear;
                 $p->date = $currDateFormatted;
-                if($p->bonus){
+                if ($p->bonus) {
                     $p->total_gaji = $p->karyawan->gaji * $p->jumlah_masuk + $p->bonus;
-                }else{
+                } else {
                     $p->total_gaji = $p->karyawan->gaji * $p->jumlah_masuk;
                 }
             }
@@ -113,10 +114,10 @@ class LaporanSamController extends Controller
     {
         try {
 
-            if($request->date){
+            if ($request->date) {
                 $currMonth = Carbon::parse($request->date)->month;
                 $currYear = Carbon::parse($request->date)->year;
-            }else{
+            } else {
                 $currMonth = Carbon::now()->month;
                 $currYear = Carbon::now()->year;
             }
@@ -140,7 +141,7 @@ class LaporanSamController extends Controller
                                     $found = true;
                                     $produkFound = false;
                                     foreach ($r['produk'] as &$p) {
-                                        if ($p['nama_produk'] == $d->produk->nama_produk) {
+                                        if ($p['nama_produk'] == $d->produk->nama_produk && $p['harga'] == $d->harga_produk_sekarang) {
                                             $p['kuantitas'] += $d->jumlah;
                                             $p['harga'] = $d->harga_produk_sekarang;
                                             $p['jumlah_penjualan'] += $d->jumlah * $d->harga_produk_sekarang;
@@ -173,7 +174,6 @@ class LaporanSamController extends Controller
                                     ]
                                 ];
                             }
-
                         }
                     } else if ($d->hampers) {
                         $dh = DetailHampers::query()->where('hampers_id', $d->hampers_id)->get();
@@ -247,15 +247,15 @@ class LaporanSamController extends Controller
     public function laporanPengeluaranPemasukan(Request $request)
     {
         try {
-            if($request->date){
+            if ($request->date) {
                 $currMonth = Carbon::parse($request->date)->month;
                 $currYear = Carbon::parse($request->date)->year;
-            }else{
+            } else {
                 $currMonth = Carbon::now()->month;
+                $currMonth = 2;
                 $currYear = Carbon::now()->year;
-
             }
-            $pemasukan = Transaksi::query()->whereYear('tanggal_lunas',$currYear)->whereMonth('tanggal_lunas', $currMonth)->get();
+            $pemasukan = Transaksi::query()->whereYear('tanggal_lunas', $currYear)->whereMonth('tanggal_lunas', $currMonth)->get();
             $total_pemasukan = 0;
             $total_tip = 0;
             foreach ($pemasukan as $p) {
@@ -263,7 +263,7 @@ class LaporanSamController extends Controller
                 $total_tip += $p->tip;
             }
 
-            $pengeluaran = Pengeluaran::query()->whereYear('tanggal_pengeluaran',$currYear)->whereMonth('tanggal_pengeluaran', $currMonth)->get();
+            $pengeluaran = Pengeluaran::query()->whereYear('tanggal_pengeluaran', $currYear)->whereMonth('tanggal_pengeluaran', $currMonth)->get();
             $total_pengeluaran = 0;
             foreach ($pengeluaran as $p) {
                 $p->tipe = 'pengeluaran';
@@ -272,7 +272,7 @@ class LaporanSamController extends Controller
 
 
             $transaksi = [
-                'jenis' => "transaksi",
+                'jenis' => "penjualan",
                 'jumlah' => $total_pemasukan,
                 'tipe' => 'pemasukan'
             ];
@@ -283,17 +283,16 @@ class LaporanSamController extends Controller
                 'tipe' => 'pemasukan'
             ];
 
+            $total_masuk = $transaksi['jumlah'] + $transaksi['jumlah'];
 
-            $pengeluaran[] = $tip;
-            $pengeluaran[] = $transaksi;
 
-            $rekap = [];
+            $pengeluaranArray = $pengeluaran->toArray();
 
-            $rekap = [
-                "pemasukan" => $pemasukan,
-                'pengeluaran' => $pengeluaran,
-                'total_pengeluaran' => $total_pengeluaran,
-            ];
+
+            array_unshift($pengeluaranArray, $tip, $transaksi);
+
+
+            $pengeluaran = collect($pengeluaranArray);
             $currDateFormatted = Carbon::now()->toDateString();
             $message = [
                 'month' => $currMonth,
@@ -301,9 +300,14 @@ class LaporanSamController extends Controller
                 'date' => $currDateFormatted,
             ];
 
+            $rekap["laporan"] = collect($pengeluaran);
+
+            $rekap['total_pengeluaran'] = $total_pengeluaran;
+            $rekap['total_pemasukan'] = $total_masuk;
+
             return response()->json([
                 'message' => $message,
-                'data' => $pengeluaran,
+                'data' => $rekap,
             ]);
         } catch (Throwable $e) {
             return response([
