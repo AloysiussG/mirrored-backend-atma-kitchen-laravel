@@ -18,6 +18,7 @@ use Throwable;
 
 class CartController extends Controller
 {
+    // method local generate nomor nota
     public function generateNomorNota()
     {
 
@@ -66,6 +67,7 @@ class CartController extends Controller
         // );
     }
 
+    // method local cek double poin
     public function cekDoublePoin($tglLahirCustomer)
     {
         // now diconvert & diparse 2x supaya tidak ada timezone
