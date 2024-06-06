@@ -57,14 +57,6 @@ class CartController extends Controller
         $newNomorNota = $yearAndMonth . '.' . $startNo;
 
         return $newNomorNota;
-
-        // return response()->json(
-        //     [
-        //         'data' => $newNomorNota,
-        //         'message' => 'Berhasil mengecek data cart.'
-        //     ],
-        //     200
-        // );
     }
 
     // method local cek double poin
@@ -338,101 +330,6 @@ class CartController extends Controller
             $cart['warnings_count'] = $warnings;
 
 
-
-
-
-            // // CEK KUOTA HARIAN (PO)
-
-            // // get seluruh rekap produk di cart
-            // $allProduksCart = [];
-            // $newArr = [];
-
-            // foreach ($cart->detailCart as $detailItem) {
-            //     if (isset($detailItem->produk)) {
-            //         $newArr = $detailItem['produk'];
-            //         $newArr['jumlah'] = $detailItem['jumlah'];
-            //         $allProduksCart[] = $newArr;
-            //     } else if (isset($detailItem->hampers)) {
-            //         foreach ($detailItem->hampers->detailHampers as $detailHampers) {
-            //             $newArr = $detailHampers['produk'];
-            //             $newArr['jumlah'] = $detailItem['jumlah'] * $detailHampers['jumlah_produk'];
-            //             $allProduksCart[] = $newArr;
-            //         }
-            //     }
-            // }
-
-            // $allProduksCartCollection = collect($allProduksCart);
-            // $groupedAllProduks = $allProduksCartCollection->groupBy('id');
-            // $allProduksCartResults = $groupedAllProduks->map(function ($group) {
-            //     $firstItem = $group->first();
-            //     $firstItem['jumlah'] = $group->sum('jumlah');
-            //     return $firstItem;
-            // })->values();
-
-            // // ------------------
-
-            // // get produk di banyak transaksi pada tanggal ambil
-            // $allProduksTransaksi = [];
-            // $newArr = [];
-
-            // $transaksiArr = Transaksi::query()
-            //     ->with(['cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])
-            //     ->where('tanggal_ambil', $request->tanggal_ambil)
-            //     ->whereNotIn('status_transaksi_id', [5, 12])
-            //     ->get();
-
-            // foreach ($transaksiArr as $value) {
-            //     $detailCarts = $value->cart->detailCart;
-            //     foreach ($detailCarts as $detailItem) {
-            //         if (isset($detailItem->produk)) {
-            //             $newArr['id'] = $detailItem['produk']['id'];
-            //             $newArr['jumlah_dibeli'] = $detailItem['jumlah'];
-            //             $allProduksTransaksi[] = $newArr;
-            //         } else if (isset($detailItem->hampers)) {
-            //             foreach ($detailItem->hampers->detailHampers as $detailHampers) {
-            //                 $newArr['id'] = $detailHampers['produk']['id'];
-            //                 $newArr['jumlah_dibeli'] = $detailItem['jumlah'] * $detailHampers['jumlah_produk'];
-            //                 $allProduksTransaksi[] = $newArr;
-            //             }
-            //         }
-            //     }
-            // }
-
-            // $collection = collect($allProduksTransaksi);
-            // $grouped = $collection->groupBy('id');
-
-            // $allProduksTransaksiResults = $grouped->map(function ($group, $id) {
-            //     return [
-            //         'id' => $id,
-            //         'jumlah_dibeli' => $group->sum('jumlah_dibeli')
-            //     ];
-            // })->values();
-
-            // $allWithSisaKuota = $allProduksCartResults->map(function ($itemProduk) use ($allProduksTransaksiResults, $cart) {
-            //     $jumlahDibeli = 0;
-            //     $found = $allProduksTransaksiResults->firstWhere('id', $itemProduk->id);
-            //     if ($found) {
-            //         $jumlahDibeli = $found['jumlah_dibeli'];
-            //     }
-
-            //     $sisaKuota = $itemProduk->kuota_harian - $jumlahDibeli;
-            //     if ($sisaKuota < 0) {
-            //         $sisaKuota = 0;
-            //     }
-
-            //     // jika jumlah beli melebihi sisa kuota
-            //     if ($itemProduk->jumlah > $sisaKuota) {
-            //         $itemProduk['warning'] = 'Pesanan melebihi kuota';
-            //         $cart['has_warning'] = true;
-            //     }
-
-            //     $itemProduk['jumlah_pembelian_pada_tanggal_ambil'] = $jumlahDibeli;
-            //     $itemProduk['sisa_kuota_harian'] = $sisaKuota;
-            //     return $itemProduk;
-            // });
-
-            // $cart['recap_by_produk'] = $allWithSisaKuota;
-
             return response()->json(
                 [
                     'data' => $cart,
@@ -586,89 +483,6 @@ class CartController extends Controller
             });
 
             $cart['detail_cart_modified'] = $detailCartsModified;
-
-            // KALO ACTIVE CART TIDAK DITEMUKAN
-            // TODO::: bikin cart baru ???
-
-            // if ($request->tanggal_ambil) {
-            //     // get seluruh rekap produk di cart
-            //     $allProduksCart = [];
-            //     $newArr = [];
-
-            //     foreach ($cart->detailCart as $detailItem) {
-            //         if (isset($detailItem->produk)) {
-            //             $newArr = $detailItem['produk'];
-            //             $newArr['jumlah'] = $detailItem['jumlah'];
-            //             $allProduksCart[] = $newArr;
-            //         } else if (isset($detailItem->hampers)) {
-            //             foreach ($detailItem->hampers->detailHampers as $detailHampers) {
-            //                 $newArr = $detailHampers['produk'];
-            //                 $newArr['jumlah'] = $detailItem['jumlah'] * $detailHampers['jumlah_produk'];
-            //                 $allProduksCart[] = $newArr;
-            //             }
-            //         }
-            //     }
-
-            //     $allProduksCartCollection = collect($allProduksCart);
-            //     $groupedAllProduks = $allProduksCartCollection->groupBy('id');
-            //     $allProduksCartResults = $groupedAllProduks->map(function ($group) {
-            //         $firstItem = $group->first();
-            //         $firstItem['jumlah'] = $group->sum('jumlah');
-            //         return $firstItem;
-            //     })->values();
-
-            //     // ------------------
-
-            //     // get produk di banyak transaksi pada tanggal ambil
-            //     $allProduksTransaksi = [];
-            //     $newArr = [];
-
-            //     $transaksiArr = Transaksi::query()
-            //         ->with(['cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])
-            //         ->where('tanggal_ambil', $request->tanggal_ambil)
-            //         ->whereNotIn('status_transaksi_id', [5, 12])
-            //         ->get();
-
-            //     foreach ($transaksiArr as $value) {
-            //         $detailCarts = $value->cart->detailCart;
-            //         foreach ($detailCarts as $detailItem) {
-            //             if (isset($detailItem->produk)) {
-            //                 $newArr['id'] = $detailItem['produk']['id'];
-            //                 $newArr['jumlah_dibeli'] = $detailItem['jumlah'];
-            //                 $allProduksTransaksi[] = $newArr;
-            //             } else if (isset($detailItem->hampers)) {
-            //                 foreach ($detailItem->hampers->detailHampers as $detailHampers) {
-            //                     $newArr['id'] = $detailHampers['produk']['id'];
-            //                     $newArr['jumlah_dibeli'] = $detailItem['jumlah'] * $detailHampers['jumlah_produk'];
-            //                     $allProduksTransaksi[] = $newArr;
-            //                 }
-            //             }
-            //         }
-            //     }
-
-            //     $collection = collect($allProduksTransaksi);
-            //     $grouped = $collection->groupBy('id');
-
-            //     $allProduksTransaksiResults = $grouped->map(function ($group, $id) {
-            //         return [
-            //             'id' => $id,
-            //             'jumlah_dibeli' => $group->sum('jumlah_dibeli')
-            //         ];
-            //     })->values();
-
-            //     $allWithSisaKuota = $allProduksCartResults->map(function ($itemProduk) use ($allProduksTransaksiResults) {
-            //         $jumlahDibeli = 0;
-            //         $found = $allProduksTransaksiResults->firstWhere('id', $itemProduk->id);
-            //         if ($found) {
-            //             $jumlahDibeli = $found['jumlah_dibeli'];
-            //         }
-            //         $itemProduk['jumlah_pembelian_pada_tanggal_ambil'] = $jumlahDibeli;
-            //         $itemProduk['sisa_kuota_harian'] = $itemProduk->kuota_harian - $jumlahDibeli;
-            //         return $itemProduk;
-            //     });
-
-            //     $cart['another'] = $allWithSisaKuota;
-            // }
 
             return response()->json(
                 [
