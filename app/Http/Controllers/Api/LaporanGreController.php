@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\PenggunaanBahanBaku;
@@ -125,7 +125,7 @@ class LaporanGreController extends Controller
             $laporan['tanggal_akhir'] = $request->tanggal_akhir;
             $laporan['tanggal_cetak'] = Carbon::now();
             $bahanBaku = [];
-            foreach($penggunaan as $item){
+            foreach ($penggunaan as $item) {
                 $bahanBaku[] = [
                     'nama_bahan_baku' => $item->bahanBaku->nama_bahan_baku,
                     'satuan_penggunaan' => $item->satuan_penggunaan,
