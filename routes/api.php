@@ -18,20 +18,18 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DetailCartController;
 use App\Http\Controllers\Api\KategoriProdukController;
 use App\Http\Controllers\Api\LaporanController;
-use App\Http\Controllers\api\LaporanGreController;
-use App\Http\Controllers\api\LaporanSamController;
+use App\Http\Controllers\Api\LaporanGreController;
+use App\Http\Controllers\Api\LaporanSamController;
 use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\PemrosesanPesananController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\PenggajianController;
-use App\Http\Controllers\api\PermintaaanRefundController;
+use App\Http\Controllers\Api\PermintaaanRefundController;
 use App\Http\Controllers\Api\PenggunaanBahanBakuController;
 use App\Http\Controllers\Api\PresensiController;
 use App\Http\Controllers\Api\ProdukUniqueController;
 use App\Http\Controllers\Api\ResepController;
-use App\Http\Controllers\API\RoleController;
-use App\Http\Controllers\API\StatusController;
-use App\Models\PermintaanRefund;
+use App\Http\Controllers\Api\RoleController;
 
 // --- PUBLIC ROUTES
 Route::post('/login', [AuthController::class, 'loginByEmail']);
