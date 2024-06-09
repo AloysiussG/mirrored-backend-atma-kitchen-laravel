@@ -7,6 +7,7 @@ use App\Models\BahanBaku;
 use App\Models\Produk;
 use App\Models\StatusTransaksi;
 use App\Models\Transaksi;
+use App\Notifications\PushNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Throwable;
@@ -465,6 +466,10 @@ class PemrosesanPesananController extends Controller
             $transaksiUpdated = Transaksi::find($foundFirst->id);
             $transaksiUpdated->status_transaksi_id = $statusRes->id;
             $transaksiUpdated->save();
+            $customer = $transaksiUpdated->cart->customer;
+            $title = 'Status Transaksi Diperbaharui';
+            $body = $transaksiUpdated->statusTransaksi->nama_status;
+            $customer->notify(new PushNotification($title, $body));
 
             return response()->json(
                 [
@@ -580,6 +585,10 @@ class PemrosesanPesananController extends Controller
                 $transaksiUpdated = Transaksi::find($item->id);
                 $transaksiUpdated->status_transaksi_id = $statusRes->id;
                 $transaksiUpdated->save();
+                $customer = $transaksiUpdated->cart->customer;
+                $title = 'Status Transaksi Diperbaharui';
+                $body = $transaksiUpdated->statusTransaksi->nama_status;
+                $customer->notify(new PushNotification($title, $body));
             });
 
             return response()->json(

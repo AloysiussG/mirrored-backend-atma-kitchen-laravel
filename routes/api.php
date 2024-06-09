@@ -129,6 +129,7 @@ Route::middleware(['auth:sanctum', 'ability:customer'])->group(function () {
     Route::get('/my-customer/indexPesanan', [CustomerController::class, 'indexPesanan']);
     Route::get('/my-customer/indexPesananTerkirim', [CustomerController::class, 'indexPesananTerkirim']);
     Route::get('/my-customer/{id}', [CustomerController::class, 'showPesanan']);
+    Route::put('/my-customer/updateToken', [CustomerController::class, 'updateToken']);
 
 
     // --- PASSWORD CHANGE CUSTOMER

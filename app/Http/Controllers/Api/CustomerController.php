@@ -239,6 +239,13 @@ class CustomerController extends Controller
                 200
             );
         } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
         }
     }
 
@@ -593,6 +600,39 @@ class CustomerController extends Controller
                     'data' => $transaksi,
                     'message' => 'Berhasil menyelesaikan transaksi'
                 ]
+            );
+        } catch (Throwable $th) {
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $th->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    public function updateToken(Request $request)
+    {
+        try {
+            $customerUpdate = Customer::find(Auth::id());
+            if (!$customerUpdate) {
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Customer tidak ditemukan.',
+                    ],
+                    404
+                );
+            }
+
+            $customerUpdate->update(['fcm_token' => $request->fcm_token]);
+            return response()->json(
+                [
+                    'data' => $customerUpdate,
+                    'message' => 'Berhasil mengubah token Customer.',
+                ],
+                200
             );
         } catch (Throwable $th) {
             return response()->json(
