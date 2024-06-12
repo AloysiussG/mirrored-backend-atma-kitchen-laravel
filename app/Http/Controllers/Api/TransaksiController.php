@@ -854,18 +854,18 @@ class TransaksiController extends Controller
     public function warnBahanBaku($id){
         try{
             $transaksi = Transaksi::find($id)->get();
-
-            $trfArr[] = [
-                'transaksi_arr' => $transaksi,
-            ];
-
             if(!$transaksi){
                 return response()->json(
                     [
                         'data' => null,
+                        'message' => 'Transaksi tidak ditemukan'
                     ]
                     );
             }
+
+            $trfArr[] = [
+                'transaksi_arr' => $transaksi,
+            ];
 
             $res = app('App\Http\Controllers\Api\PemrosesanPesananController')->checkPesananHarian($transaksi);
 
