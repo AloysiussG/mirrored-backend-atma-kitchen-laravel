@@ -17,7 +17,7 @@ class PemrosesanPesananController extends Controller
     /**
      * CUSTOM FUNCTIONS
      */
-    public function getArrPesananHarian()
+    public function getArrPesananHarian($search = '')
     {
         // list pesanan harian yang perlu diproses hari ini
         // hari ini diproses === h-1 tanggal ambil
@@ -35,12 +35,16 @@ class PemrosesanPesananController extends Controller
             ->first();
 
         // ambil transaksi yang sesuai tanggal & status transaksi = Pesanan diterima
-        $transaksiArr = Transaksi::query()
+        $transaksiArrQuery = Transaksi::query()
             ->with(['cart.customer', 'cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])
             ->whereDate('tanggal_ambil', $todayPlusOne)
-            ->where('status_transaksi_id', $statusRes->id)
-            ->orderBy('id', 'asc')
-            ->get();
+            ->where('status_transaksi_id', $statusRes->id);
+
+        if ($search) {
+            $transaksiArrQuery->where('no_nota', 'like', '%' . $search . '%');
+        }
+
+        $transaksiArr = $transaksiArrQuery->orderBy('id', 'asc')->get();
 
         return [
             'today' => $today,
@@ -610,10 +614,10 @@ class PemrosesanPesananController extends Controller
     }
 
     // list pesanan harian ---> hanya untuk tampilan di web saja, list transaksi & produk & bahan baku yg dibutuhkan
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $res = $this->getArrPesananHarian();
+            $res = $this->getArrPesananHarian($request->search);
 
             // list pesanan harian yang perlu diproses hari ini
             // hari ini diproses === h-1 tanggal ambil

@@ -1,4 +1,6 @@
 /hampers
 /produk
 /bukti_pembayaran
+/customer
+/kategori
 !.gitignore
