@@ -9,6 +9,7 @@ use App\Models\Produk;
 use App\Models\Resep;
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
+use App\Notifications\PushNotification;
 use Carbon\Carbon;
 use DateTime;
 use Throwable;
@@ -93,6 +94,9 @@ class TransaksiController extends Controller
                             $customer->save();
                             $transaksi->status_transaksi_id = 12;
                             $transaksi->save();
+                            $title = 'Status Transaksi Diperbaharui';
+                            $body = $transaksi->statusTransaksi->nama_status;
+                            $customer->notify(new PushNotification($title, $body));
                         }
                     } else if ($status_transaksi == "Pre Order") {
                         foreach ($transaksi->cart->detailCart as $detailCart) {
@@ -115,11 +119,14 @@ class TransaksiController extends Controller
                                 }
                             }
                         }
-                        $$customer = $transaksi->cart->customer;
+                        $customer = $transaksi->cart->customer;
                         $customer->poin = $customer->poin + $transaksi->poin_dipakai;
                         $customer->save();
                         $transaksi->status_transaksi_id = 12;
                         $transaksi->save();
+                        $title = 'Status Transaksi Diperbaharui';
+                        $body = $transaksi->statusTransaksi->nama_status;
+                        $customer->notify(new PushNotification($title, $body));
                     }
                 }
             }
@@ -230,6 +237,9 @@ class TransaksiController extends Controller
                             $customer->save();
                             $transaksi->status_transaksi_id = 12;
                             $transaksi->save();
+                            $title = 'Status Transaksi Diperbaharui';
+                            $body = $transaksi->statusTransaksi->nama_status;
+                            $customer->notify(new PushNotification($title, $body));
                         }
                     } else if ($status_transaksi == "Pre Order") {
                         foreach ($transaksi->cart->detailCart as $detailCart) {
@@ -257,6 +267,9 @@ class TransaksiController extends Controller
                         $customer->save();
                         $transaksi->status_transaksi_id = 12;
                         $transaksi->save();
+                        $title = 'Status Transaksi Diperbaharui';
+                        $body = $transaksi->statusTransaksi->nama_status;
+                        $customer->notify(new PushNotification($title, $body));
                     }
                 }
             }
@@ -353,6 +366,11 @@ class TransaksiController extends Controller
             $transaksi->total_harga = $transaksi->total_harga + $transaksi->ongkos_kirim;
             $transaksi->status_transaksi_id = 2;
             $transaksi->save();
+            $customer = $transaksi->cart->customer;
+            $title = 'Status Transaksi Diperbaharui';
+            $body = $transaksi->statusTransaksi->nama_status;
+            $customer->notify(new PushNotification($title, $body));
+
             return response()->json(
                 [
                     'data' => $transaksi,
@@ -426,6 +444,10 @@ class TransaksiController extends Controller
             $transaksi->tanggal_lunas = Carbon::now();
             $transaksi->status_transaksi_id = 4;
             $transaksi->save();
+            $customer = $transaksi->cart->customer;
+            $title = 'Status Transaksi Diperbaharui';
+            $body = $transaksi->statusTransaksi->nama_status;
+            $customer->notify(new PushNotification($title, $body));
             return response()->json(
                 [
                     'data' => $transaksi,
@@ -476,7 +498,10 @@ class TransaksiController extends Controller
                     $transaksi->status_transaksi_id = 9;
                 }
             }
-
+            $customer = $transaksi->cart->customer;
+            $title = 'Status Transaksi Diperbaharui';
+            $body = $transaksi->statusTransaksi->nama_status;
+            $customer->notify(new PushNotification($title, $body));
             $transaksi->save();
             return response()->json(
                 [
@@ -631,6 +656,9 @@ class TransaksiController extends Controller
                             $customer->save();
                             $transaksi->status_transaksi_id = 12;
                             $transaksi->save();
+                            $title = 'Status Transaksi Diperbaharui';
+                            $body = $transaksi->statusTransaksi->nama_status;
+                            $customer->notify(new PushNotification($title, $body));
                         } else {
                             //keluarkan transaksi yang tanggal ambilnya belum lewat
                             $transaksis = $transaksis->reject(function ($item) use ($transaksi) {
@@ -663,6 +691,9 @@ class TransaksiController extends Controller
                         $customer->save();
                         $transaksi->status_transaksi_id = 12;
                         $transaksi->save();
+                        $title = 'Status Transaksi Diperbaharui';
+                        $body = $transaksi->statusTransaksi->nama_status;
+                        $customer->notify(new PushNotification($title, $body));
                     }
                 }
             }
@@ -728,6 +759,9 @@ class TransaksiController extends Controller
                 //ganti transaksi status jadi diterima
                 $transaksi->status_transaksi_id = 6;
                 $transaksi->save();
+                $title = 'Status Transaksi Diperbaharui';
+                $body = $transaksi->statusTransaksi->nama_status;
+                $customer->notify(new PushNotification($title, $body));
 
                 //update stock produk
 
@@ -785,6 +819,10 @@ class TransaksiController extends Controller
 
                 $transaksi->cart->customer->save();
                 $transaksi->save();
+                $customer = $transaksi->cart->customer;
+                $title = 'Status Transaksi Diperbaharui';
+                $body = $transaksi->statusTransaksi->nama_status;
+                $customer->notify(new PushNotification($title, $body));
                 return response()->json(
                     [
                         'data' => $transaksi,
@@ -995,6 +1033,10 @@ class TransaksiController extends Controller
                 $transaksi->status_transaksi_id = 3;
                 $transaksi->tanggal_lunas = Carbon::now();
                 $transaksi->save();
+                $customer = $transaksi->cart->customer;
+                $title = 'Status Transaksi Diperbaharui';
+                $body = $transaksi->statusTransaksi->nama_status;
+                $customer->notify(new PushNotification($title, $body));
             }
 
             return response()->json(

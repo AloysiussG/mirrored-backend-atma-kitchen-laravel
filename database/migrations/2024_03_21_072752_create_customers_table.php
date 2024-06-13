@@ -28,6 +28,8 @@ return new class extends Migration
             $table->date('tanggal_lahir');
             $table->string('foto_profile')->nullable();
             $table->timestamps();
+
+            $table->string('fcm_token')->nullable();
         });
     }
 

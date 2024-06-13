@@ -39,4 +39,14 @@ class Customer extends Authenticatable
     {
         return $this->hasMany(Alamat::class);
     }
+
+    /**
+     * Specifies the user's FCM token
+     *
+     * @return string|array
+     */
+    public function routeNotificationForFcm()
+    {
+        return $this->fcm_token;
+    }
 }
