@@ -853,7 +853,7 @@ class TransaksiController extends Controller
 
     public function warnBahanBaku($id){
         try{
-            $transaksi = Transaksi::find($id)->get();
+            $transaksi = Transaksi::query()->where('id', $id)->with(['cart.customer', 'cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])->get();
             if(!$transaksi){
                 return response()->json(
                     [
@@ -862,7 +862,6 @@ class TransaksiController extends Controller
                     ]
                     );
             }
-
             $trfArr[] = [
                 'transaksi_arr' => $transaksi,
             ];
