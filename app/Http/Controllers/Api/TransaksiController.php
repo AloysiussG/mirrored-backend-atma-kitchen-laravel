@@ -851,6 +851,43 @@ class TransaksiController extends Controller
     // }
 
 
+    public function warnBahanBaku($id){
+        try{
+            $transaksi = Transaksi::query()->where('id', $id)->with(['cart.customer', 'cart.detailCart.produk.kategoriProduk', 'cart.detailCart.hampers.detailHampers.produk.kategoriProduk'])->get();
+            if(!$transaksi){
+                return response()->json(
+                    [
+                        'data' => null,
+                        'message' => 'Transaksi tidak ditemukan'
+                    ]
+                    );
+            }
+            $trfArr[] = [
+                'transaksi_arr' => $transaksi,
+            ];
+
+            $res = app('App\Http\Controllers\Api\PemrosesanPesananController')->checkPesananHarian($transaksi);
+
+            $data = $res['rekap_bahan'];
+
+            return response()->json(
+                [
+                    'data' => $data,
+                    'message' => 'Berhasil mendapatkan data bahan baku pada transaksi'
+                ]
+                );
+
+        }catch(Throwable $e){
+            return response()->json(
+                [
+                    'data' => null,
+                    'message' => $e->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
     public function BahanBakuTransaksi()
     {
         try {
