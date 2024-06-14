@@ -98,10 +98,10 @@ Route::middleware(['auth:sanctum', 'ability:owner,manager-operasional'])->group(
     Route::get('/testsam2', [LaporanSamController::class, 'laporan_penitip']);
     Route::get('/testsam3', [LaporanSamController::class, 'laporanPengeluaranPemasukan']);
 
-    // laporan penjualan bulanan per produk 
+    // laporan penjualan bulanan per produk
     Route::post('/laporan-penjualan-bulanan-per-produk', [LaporanController::class, 'indexLaporanPenjualanBulananPerProduk']);
 
-    // laporan stok bahan baku 
+    // laporan stok bahan baku
     Route::get('/laporan-stok-bahan-baku', [LaporanController::class, 'indexLaporanStokBahanBaku']);
 });
 
@@ -276,6 +276,8 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
     // list pesanan harian, yang perlu diproses hari ini (h-1 tanggal ambil)
     // 1. list pesanan harian ---> hanya untuk tampilan di web saja, list transaksi & produk & bahan baku yg dibutuhkan
     Route::get('/list-pesanan-harian', [PemrosesanPesananController::class, 'index']);
+
+    Route::get('/list-pesanan-belum-diproses/{id}', [TransaksiController::class, 'warnBahanBaku']);
     // 2. list transaksi harian ---> untuk confirm proses/tidak
     // Route::get('/list-transaksi-harian', [PemrosesanPesananController::class, 'indexTransaksiPerluDiproses']);
     Route::get('/list-pesanan-harian/cek/{id}', [PemrosesanPesananController::class, 'cekProsesTransaksi']);
