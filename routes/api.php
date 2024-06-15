@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\KategoriProdukController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\LaporanGreController;
 use App\Http\Controllers\Api\LaporanSamController;
+use App\Http\Controllers\Api\MainDashboardController;
 use App\Http\Controllers\Api\PackagingController;
 use App\Http\Controllers\Api\PemrosesanPesananController;
 use App\Http\Controllers\Api\TransaksiController;
@@ -162,6 +163,9 @@ Route::middleware(['auth:sanctum', 'ability:owner'])->group(function () {
     // ubah data gaji dan bonus karyawan
     Route::put('/changeGaji/{id}', [KaryawanController::class, 'changeGaji']);
 
+    // main dash
+    Route::get('/main-dash-owner', [MainDashboardController::class, 'mainDashOwner']);
+
     // ... nanti route API untuk laporan yang bisa dilihat Owner ditaruh juga disini
 });
 
@@ -221,6 +225,9 @@ Route::middleware(['auth:sanctum', 'ability:admin'])->group(function () {
     //permintaan refund
     Route::get('/permintaan-refund-admin', [PermintaaanRefundController::class, 'indexByStatus']);
     Route::put('/permintaan-refund-admin/{id}', [PermintaaanRefundController::class, 'terimaRequest']);
+
+    // main dash
+    Route::get('/main-dash-admin', [MainDashboardController::class, 'mainDashAdmin']);
 });
 
 // --- --- MANAGER OPERASIONAL ONLY
@@ -288,4 +295,7 @@ Route::middleware(['auth:sanctum', 'ability:manager-operasional'])->group(functi
 
     // penggunaan bahan baku
     Route::get('/penggunaan-bahan-baku', [PenggunaanBahanBakuController::class, 'index']);
+
+    // main dash
+    Route::get('/main-dash-mo', [MainDashboardController::class, 'mainDashMO']);
 });

@@ -190,7 +190,6 @@ class CustomerController extends Controller
                     'starts_with:08',
                     Rule::unique('customers')->ignore(Auth::id()),
                 ],
-                'foto_profile' => 'image:jpeg,png,jpg,gif,svg|max:4096',
             ], [
                 'nama.required' => 'Nama tidak boleh kosong.',
                 'email.required' => 'Email Tidak Boleh Kosong',
@@ -203,8 +202,6 @@ class CustomerController extends Controller
                 'tanggal_lahir.date' => 'Kolom tanggal lahir harus berupa tanggal.',
                 'tanggal_lahir.before' => 'Maaf kamu belum cukup dewasa untuk mengakses web ini.',
                 'email.email' => 'Email tidak valid.',
-                'foto_profile.image' => 'Foto harus berupa file gambar.',
-                'foto_profile.max' => 'Ukuran foto terlalu besar, maksimal 4MB.',
             ]);
 
             if ($validate->fails()) {
@@ -217,17 +214,48 @@ class CustomerController extends Controller
                 );
             }
 
-            // jika ada request image
-            if ($request->file('foto_profile')) {
-                $uploadFolder = '/customer';
+            if ($customer['foto_profile']) {
+                if ($customer['foto_profile'] == "foto sebelumnya") {
+                    $customer['foto_profile'] = $customerUpdate->foto_profile;
+                } else if ($customer['foto_profile'] == "hapus foto") {
+                    if ($customerUpdate->foto_profile) {
+                        $path = public_path() . '/storage/' . $customerUpdate->foto_profile;
+                        if (file_exists($path)) {
+                            unlink($path);
+                        }
+                    }
+                    $customer['foto_profile'] = null;
+                } else {
+                    $validate = Validator::make($customer, [
+                        'foto_profile' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+                    ], [
+                        'foto_profile.image' => 'Foto harus berupa file gambar.',
+                        'foto_profile.max' => 'Ukuran foto terlalu besar, maksimal 4MB.',
+                    ]);
 
-                $fileImage = $customer['foto_profile'];
-                $imageUploadedPath = $fileImage->store($uploadFolder, 'public');
+                    if ($validate->fails()) {
+                        return response()->json(
+                            [
+                                'data' => null,
+                                'message' => $validate->errors()->first(),
+                            ],
+                            400
+                        );
+                    }
 
-                // ambil url image yang disimpan di storage link
-                // lalu masukkan ke db
-                // $imageURL = Storage::url($imageUploadedPath);
-                $customer['foto_profile'] = $imageUploadedPath;
+                    if ($customerUpdate->foto_profile) {
+                        $path = public_path() . '/storage/' . $customerUpdate->foto_profile;
+                        if (file_exists($path)) {
+                            unlink($path);
+                        }
+                    }
+                    // jika ada request image
+                    $uploadFolder = '/customer';
+                    $fileImage = $customer['foto_profile'];
+                    $imageUploadedPath = $fileImage->store($uploadFolder, 'public');
+
+                    $customer['foto_profile'] = $imageUploadedPath;
+                }
             }
 
             $customerUpdate->update($customer);
